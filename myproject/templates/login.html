@@ -1,0 +1,46 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'login_style.css' %}">
+    <script src="{% static 'login_script.js' %}"></script>
+    <title>Login Page</title>
+</head>
+<body style = "background-color: white">
+    <div id="box">
+        <img src="{% static 'media/default_image.png' %}" />
+        <h1>Welcome to H2H!</h1> <br>
+        <h3>Please enter your login information</h3>
+        <div id="input">
+            <!-- <div class="user-pass">
+                <input type="text" id="username" name = "username" placeholder="Enter ID" required>
+                <button id="send-code">Send Code</button>
+            </div><br>
+            <div class="user-pass">
+                <input type="password" id="password" name = "password" placeholder="Enter password" required>
+            </div><br>
+            <div id="warning"><label>Username or password incorrect</label></div>
+            <button id="submit" onclick="verify()">Submit</button> -->
+            <form method="POST" action="login">
+                {% csrf_token %}
+                
+                <input type="text" name="username" placeholder="Enter username"/><br>
+                <input type="password" name="password" placeholder="Enter password"/><br>
+                <input type="submit"/>
+            </form>
+
+            <div style="margin: 10px"><a><span style="margin: 3px">Forgot username and/or password? Click here!</span></a></div>
+            <div style="margin: 10px; color: gray;"><a><span style="margin: 3px">Don't have an account? <a href="register">Click here!</a></span></a></div>
+
+        </div>
+
+        <div>
+
+        </div>
+    </div>
+</body>
+</html>

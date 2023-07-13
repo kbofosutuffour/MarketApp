@@ -1,0 +1,91 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'main_style.css' %}">
+    <title>Document</title>
+</head>
+<body>
+    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
+
+        {% if user.is_authenticated %}
+            <div style="margin-right: 90%; display: inline;"><h2 style="display: inline; ">Welcome, {{user.username}}!</h2></div>
+        {% else %}
+            <div style="margin-right: 90%; display: inline;"><h2 style="display: inline; ">Welcome, Guest!</h2></div>
+        {% endif %}
+        <img id="search" src="{% static 'media/search.png' %}" style="display: inline; width: 30px;"/>
+
+        {% if user.is_authenticated %}
+        <a href="logout"><button>Logout</button></a>
+        {% else %}
+        <a href="login"><button>Login</button></a>
+        {% endif %}    </div>
+    
+    <div class="post">
+        <div style="display: inline;">
+            <img id="post-image" src="{% static 'media/default_image.png' %}" />
+        </div>
+        <div class ="text">
+            <h3 class="product_description">Example Product Name</h3>
+            <h4 class="user">User Name</h4>
+            <h3 class="price">$X.XX</h3>
+
+        </div>
+    </div>
+    <div class="post">
+        <div style="display: inline;">
+            <img id="post-image" src="{% static 'media/default_image.png' %}" />
+        </div>
+        <div class ="text">
+            <h3 class="product_description">Example Product Name</h3>
+            <h4 class="user">User Name</h4>
+            <h3 class="price">$X.XX</h3>
+
+        </div>
+    </div>
+    <div class="post">
+        <div style="display: inline;">
+            <img id="post-image" src="{% static 'media/default_image.png' %}" />
+        </div>
+        <div class ="text">
+            <h3 class="product_description">Example Product Name</h3>
+            <h4 class="user">User Name</h4>
+            <h3 class="price">$X.XX</h3>
+
+        </div>
+    </div>     <div class="post">
+        <div style="display: inline;">
+            <img id="post-image" src="{% static 'media/default_image.png' %}" />
+        </div>
+        <div class ="text">
+            <h3 class="product_description">Example Product Name</h3>
+            <h4 class="user">User Name</h4>
+            <h3 class="price">$X.XX</h3>
+
+        </div>
+    </div> 
+    <div class="post">
+        <div style="display: inline;">
+            <img id="post-image" src="{% static 'media/default_image.png' %}" />
+        </div>
+        <div class ="text">
+            <h3 class="product_description">Example Product Name</h3>
+            <h4 class="user">User Name</h4>
+            <h3 class="price">$X.XX</h3>
+
+        </div>
+    </div>
+    <img src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" />
+    <footer>
+        <ul>
+            <li class = "footer_img"><a href="{% static 'main.html' %}"><img src="{% static 'media/default_image.png' %}" id="home"/></a></li>
+            <li class = "footer_img"><a><img src="{% static 'media/default_image.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a><img src="{% static 'media/default_image.png' %}" id="profile" /></a></li>
+        </ul>
+   </footer>
+</body>
+</html>

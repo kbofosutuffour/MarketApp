@@ -1,0 +1,33 @@
+#box {
+    text-align: center;
+    margin: auto;
+    width: 50%;
+}
+
+img {
+    width: 50%;
+}
+
+.user-pass {
+    margin: 5px;
+}
+
+#submit {
+    margin: 10px
+}
+
+#send-code {
+    background-color: rgb(193, 193, 255);
+    border-radius: 10%;
+    border-color:rgb(193, 193, 255);
+}
+
+#username, #password {
+    width: 250px;
+    border-color: rgb(210, 210, 210);
+}
+
+#warning {
+    display: none;
+    color: red;
+}

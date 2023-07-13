@@ -1,0 +1,49 @@
+body {
+    overflow: scroll;
+}
+
+
+.footer_img {
+    width: 50px;
+    display: inline;
+}
+
+.post {
+    width: 100%;
+    margin: auto;
+    border: 1px solid rgb(191, 188, 188) ;
+}
+
+.text {
+    display: inline-block;
+}
+
+#add-post {
+    position: absolute;
+    width: 50px;
+}
+
+#post-image {
+    width: 150px
+}
+
+#home, #profile, #chats {
+
+    width: 50px;
+
+}
+
+footer {
+    display: block;
+    margin: 0px;
+    width: 100%;
+    position: absolute;
+
+}
+
+#search {
+    position: relative;
+}
+
+
+
