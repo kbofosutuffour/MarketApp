@@ -2,12 +2,14 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
+from .models import Post, Photo
 
 # Create your views here.
 
 # Create your views here.
 def main(request):
-    return render(request, 'main.html')
+    posts = Post.objects.all()
+    return render(request, 'main.html', {'posts': posts})
 
 def login(request):
 
@@ -95,3 +97,27 @@ def forgot_screen(request):
     else:
         return render(request, 'forgot_screen')
         
+
+def new_post(request):
+    if User.username is None:
+        messages.info(request, 'Must have an account to create a new post')
+        return redirect('/')
+    if request.method == "POST":
+
+        product = request.POST['product']
+        description = request.POST['description']
+        price = request.POST['price']
+        username = request.user.get_username()
+
+        photo = Photo.objects.create(image=product)
+        n_post = Post.objects.create(product=product, description=description, price=price, username=username)
+
+        messages.info(request, 'Your post has been created!')
+        posts = Post.objects.all()
+        return render(request, 'main.html', {'posts': posts})
+    
+    else:
+        return render(request, 'new_post.html')
+
+
+
