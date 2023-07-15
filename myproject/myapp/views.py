@@ -3,10 +3,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from .models import Post, Photo
+from .models import Post, dP
 from django.template import Context, Template
 from django.http import JsonResponse
-from .forms import PostForm
+from .forms import *
 
 # Create your views here.
 
@@ -141,4 +141,21 @@ def getImage(request):
 def returnHome(request):
     return redirect('/')
 
+def avatar(request):
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            user = User.objects.get( username=request.user.get_username() )
+            first = request.POST['first_name']
+            last = request.POST['last_name']
+            user.first_name = first
+            user.last_name = last
+            form.save()
+    else:
+        form = ProfileForm()
+        return render(request, 'avatar.html')
+
+    return redirect('login')
 

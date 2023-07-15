@@ -14,32 +14,36 @@
     </script>
 
 </head>
-<body id="body">
+<body>
 
     <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
 
         {% if user.is_authenticated %}
-            <div style="margin-right: 90%; display: inline;"><h2 style="display: inline; ">Welcome, {{user.username}}!</h2></div>
+            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Welcome, {{user.username}}!</h2></div>
         {% else %}
-            <div style="margin-right: 90%; display: inline;"><h2 style="display: inline; ">Welcome, Guest!</h2></div>
+            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Welcome, Guest!</h2></div>
         {% endif %}
-        <img id="search" src="{% static 'media/search.png' %}" style="display: inline; width: 30px;"/>
 
-        {% if user.is_authenticated %}
-        <a href="logout"><button>Logout</button></a>
-        {% else %}
-        <a href="login"><button>Login</button></a>
-        {% endif %}    </div>
+        <div id="search-login">
+            <img id="search" src="{% static 'media/search.png' %}" style="display: block; width: 30px; padding-bottom: 20%"/>
+
+            {% if user.is_authenticated %}
+            <a href="logout" id="login"><button>Logout</button></a>
+            {% else %}
+            <a href="login" id="login"><button>Login</button></a>
+            {% endif %}   
+        </div>
+ 
+    </div>
     
     {% for post in posts %}
     <div class="post">
-        <div style="display: inline;">
-            <p id="product">{{post.product}}</p>
-            <img id="post-image" src="{{ post.image.url }}" onclick=my_func()/>
+        <div class="post-image-div" display="inline-block" >
+            <img class="post-image" src="{{ post.image.url }}"/>
         </div>
-        <div class ="text">
-            <h3 class="product_description">{{post.product}}</h3>
-            <h4 class="user">{{post.username}}</h4>
+        <div class ="post-text" display="inline-block">
+            <h3 class="product">{{post.product}}</h3>
+            <h4 class="username">{{post.username}}</h4>
             <h3 class="price">${{post.price}}</h3>
 
         </div>
@@ -51,9 +55,9 @@
     <a href="new_post"><img src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" /></a>
     <footer>
         <ul>
-            <li class = "footer_img"><a href="{% static 'main.html' %}"><img src="{% static 'media/default_image.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a><img src="{% static 'media/default_image.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a><img src="{% static 'media/default_image.png' %}" id="profile" /></a></li>
+            <li class = "footer_img"><a href="{% static 'main.html' %}"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
+            <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a href="" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
    </footer>
    <!-- <script>

@@ -16,9 +16,11 @@
         <h1>Create your Profile</h1> <br>
         <form action="/" method="post">
             {% csrf_token %}
-            <input type="text" id="username" placeholder="Enter your first name" name="first" required><br>
-            <input type="text" id="password" placeholder="Enter your last name" name="last" required><br>
-            <input id="sign-up" type="submit" placeholder="Create Profile"></input><br>
+
+            {{ form.as_p }}
+
+        <p>First Name: </p><input type="text" name="first_name"/><br>
+        <p>Last Name:</p><input type="password" name="last_name"/><br>
         </form>
     </div>
 </body>

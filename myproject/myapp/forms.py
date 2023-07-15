@@ -8,6 +8,11 @@ class PostForm(forms.ModelForm):
 	class Meta:
 		model = Post
 		fields = '__all__'
-		exclude = ['username']
+		exclude = ['username', 'date']
 
+class ProfileForm(forms.ModelForm):
+
+	class Meta:
+		model = dP
+		fields = '__all__'
 

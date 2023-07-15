@@ -1,21 +1,63 @@
+#top-bar {
+    border-bottom: 2px solid rgb(191, 188, 188)
+}
+
+#search-login {
+    position: absolute;
+    right: 0;
+    top: 5%
+}
+
+#login {
+    position: absolute;
+    right: 0
+}
+
+
 body {
     overflow: scroll;
 }
 
-
-.footer_img {
-    width: 50px;
-    display: inline;
-}
-
 .post {
-    width: 100%;
+    width: 70%;
+    padding: 10px 10px 10px 10px;
     margin: auto;
     border: 1px solid rgb(191, 188, 188) ;
 }
 
-.text {
+.product {
+    font-weight: bold;
+    font-size: x-large
+}
+
+.username {
+    font-weight: lighter;
+}
+
+
+.post-image {
+    width: 150px;
+    border-radius: 25%;
+}
+
+.post-image-div {
+    width: 150px;
+    border-color:red;
     display: inline-block;
+    border-radius: 50px;
+
+}
+
+.post-text {
+    display: inline-block;
+    border-color:red;
+    border-width: 10px;
+    margin-left: 40px
+
+}
+
+#home, #profile, #chats {
+    width: 50px;
 }
 
 #add-post {
@@ -23,22 +65,22 @@ body {
     width: 50px;
 }
 
-#post-image {
-    width: 150px
-}
-
-#home, #profile, #chats {
-
-    width: 50px;
-
-}
-
 footer {
     display: block;
-    margin: 0px;
-    width: 100%;
-    position: absolute;
+    background-color: white;
+    position: fixed;
+    bottom: 0;
+    /* border: 1px solid rgb(233, 19, 19) ; */
+    /* margin: auto; */
+    width: 50%;
+    margin-left: 25%;
 
+}
+
+.footer_img {
+    width: 50px;
+    display: inline-block;
+    margin-left: 20%;
 }
 
 #search {
