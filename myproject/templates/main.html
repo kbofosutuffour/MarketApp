@@ -8,8 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'main_style.css' %}">
     <title>Document</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
+    </script>
+
 </head>
-<body>
+<body id="body">
+
     <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
 
         {% if user.is_authenticated %}
@@ -28,7 +34,8 @@
     {% for post in posts %}
     <div class="post">
         <div style="display: inline;">
-            <img id="post-image" src="{% static 'media/default_image.png' %}" />
+            <p id="product">{{post.product}}</p>
+            <img id="post-image" src="{{ post.image.url }}" onclick=my_func()/>
         </div>
         <div class ="text">
             <h3 class="product_description">{{post.product}}</h3>
@@ -36,9 +43,11 @@
             <h3 class="price">${{post.price}}</h3>
 
         </div>
-    </div>
+    </div> 
     {% endfor %}
- 
+
+
+    
     <a href="new_post"><img src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" /></a>
     <footer>
         <ul>
@@ -47,5 +56,37 @@
             <li class = "footer_img"><a><img src="{% static 'media/default_image.png' %}" id="profile" /></a></li>
         </ul>
    </footer>
+   <!-- <script>
+    $(document).ready(function() {
+        //setInterval(function(){
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'getImage' %}",
+                success: function(response) {
+                    $("#front").empty();
+                    for(var key in response.posts) {
+                        prod = response.posts[key].product
+                        
+                        let string = '<img id="post-image" src="'
+                        string = string.concat("{% static 'post_images/")
+                        // <img id='post-image' src="{% static 'post_images/Airpods.jpg' %}"/>
+                        // <img id='post-image' src="{% static 'post_images/Airpods.jpg' %}"/>
+
+                        string = string.concat(prod)
+                        string = string.concat(".jpg' %}", '"/>')
+                        console.log(string)
+
+                    $("#front").append(string);
+                    }
+                },
+                error: function(response) {
+                    alert('Error getting data')
+                }
+            })
+
+        },1000) 
+
+    //}); 
+   </script> -->
 </body>
 </html>

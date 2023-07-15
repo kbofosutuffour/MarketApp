@@ -7,14 +7,17 @@
 </head>
 <body>
     <h1>Create a New Post</h1>
-    <form method="POST" action="new_post">
+    <form method="POST" action="new_post" enctype="multipart/form-data">
         {% csrf_token %}
-        
-        <p>Enter the name of your product</p><input type="text" name="product"/><br>
-        <p>Describe your product</p><input type="password" name="description"/><br>
-        <p>Enter your desired selling price: $</p><input type="password" name="price"/><br>
+        {{ form.as_p }}
 
-        <input type="submit"/>
+        <!-- <p>Enter the name of your product</p><input type="text" name="product"/><br>
+        <p>Describe your product</p><input type="password" name="description"/><br>
+        <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
+
+        <button type="submit">Upload</button>
     </form>
+
+    <a href="returnHome"><button>Back to Home</button></a>
 </body>
 </html>

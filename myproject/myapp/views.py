@@ -1,14 +1,19 @@
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from .models import Post, Photo
+from django.template import Context, Template
+from django.http import JsonResponse
+from .forms import PostForm
 
 # Create your views here.
 
 # Create your views here.
 def main(request):
     posts = Post.objects.all()
+
     return render(request, 'main.html', {'posts': posts})
 
 def login(request):
@@ -102,22 +107,38 @@ def new_post(request):
     if User.username is None:
         messages.info(request, 'Must have an account to create a new post')
         return redirect('/')
-    if request.method == "POST":
+    #if request.method == "POST":
 
-        product = request.POST['product']
-        description = request.POST['description']
-        price = request.POST['price']
-        username = request.user.get_username()
 
-        photo = Photo.objects.create(image=product)
-        n_post = Post.objects.create(product=product, description=description, price=price, username=username)
+        # photo = Photo.objects.create(image=product)
+        # n_post = Post.objects.create(product=product, description=description, price=price, username=username)
 
-        messages.info(request, 'Your post has been created!')
-        posts = Post.objects.all()
-        return render(request, 'main.html', {'posts': posts})
-    
+        # messages.info(request, 'Your post has been created!')
+        # posts = Post.objects.all()
+        # product = request.POST['product']
+        # description = request.POST['description']
+        # price = request.POST['price']
+        # username = request.user.get_username()
+
+    form = PostForm(request.POST, request.FILES)
+    if form.is_valid():
+        np = form.save(commit=False)
+        user = request.user.get_username()
+        np.username = user
+        np.save()
     else:
-        return render(request, 'new_post.html')
+        form = PostForm()
+    
+    return render(request, 'new_post.html', {'form': form})
 
+    # else:
+    #     return render(request, 'new_post.html')
+
+def getImage(request):
+    posts = Post.objects.all()
+    return JsonResponse({'posts': list(posts.values())})
+
+def returnHome(request):
+    return redirect('/')
 
 
