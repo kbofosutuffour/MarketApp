@@ -19,6 +19,7 @@ There's still a consideratble amount of front-end that the profile and login web
 I hope that a demo version of the project can be released before the Fall 2023 semester starts, that way we all will have a good start to develop more ideas for the project.  Thank you all for committing your time to this project, and hopefully we can continue to make this idea into a reality
 
 Best,
+
 Kwaku Ofosu
 
 p.s. I did not proofread this message for spelling errors
