@@ -12,6 +12,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
     </script>
+    <script src="{% static 'main.js' %}"></script>
 
 </head>
 <body>
@@ -28,34 +29,48 @@
             <img id="search" src="{% static 'media/search.png' %}" style="display: block; width: 30px; padding-bottom: 20%"/>
 
             {% if user.is_authenticated %}
-            <a href="logout" id="login"><button>Logout</button></a>
+            <a href="logout" ><button id="login">Logout</button></a>
             {% else %}
-            <a href="login" id="login"><button>Login</button></a>
+            <a href="login" ><button id="login" onmouseover="login()">Login</button></a>
             {% endif %}   
         </div>
  
     </div>
     
     {% for post in posts %}
-    <div class="post">
+    <div class="post" >
         <div class="post-image-div" display="inline-block" >
             <img class="post-image" src="{{ post.image.url }}"/>
         </div>
-        <div class ="post-text" display="inline-block">
+        <div class ="post-text" display="inline-block" >
             <h3 class="product">{{post.product}}</h3>
             <h4 class="username">{{post.username}}</h4>
             <h3 class="price">${{post.price}}</h3>
-
         </div>
+        <div class="edit-post" id="edit-post"  >
+            <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
+            <div class="post-drop-down">
+                <ul style = "list-style-type:none; margin: 0; padding: 0">
+                    {% if user.is_authenticated and post.username == user.get_username %}
+                    <li>Edit Post</li>
+                    {% endif %}
+                    <li>Save Post</li>
+                    <li>Flag Post</li>
+                </ul>
+    
+    
+            </div>
+        </div>
+
     </div> 
     {% endfor %}
 
 
     
-    <a href="new_post"><img src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" /></a>
+    <a href="new_post"><img id="new-post" src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" /></a>
     <footer>
         <ul>
-            <li class = "footer_img"><a href="{% static 'main.html' %}"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
+            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
             <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
             <li class = "footer_img"><a href="" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>

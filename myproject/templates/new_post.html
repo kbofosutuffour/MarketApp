@@ -1,23 +1,51 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>User: Create New Post</title>
+    <link rel="stylesheet" href="{% static 'new_post.css' %}">
+    <script src="{% static 'new_post.js' %}"></script>
+
+
+    
 </head>
 <body>
-    <h1>Create a New Post</h1>
-    <form method="POST" action="new_post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px; height: 50px">
 
-        <!-- <p>Enter the name of your product</p><input type="text" name="product"/><br>
-        <p>Describe your product</p><input type="password" name="description"/><br>
-        <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
+        {% if user.is_authenticated %}
+            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Create a New Post</h2></div>
 
-        <button type="submit">Upload</button>
-    </form>
+        {% endif %}
 
-    <a href="returnHome"><button>Back to Home</button></a>
+        <div id="cancel-publish" style="display: inline;">
+            <a><p id="cancel" onmouseenter="cancel()" onmouseout="cancel_out()">Cancel</p></a>
+            <a><p id="publish" onmouseenter="publish()" onmouseout="publish_out()">Publish</p></a>  
+        </div>
+ 
+    </div>
+    
+    <div class="section">
+        <form method="POST" action="new_post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <!-- <p>Enter the name of your product</p><input type="text" name="product"/><br>
+            <p>Describe your product</p><input type="password" name="description"/><br>
+            <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
+
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    
+    <footer>
+        <ul>
+            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
+            <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a href="" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
+        </ul>
+   </footer>
 </body>
 </html>
