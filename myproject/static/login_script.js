@@ -4,7 +4,7 @@ function verify() {
     let warning = document.getElementById('warning');
 
     if (username == "marketapp" && password == "h2h") {
-        window.location.href = "./main.html";
+        window.location.href = "./home.html";
     } else {
         warning.style.display = "block";
     }

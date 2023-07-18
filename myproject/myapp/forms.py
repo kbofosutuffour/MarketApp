@@ -13,6 +13,7 @@ class PostForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
 
 	class Meta:
-		model = dP
+		model = Profile
 		fields = '__all__'
+		exclude = ['username']
 

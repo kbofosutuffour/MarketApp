@@ -27,8 +27,5 @@ function createID() {
     target = post_list[len(post_list)-1];
 }
 
-function login() {
-    let log = document.getElementById('login');
-    log.setAttribute("style", "background-color:red;");
-}
+
 

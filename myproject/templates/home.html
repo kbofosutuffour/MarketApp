@@ -6,13 +6,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'main_style.css' %}">
-    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'home_style.css' %}">
+    <title>H2H | Homepage</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
     </script>
-    <script src="{% static 'main.js' %}"></script>
+    <script src="{% static 'home.js' %}"></script>
 
 </head>
 <body>
@@ -31,7 +31,7 @@
             {% if user.is_authenticated %}
             <a href="logout" ><button id="login">Logout</button></a>
             {% else %}
-            <a href="login" ><button id="login" onmouseover="login()">Login</button></a>
+            <a href="login" ><button id="login">Login</button></a>
             {% endif %}   
         </div>
  
@@ -72,7 +72,7 @@
         <ul>
             <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
             <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
+            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
    </footer>
    <!-- <script>

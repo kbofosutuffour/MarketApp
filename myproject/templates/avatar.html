@@ -6,21 +6,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'login_style.css' %}">
+    <link rel="stylesheet" href="{% static 'avatar.css' %}">
     <script src=""></script>
     <title>Login Page</title>
 </head>
 <body style = "background-color: white">
-    <div id="box">
+    
+    <div id="section">
         <img src="{% static 'media/default_image.png' %}" style="width: 5px"/>
-        <h1>Create your Profile</h1> <br>
-        <form action="/" method="post">
+        <h1 style="text-align: center;">Create your H2H Profile!</h1> <br>
+        <form action="avatar" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
             {{ form.as_p }}
 
-        <p>First Name: </p><input type="text" name="first_name"/><br>
-        <p>Last Name:</p><input type="password" name="last_name"/><br>
+        <button type="submit">Create Profile</button>
+
         </form>
     </div>
 </body>

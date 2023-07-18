@@ -1,0 +1,70 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'profile.css' %}">
+    <title>H2H | My Profile</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
+    </script>
+    <script src="{% static 'home.js' %}"></script>
+
+</head>
+<body>
+
+    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
+
+        <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">My Profile</h2></div>
+
+        <div id="search-login">
+            <img id="search" src="{% static 'media/search.png' %}" style="display: block; width: 30px; padding-bottom: 20%"/>
+
+        </div>
+ 
+    </div>
+
+    {% for profile in profiles %}
+    <div id="profile1">
+        <div id="profile-image-div">
+            <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
+        </div>
+        <div id="profile-text">
+            <h1 id="profile-name">{{profile.username}}</h1>
+            <button><h3 id="edit-profile">Edit Profile</h3></button>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div id="sell-history">
+    <p>Sell History</p>
+
+        {% for post in posts %}
+        <div class="post">
+            <div class="post-image-div" display="inline-block" >
+                <img class="post-image" src="{{ post.image.url }}"/>
+            </div>
+            <div class ="post-text" display="inline-block" >
+                <h3 class="product">{{post.product}}</h3>
+                <h3 class="price">${{post.price}}</h3>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+
+    <footer>
+        <ul>
+            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
+            <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
+        </ul>
+   </footer>
+
+</body>
+</html>
