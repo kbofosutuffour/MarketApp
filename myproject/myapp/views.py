@@ -163,3 +163,17 @@ def profile(request):
     }
 
     return render(request, 'profile.html', context)
+
+
+def productDescription(request):
+    product = request.GET['product']
+    username = request.GET['username']
+    posts = Post.objects.filter(username=username, product=product)
+    profiles = Profile.objects.filter(username=username)
+    context = {
+        'profiles': profiles,
+        'posts': posts,
+    }
+
+
+    return render(request, 'product_description.html', context)

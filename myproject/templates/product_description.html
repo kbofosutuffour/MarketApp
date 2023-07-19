@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% for post in posts %}
+    <title>H2H | {{posts.product}}</title>
+    {% endfor %}
+    <link rel="stylesheet" href="{% static 'product_description.css' %}">
+</head>
+<body>
+
+
+    {% for post in posts %}
+    <div id="image-div">
+        <img src="{{ post.image.url }}" id="image"/>
+    </div>
+
+    {% endfor %}
+
+    <div id="right">
+        {% for profile in profiles %}
+        <div id="profile">
+            <img id="profile-picture" src="{{ profile.profile_picture.url }}" />
+            <h2 id="username">{{ profile.username }}</h2>
+        </div>
+        {% endfor %}
+    
+        {% for post in posts %}
+        <div id ="description">
+            <h1 id="product">{{post.product}}</h1>
+            <p id="desc">{{post.description}}</p>
+        </div>
+
+        <div id="footer">
+            <h2 id="price">${{post.price}}</h2>
+            <div id="message"><p id="message-inner" style="margin: auto; padding-top: 5px;">Message</p></div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -43,7 +43,13 @@
             <img class="post-image" src="{{ post.image.url }}"/>
         </div>
         <div class ="post-text" display="inline-block" >
-            <h3 class="product">{{post.product}}</h3>
+            <form method="GET" action="productDescription">
+                <input class="product" name="product" type="text" value="{{post.product}}" style="border: none; display: inline;">
+                <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+
+                <input type="submit" value=">" style="background-color: white;display: inline;">
+            </form>
+            <!-- <h3 class="product">{{post.product}}</h3>  -->
             <h4 class="username">{{post.username}}</h4>
             <h3 class="price">${{post.price}}</h3>
         </div>
