@@ -12,16 +12,16 @@
     
 </head>
 <body>
-    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px; height: 50px">
+    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
 
         {% if user.is_authenticated %}
             <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Create a New Post</h2></div>
-
         {% endif %}
+        <br>
 
         <div id="cancel-publish" style="display: inline;">
-            <a><p id="cancel" onmouseenter="cancel()" onmouseout="cancel_out()">Cancel</p></a>
-            <a><p id="publish" onmouseenter="publish()" onmouseout="publish_out()">Publish</p></a>  
+            <a href="returnHome" style="text-decoration: none;"><p id="cancel" onmouseenter="cancel()" onmouseout="cancel_out()">Cancel</p></a>
+            <!-- <a href="returnHome"><p id="publish" onmouseenter="publish()" onmouseout="publish_out()">Publish</p></a>   -->
         </div>
  
     </div>

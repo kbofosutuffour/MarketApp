@@ -14,6 +14,11 @@
     <div id="box">
         <img src="{% static 'media/default_image.png' %}" />
         <h1>Welcome to H2H!</h1> <br>
+
+        {% for message in messages %}
+        <h5 style="color: red">{{message}}</h5>
+        {% endfor %}
+        
         <h3>Please enter your login information</h3>
         <div id="input">
             <!-- <div class="user-pass">
@@ -33,7 +38,7 @@
                 <input type="submit"/>
             </form>
 
-            <div style="margin: 10px"><a><span style="margin: 3px">Forgot username and/or password? Click here!</span></a></div>
+            <div style="margin: 10px; color: gray">Forgot username and/or password? <a href="forgot_screen"><span style="margin: 3px">Click here!</span></a></div>
             <div style="margin: 10px; color: gray;"><a><span style="margin: 3px">Don't have an account? <a href="register">Click here!</a></span></a></div>
 
         </div>

@@ -36,36 +36,85 @@
         </div>
  
     </div>
+
+    {% for message in messages %}
+    <h5 class="message" >{{message}}</h5>
+    {% endfor %}
     
     {% for post in posts %}
     <div class="post" >
+        <p hidden>{{post.product}}</p>
+        <p hidden>{{post.username}}</p>
+
         <div class="post-image-div" display="inline-block" >
             <img class="post-image" src="{{ post.image.url }}"/>
         </div>
+
         <div class ="post-text" display="inline-block" >
+
             <form method="GET" action="productDescription">
                 <input class="product" name="product" type="text" value="{{post.product}}" style="border: none; display: inline;">
                 <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
 
                 <input type="submit" value=">" style="background-color: white;display: inline;">
             </form>
-            <!-- <h3 class="product">{{post.product}}</h3>  -->
             <h4 class="username">{{post.username}}</h4>
             <h3 class="price">${{post.price}}</h3>
+
         </div>
-        <div class="edit-post" id="edit-post"  >
+
+        <div class="edit-post" id="edit-post" >
+
+            <script type="text/javascript">
+                function edit_post() {
+                    let editButtons = document.getElementsByClassName('edit-post');
+                    for (let i = 0; i < editButtons.length; i++) {
+                        if (editButtons[i].children[2].style.visibility == 'visible') {
+                            editButtons[i].children[2].style.visibility = 'hidden';
+                        } else {
+                            editButtons[i].children[2].style.visibility = 'visible';
+                        }
+                        
+                    }
+                }
+            </script>
+
             <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
-            <div class="post-drop-down">
-                <ul style = "list-style-type:none; margin: 0; padding: 0">
-                    {% if user.is_authenticated and post.username == user.get_username %}
-                    <li>Edit Post</li>
-                    {% endif %}
-                    <li>Save Post</li>
-                    <li>Flag Post</li>
-                </ul>
+            <div class="post-drop-down" style="visibility: hidden;">
+ 
+                {% if user.is_authenticated and post.username == user.get_username %}
+
+                <form method="POST" action="edit_post">
+                    {% csrf_token %}
+                    <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+                    <input class="image" name="image" type="hidden" value="{{post.image.url}}" style="border: none; display: inline;">
+                    <input type="submit" value="Edit Post" style="background-color: white; border: none;">
+                </form>
+
+                {% endif %}
+
+                {% if user.is_authenticated%}
+
+                <form method="GET" action="">
+                    <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
     
+                    <input type="submit" value="Save Post" style="background-color: white; border: none">
+                </form>
+
+
+                <form method="GET" action="">
+                    <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
     
+                    <input type="submit" value="Flag Post" style="background-color: white; border: none;">
+                </form>
+                {% endif %}
+
+                
             </div>
+
         </div>
 
     </div> 
@@ -81,6 +130,8 @@
             <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
    </footer>
+
+   <!-- PLEASE DO NOT DELETE THIS FORMAT WILL BE NEEDED IN THE FUTURE -->
    <!-- <script>
     $(document).ready(function() {
         //setInterval(function(){

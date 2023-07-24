@@ -4,8 +4,7 @@ body {
 
 
 #top-bar {
-    border-bottom: 2px solid rgb(191, 188, 188);
-    height: 10%;
+    border-bottom: 2px solid rgb(191, 188, 188)
 }
 
 
@@ -21,8 +20,6 @@ body {
     color: gray;
     width: fit-content;
     display: inline;
-    position: relative;
-    left: 95%;
 
 }
 
