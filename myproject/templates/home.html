@@ -39,8 +39,15 @@
     {% for message in messages %}
     <h5 class="message" >{{message}}</h5>
     {% endfor %}
+
+    {% if number_of_posts == 0 %}
+    <div class="post" style="text-align: center;">
+        No posts at the moment.  Add a post or check in later!
+    </div>
+    {% endif %}
     
     {% for post in posts %}
+
     <div class="post" >
         <p hidden>{{post.product}}</p>
         <p hidden>{{post.username}}</p>

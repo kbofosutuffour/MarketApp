@@ -22,8 +22,9 @@ def home(request):
     View representing the functionality of the home screen (home.html)
     """
     posts = Post.objects.all()
+    number_of_posts = len(posts)
 
-    return render(request, 'home.html', {'posts': posts})
+    return render(request, 'home.html', {'posts': posts, 'number_of_posts': number_of_posts})
 
 def login(request):
     """
@@ -38,9 +39,14 @@ def login(request):
         #authenticates the login information
         user = auth.authenticate(username=username, password=password) 
 
-        #if the user is authenitcated, move to the home screen
+        #Authenticates the user and checks if user has a profile
         if user is not None:
             auth.login(request, user)
+            try:
+                Profile.objects.get(username=request.user.get_username())
+            except:
+                return redirect('avatar')
+            
             return redirect('/')
         
         #else, reload the login screen and display error message
@@ -309,12 +315,19 @@ def edit_profile(request):
     """
 
     #If the user is not logged in, redirect them to the home page (guests should not be able to edit profile)
-    if User.username is None:
+    try:
+        user = User.objects.get(username=request.user.get_username())
+    except:
         messages.info(request, 'Must have an account to edit your profile')
         return redirect('/')
     
-    profile = Profile.objects.get(username=request.user.get_username())
-    user = User.objects.get(username=request.user.get_username())
+    try:
+        profile = Profile.objects.get(username=request.user.get_username())
+        hasProfile = True
+    except:
+        profile = Profile(username=request.user.get_username())
+        hasProfile = False
+
 
     form = ProfileForm(request.POST, request.FILES)
 
@@ -337,16 +350,22 @@ def edit_profile(request):
 
         #form object that will store all data of edited post.  Loaded with the profile initial information
         form = ProfileForm(
-                initial = {
-                    "username": request.user.get_username(),
-                    # "first_name": profile.first_name,
-                    # "last_name": profile.last_name,
-                    "profile_picture": profile.profile_picture
+            initial = {
+                "username": request.user.get_username(),
+                # "first_name": profile.first_name,
+                # "last_name": profile.last_name,
+                "profile_picture": profile.profile_picture
+            }
+        )
 
-                }
-            )
-        
-    return render(request, 'edit_profile.html', {'form': form, 'profile': profile, 'user': user})
+    context = {'form': form,
+               'profile': profile,
+               'user': user,
+               'username': request.user.get_username(),
+               'hasProfile': hasProfile
+               }
+
+    return render(request, 'edit_profile.html', context)
 
 
 
@@ -397,11 +416,24 @@ def profile(request):
     """
 
     posts = Post.objects.filter(username=request.user.get_username())
-    profile = Profile.objects.get(username=request.user.get_username())
-    context = {
-        'profile': profile,
-        'posts': posts,
-    }
+    try:
+        profile = Profile.objects.get(username=request.user.get_username())
+        hasProfile = True
+        context = {
+            'profile': profile,
+            'posts': posts,
+            'hasProfile': hasProfile,
+            'username': request.user.get_username()
+
+        }
+    except: 
+        hasProfile = False
+        context = {
+            'posts': posts,
+            'hasProfile': hasProfile,
+            'username': request.user.get_username()
+
+        }
 
     return render(request, 'profile.html', context)
 
@@ -433,6 +465,13 @@ def chat_room(request):
     """
     View used for the functionality of the chat room (chat_room.html).  
     """
+
+    #If the user is not logged in, redirect them to the home page (guests should not be able to enter a chat room)
+    try:
+        User.objects.get(username=request.user.get_username())
+    except:
+        messages.info(request, 'Must have an account to chat with others')
+        return redirect('/')
 
     if len(request.GET.keys()) != 0:
 
@@ -466,7 +505,14 @@ def chat_room(request):
     else:
         chatrooms = Room.objects.filter(username1 = request.user.get_username())
         chatrooms2 = Room.objects.filter(username2 = request.user.get_username())
-        return render(request, 'chat_room.html', {'chatrooms': chatrooms, 'chatrooms2': chatrooms2, 'current_user': request.user.get_username()})
+        number_of_chats = len(chatrooms) + len(chatrooms2)
+
+        context = {'chatrooms': chatrooms, 
+                    'chatrooms2': chatrooms2, 
+                    'current_user': request.user.get_username(),
+                    'number_of_chats': number_of_chats}
+        
+        return render(request, 'chat_room.html', context)
 
 def chat_messaging(request):
     """

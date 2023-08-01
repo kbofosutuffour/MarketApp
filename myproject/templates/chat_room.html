@@ -16,6 +16,11 @@
       {% endif %}
 
     </div>
+    {% if number_of_chats == 0 %}
+    <div class="chat">
+        You have no active chatrooms
+    </div>
+    {% endif %}
 
     {% for chatroom in chatrooms %}
     {% if chatroom.username2 == current_user %}

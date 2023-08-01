@@ -30,10 +30,15 @@
 
     <div id="profile1">
         <div id="profile-image-div">
+            {% if hasProfile %}
             <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
+            {% else %}
+            <img id="profile-image" src="{% static 'media/empty_profile.jpg' %}"/>
+            {% endif %}
         </div>
         <div id="profile-text">
-            <h1 id="profile-name">{{profile.username}}</h1>
+            <h1 id="profile-name">{{username}}</h1>
+
             <a href="edit_profile"><button><h3 id="edit-profile">Edit Profile</h3></button></a>
         </div>
     </div>

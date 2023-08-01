@@ -20,7 +20,7 @@ body {
     /* border: 1px solid red; */
     border-width: 10px;
     margin-left: 40px;
-    width: 200px;
+    width: 500px;
     position: relative;
     bottom: 20px
 
@@ -36,7 +36,7 @@ body {
 
 .chat-date {
     color: gray;
-    font-size: small
+    font-size: small;
 
 }
 

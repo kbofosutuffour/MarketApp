@@ -28,7 +28,12 @@
 
     <div id="profile1">
         <div id="profile-image-div">
+            {% if not hasProfile %}
+            <img id="profile-image" src="{% static 'media/empty_profile.jpg' %}"/>
+            {% else %}
             <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
+
+            {% endif %}
         </div>
         <div id="profile-text">
             <h1 id="profile-name">{{profile.username}}</h1>

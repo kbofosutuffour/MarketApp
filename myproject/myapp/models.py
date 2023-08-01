@@ -22,7 +22,7 @@ class Post(models.Model):
     product = models.CharField(max_length=100)
     username = models.CharField(max_length=500, default=None)
     date = models.DateTimeField(auto_now=True)
-    display_image = models.ImageField("Display Image", default=None)
+    display_image = models.ImageField("Display Image", upload_to="posts", default=None)
     description = models.TextField(max_length=1000, blank=True)
     price = models.DecimalField(decimal_places=2, max_digits=9)
 
@@ -35,7 +35,7 @@ class Profile(models.Model):
         profile_picture (charfield): A user's selected profile picture 
     """
     username = models.CharField(max_length=500, default=None, unique=True)
-    profile_picture = models.ImageField("Profile Picture", default=None)
+    profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     # first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     # last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
 
@@ -87,10 +87,10 @@ class Image(models.Model):
         null=True
     )
 
-    image1 = models.ImageField("images/", default=None)
-    image2 = models.ImageField("images/", default=None)
-    image3 = models.ImageField("images/", default=None)
-    image4 = models.ImageField("images/", default=None)
+    image1 = models.ImageField("images/", upload_to="posts", default=None)
+    image2 = models.ImageField("images/", upload_to="posts", default=None)
+    image3 = models.ImageField("images/", upload_to="posts", default=None)
+    image4 = models.ImageField("images/", upload_to="posts", default=None)
 
 
 
