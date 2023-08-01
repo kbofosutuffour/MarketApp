@@ -28,17 +28,15 @@
  
     </div>
 
-    {% for profile in profiles %}
     <div id="profile1">
         <div id="profile-image-div">
             <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
         </div>
         <div id="profile-text">
             <h1 id="profile-name">{{profile.username}}</h1>
-            <button><h3 id="edit-profile">Edit Profile</h3></button>
+            <a href="edit_profile"><button><h3 id="edit-profile">Edit Profile</h3></button></a>
         </div>
     </div>
-    {% endfor %}
 
     <div id="sell-history">
     <p>Sell History</p>
@@ -46,7 +44,7 @@
         {% for post in posts %}
         <div class="post">
             <div class="post-image-div" display="inline-block" >
-                <img class="post-image" src="{{ post.image.url }}"/>
+                <img class="post-image" src="{{ post.display_image.url }}"/>
             </div>
             <div class ="post-text" display="inline-block" >
                 <h3 class="product">{{post.product}}</h3>
@@ -61,7 +59,7 @@
     <footer>
         <ul>
             <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
             <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
    </footer>

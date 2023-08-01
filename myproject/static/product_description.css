@@ -15,9 +15,41 @@
 
 }
 
-#image {
+#image0 {
     height: 570px;
     float: right;
+    display: inline;
+}
+
+#image1, #image2, #image3, #image4 {
+    height: 570px;
+    float: right;
+}
+
+#left-arrow {
+    position: relative;
+    top: 250px;
+    height: 50px;
+    left: 250px;
+    background-color: white;
+    opacity: 0%;
+    width: 50px;
+
+}
+
+#right-arrow {
+    position: relative;
+    top: 200px;
+    height: 50px;
+    left: 625px;
+    background-color: white;
+    opacity: 0%;
+    width: 50px;
+    
+}
+
+#left-arrow-img, #right-arrow-img {
+    width: 50px;
 }
 
 #profile {
@@ -73,3 +105,32 @@
     position: relative;
     left: 10px
 }
+
+#new-post {
+    transition: 0.5s filter
+}
+
+#new-post:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+
+
+
+.footer_img {
+    width: 50px;
+    display: inline-block;
+    margin-left: 20%;
+}
+
+#home, #profile, #chats {
+    width: 50px;
+    transition: 0.5s filter
+}
+
+
+#home:hover, #profile:hover, #chats:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+

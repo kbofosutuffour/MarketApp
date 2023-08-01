@@ -1,8 +1,9 @@
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
+from django.core.mail import send_mail
 from .models import *
 from django.template import Context, Template
 from django.http import JsonResponse
@@ -111,15 +112,18 @@ def forgot_screen(request):
     #If user has hit the submit button on screen
     if request.method == "POST":
         username = request.POST['username']
+        email = request.POST['email']
 
-        # if User.objects.filter(email=email).exists():
-        #     #TODO retrieve email
-        #     user = User.objects.get(username=username)
-        #     answer = 'Your username is' + user.username
-        #     messages.info(request, answer)
+
+        if User.objects.filter(email=email).exists():
+            #TODO retrieve email
+            user = User.objects.get(email=email)
+            answer = 'Your username is ' + user.username
+            messages.info(request, answer)
+            return redirect('login')
 
         #Option where user has forgotten password.  Retrieves username from the screen and redirects to reset_password page
-        if User.objects.filter(username=username).exists():
+        elif User.objects.filter(username=username).exists():
             request.session['username'] = username
             return redirect('reset_password')
         else:
@@ -181,11 +185,39 @@ def new_post(request):
         user = request.user.get_username()
         np.username = user
         np.save()
+
+
+        #add additional images to the Image Model, which holds additional images for a unique post
+        additional_images = request.FILES.getlist('additional_images')
+        additional_images_list = []
+        for additions in additional_images:
+            additional_images_list.append(additions)
+
+        length = len(additional_images_list)
+        while length != 4:
+            additional_images_list.append(None)
+            length += 1
+        post = Post.objects.get(
+            product=form.cleaned_data['product'], 
+            username = request.user.get_username()
+        )
+        img = Image(
+            post = post,
+            image1 = additional_images_list[0],
+            image2 = additional_images_list[1],
+            image3 = additional_images_list[2],
+            image4 = additional_images_list[3],
+        )
+        img.save()
+
+
         messages.success(request, "Your post has been successfully uploaded!")
         return redirect('/')
     
     #Creates an empty form if page has loaded for the first time
     else:
+        print(form.errors)
+        print('test')
         form = PostForm()
     
 
@@ -195,12 +227,12 @@ def new_post(request):
 
 def edit_post(request):
     """
-    View used for the functionality of the edit_post screem (edit_post.html)
+    View used for the functionality of the edit post screes (edit_post.html)
     """
 
     #If the user is not logged in, redirect them to the home page (guests should not be able to edit posts)
     if User.username is None:
-        messages.info(request, 'Must have an account to create a new post')
+        messages.info(request, 'Must have an account to edit your profile')
         return redirect('/')
     
     form = PostForm(request.POST, request.FILES)
@@ -214,19 +246,43 @@ def edit_post(request):
         for post in posts:
             post.product = form.cleaned_data['product']
             post.price = form.cleaned_data['price']
-            post.image = form.cleaned_data['image']
+            post.display_image = form.cleaned_data['display_image']
             post.description = form.cleaned_data['description']
             post.save()
+
+            #add additional images to the Image Model, which holds additional images for a unique post
+
+            additional_images = request.FILES.getlist('additional_images')
+            additional_images_list = []
+            for additions in additional_images:
+                additional_images_list.append(additions)
+
+            length = len(additional_images_list)
+            while length != 4:
+                additional_images_list.append(None)
+                length += 1
+            post = Post.objects.get(
+                product=form.cleaned_data['product'], 
+                username = request.user.get_username()
+            )
+            img = Image(
+                post = post,
+                image1 = additional_images_list[0],
+                image2 = additional_images_list[1],
+                image3 = additional_images_list[2],
+                image4 = additional_images_list[3],
+            )
+            img.save()
             messages.success(request, 'You have successfully edited your post')
 
             return redirect('/')
     
     #Creates an empty form for the user to edit their post
     else:
-        username = request.POST['username']
+        username = request.user.get_username()
         product = request.POST['product']
         posts = Post.objects.filter(username=username, product=product)
-        image = request.POST['image']
+        display_image = request.POST['display_image']
 
         #TODO: Create an implementation without using a for loop
         for post in posts:
@@ -239,13 +295,58 @@ def edit_post(request):
                     "product": product,
                     "price": price,
                     "description": description,
-                    "image": image
+                    "display_image": display_image
                 }
             )
         
         request.session['old_product'] = product        #temporary dictionary that passes on the product name to different views
 
     return render(request, 'edit_post.html', {'form': form})
+
+def edit_profile(request):
+    """
+    View used for the functionality of the edit profile screes (edit_post.html)
+    """
+
+    #If the user is not logged in, redirect them to the home page (guests should not be able to edit profile)
+    if User.username is None:
+        messages.info(request, 'Must have an account to edit your profile')
+        return redirect('/')
+    
+    profile = Profile.objects.get(username=request.user.get_username())
+    user = User.objects.get(username=request.user.get_username())
+
+    form = ProfileForm(request.POST, request.FILES)
+
+    #If the user has submitted their edits for their profile
+    if form.is_valid():
+
+        #retrieve the profile from the database, make all changes to the post, then redirect user to the home screen
+        #TODO: Create an implementation without using a for loop
+        profile.profile_picture = form.cleaned_data['profile_picture']
+        profile.save()
+        # user.first_name = profile.first_name
+        # user.last_name = profile.last_name
+        # user.save()
+        messages.success(request, 'You have successfully edited your post')
+
+        return redirect('profile')
+    
+    #Creates an empty form for the user to edit their profile
+    else:
+
+        #form object that will store all data of edited post.  Loaded with the profile initial information
+        form = ProfileForm(
+                initial = {
+                    "username": request.user.get_username(),
+                    # "first_name": profile.first_name,
+                    # "last_name": profile.last_name,
+                    "profile_picture": profile.profile_picture
+
+                }
+            )
+        
+    return render(request, 'edit_profile.html', {'form': form, 'profile': profile, 'user': user})
 
 
 
@@ -275,6 +376,7 @@ def avatar(request):
         np = form.save(commit=False)
         np.username = request.user.get_username()
         np.save()
+        return redirect('/')
 
         #TODO: Add first-name, last name to profile
 
@@ -289,17 +391,15 @@ def avatar(request):
     return render(request, 'avatar.html', {'form': form, 'user': user})
     
 
-
-
 def profile(request):
     """
     View used for the funcitonality of the profile page (profile.html)
     """
 
     posts = Post.objects.filter(username=request.user.get_username())
-    profiles = Profile.objects.filter(username=request.user.get_username())
+    profile = Profile.objects.get(username=request.user.get_username())
     context = {
-        'profiles': profiles,
+        'profile': profile,
         'posts': posts,
     }
 
@@ -312,12 +412,161 @@ def productDescription(request):
     """
     product = request.GET['product']
     username = request.GET['username']
-    posts = Post.objects.filter(username=username, product=product)
-    profiles = Profile.objects.filter(username=username)
+    post = Post.objects.get(username=username, product=product)
+    profile = Profile.objects.get(username=username)
+
+    try:
+        additional_images = Image.objects.get(post=post)
+    except:
+        additional_images = None
+
+
     context = {
-        'profiles': profiles,
-        'posts': posts,
+        'profile': profile,
+        'post': post,
+        'additional_images': additional_images
     }
 
-
     return render(request, 'product_description.html', context)
+
+def chat_room(request):
+    """
+    View used for the functionality of the chat room (chat_room.html).  
+    """
+
+    if len(request.GET.keys()) != 0:
+
+        username1 = request.GET['username1']
+        product = request.GET['product']
+
+        profiles = Profile.objects.filter(username=username1)
+        user_profiles = Profile.objects.filter(username=request.user.get_username())
+        posts = Post.objects.filter(username=username1, product=product)
+
+        for p in posts:
+            post = p
+        for pro in profiles:
+            profile = pro
+        for u in user_profiles:
+            user_profile = u
+
+        chatroom = Room(
+            username1 = username1,
+            profile_picture1 = profile.profile_picture,
+            username2 = request.user.get_username(),
+            profile_picture2 = user_profile.profile_picture,
+            product = post.product,
+            image = post.display_image
+        )
+        chatroom.save()
+
+        chatrooms = Room.objects.filter(username1=username1, username2=request.user.get_username())
+        return render(request, 'chat_room.html', {'chatrooms': chatrooms, 'current_user': request.user.get_username()})
+
+    else:
+        chatrooms = Room.objects.filter(username1 = request.user.get_username())
+        chatrooms2 = Room.objects.filter(username2 = request.user.get_username())
+        return render(request, 'chat_room.html', {'chatrooms': chatrooms, 'chatrooms2': chatrooms2, 'current_user': request.user.get_username()})
+
+def chat_messaging(request):
+    """
+    View used to render the chat messaging pate (chat_messaging.html)
+    """
+    if request.method == "POST":
+        pass
+    
+    try:
+        username1 = request.GET['username1']
+    except:
+        username1 = request.GET['username2']
+
+    product = request.GET['product']
+
+    profile = Profile.objects.get(username=username1)
+    user_profile = Profile.objects.get(username=request.user.get_username())
+    posts = Post.objects.filter(product=product)
+
+    for p in posts:
+        if p.username == request.user.get_username() or p.username == username1:
+            post = p
+ 
+
+    try:
+        chatrooms = Room.objects.get(username1=username1, username2=request.user.get_username(), product=post.product)
+    except:
+        chatrooms = Room.objects.get(username2=username1, username1=request.user.get_username(), product=post.product)
+
+   
+    messages = Message.objects.filter(room=chatrooms)
+
+    context = {
+        'chatrooms': chatrooms,
+        'messages': messages,
+        'current_user': request.user.get_username(),
+        'username1': username1,
+        'username2': request.user.get_username(),
+        'product': product,
+    }
+    
+    return render(request, 'chat_messaging.html', context)
+
+def new_message(request):
+    """
+    View/function used to store a new message into our database, specifically the Message model
+    """
+    username1 = request.POST['username1']
+    username2 = request.POST['username2']
+    product = request.POST['product']
+    new_message = request.POST['new_message']
+
+    print(username1, username2, product, new_message)
+    print('testing')
+
+    try:
+        chatroom = Room.objects.get(username1=username1, username2=username2, product=product)
+    except:
+        chatroom = Room.objects.get(username2=username1, username1=username2, product=product)
+
+
+    m = Message(value=new_message, room=chatroom,username=request.user.get_username())
+    m.save()
+
+    return HttpResponse('Message sent successfully')
+
+def load_messages(request, username1, username2, current_user):
+    """
+    function used to asynchronously load messages in any given chat room
+    """
+
+    try:
+        flip = False
+        chatroom = Room.objects.get(username1=username1, username2=username2)
+    except:
+        flip = True
+        chatroom = Room.objects.get(username1=username2, username2=username1)
+
+    
+    messages = Message.objects.filter(room=chatroom)
+
+    if not flip:
+        context = {
+            'messages': list(messages.values()),
+            'profile_picture1': chatroom.profile_picture1.url,
+            'profile_picture2': chatroom.profile_picture2.url,
+            'username1': username1,
+            'username2': username2,
+            'current_user': current_user
+        }
+    else:
+        context = {
+            'messages': list(messages.values()),
+        
+            'profile_picture1': chatroom.profile_picture2.url,
+            'profile_picture2': chatroom.profile_picture1.url,
+            'username1': username1,
+            'username2': username2,
+            'current_user': current_user
+        # 'product': product
+    }
+
+    return JsonResponse(context)

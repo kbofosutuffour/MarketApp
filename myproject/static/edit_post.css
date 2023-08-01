@@ -8,6 +8,26 @@ body {
 }
 
 
+#profile-text {
+    /* border: 1px solid green ; */
+    width: 30%;
+    position: relative;
+    float: right;
+    right: 42.5%
+
+}
+
+#profile1 {
+    margin: auto;
+    padding: 10px 10px 10px 10px;
+    /* border: 1px solid red ; */
+    border-left: 1px solid rgb(191, 188, 188);
+    border-right: 1px solid rgb(191, 188, 188);
+    height: 200px;
+    width: 60%;
+
+}
+
 .section {
     width: 60%;
     padding: 10px 10px 10px 10px;
@@ -20,6 +40,8 @@ body {
     color: gray;
     width: fit-content;
     display: inline;
+    position: relative;
+    left: 95%;
 
 }
 

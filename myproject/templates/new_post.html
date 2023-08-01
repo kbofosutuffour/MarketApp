@@ -30,6 +30,11 @@
         <form method="POST" action="new_post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
+            {{ form.errors }}
+            {{ form.non_field_errors }}
+
+
+            
 
             <!-- <p>Enter the name of your product</p><input type="text" name="product"/><br>
             <p>Describe your product</p><input type="password" name="description"/><br>

@@ -8,11 +8,16 @@ from .models import *
 """
 
 class PostForm(forms.ModelForm):
+	additional_images = forms.ImageField(required=False, label="Additional Images", widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
 	class Meta:
 		model = Post
 		fields = '__all__'
 		exclude = ['username', 'date']
+	
+	# def save(self, commit=True):
+	# 	return super(PostForm, self).save(commit=commit)
+
 
 class ProfileForm(forms.ModelForm):
 

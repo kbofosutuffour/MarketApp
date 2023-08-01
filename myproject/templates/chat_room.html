@@ -1,0 +1,157 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'chat_room.css' %}" >
+    <title>H2H | Chatroom</title>
+</head>
+<body>
+    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
+
+        {% if user.is_authenticated %}
+            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Chats</h2></div>
+      {% endif %}
+
+    </div>
+
+    {% for chatroom in chatrooms %}
+    {% if chatroom.username2 == current_user %}
+
+    <div class="chat" >
+
+        <div class="chat-image-div" display="inline-block" >
+            <img class="chat-image" src="{{ chatroom.profile_picture1.url }}"/>
+        </div>
+
+        <div class ="chat-text" display="inline-block" >
+
+            <form method="GET" action="chat_messaging">
+                
+                <input class="product" name="username1" type="text" value="{{chatroom.username1}}" style="border: none; display: inline;">
+                <input name="image" type="hidden" value="{{chatroom.image}}">
+                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
+                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
+                <input name="product" type="hidden" value="{{chatroom.product}}">
+
+
+
+                <input type="submit" value=">" style="background-color: white;display: inline;">
+            </form>
+
+        </div>
+
+        <div class="post-image-div" display="inline-block" >
+            <img class="post-image" src="{{ chatroom.image.url }}"/>
+        </div>
+        
+    </div>
+
+    {% else %}
+    <div class="chat" >
+
+        <div class="chat-image-div" display="inline-block" >
+            <img class="chat-image" src="{{ chatroom.profile_picture2.url }}"/>
+        </div>
+
+        <div class ="chat-text" display="inline-block" >
+
+            <form method="GET" action="chat_messaging">
+                
+                <input class="product" name="username2" type="text" value="{{chatroom.username2}}" style="border: none; display: inline;">
+                <input name="image" type="hidden" value="{{chatroom.image}}">
+                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
+                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
+                <input name="product" type="hidden" value="{{chatroom.product}}">
+
+
+
+                <input type="submit" value=">" style="background-color: white;display: inline;">
+            </form>
+
+        </div>
+
+        <div class="post-image-div" display="inline-block" >
+            <img class="post-image" src="{{ chatroom.image.url }}"/>
+        </div>
+        
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    {% for chatroom in chatrooms2 %}
+    {% if chatroom.username2 == current_user %}
+
+    <div class="chat" >
+
+        <div class="chat-image-div" display="inline-block" >
+            <img class="chat-image" src="{{ chatroom.profile_picture1.url }}"/>
+        </div>
+
+        <div class ="chat-text" display="inline-block" >
+
+            <form method="GET" action="chat_messaging">
+                
+                <input class="product" name="username1" type="text" value="{{chatroom.username1}}" style="border: none; display: inline;">
+                <input name="image" type="hidden" value="{{chatroom.image}}">
+                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
+                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
+                <input name="product" type="hidden" value="{{chatroom.product}}">
+
+
+
+                <input type="submit" value=">" style="background-color: white;display: inline;">
+            </form>
+
+        </div>
+
+        <div class="post-image-div" display="inline-block" >
+            <img class="post-image" src="{{ chatroom.image.url }}"/>
+        </div>
+        
+    </div>
+
+    {% else %}
+    <div class="chat" >
+
+        <div class="chat-image-div" display="inline-block" >
+            <img class="chat-image" src="{{ chatroom.profile_picture2.url }}"/>
+        </div>
+
+        <div class ="chat-text" display="inline-block" >
+
+            <form method="GET" action="chat_messaging">
+                
+                <input class="product" name="username2" type="text" value="{{chatroom.username2}}" style="border: none; display: inline;">
+                <input name="image" type="hidden" value="{{chatroom.image}}">
+                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
+                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
+                <input name="product" type="hidden" value="{{chatroom.product}}">
+
+
+
+                <input type="submit" value=">" style="background-color: white;display: inline;">
+            </form>
+
+        </div>
+
+        <div class="post-image-div" display="inline-block" >
+            <img class="post-image" src="{{ chatroom.image.url }}"/>
+        </div>
+        
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <footer>
+        <ul>
+            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
+            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
+        </ul>
+   </footer>
+    
+</body>
+</html>

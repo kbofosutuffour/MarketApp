@@ -7,3 +7,6 @@ from .models import *
 
 admin.site.register(Post)
 admin.site.register(Profile)
+admin.site.register(Room)
+admin.site.register(Message)
+admin.site.register(Image)

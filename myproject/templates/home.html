@@ -6,12 +6,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'home_style.css' %}">
+    <link rel="stylesheet" href="{% static 'home.css' %}">
     <title>H2H | Homepage</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
-    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="{% static 'home.js' %}"></script>
 
 </head>
@@ -47,7 +46,7 @@
         <p hidden>{{post.username}}</p>
 
         <div class="post-image-div" display="inline-block" >
-            <img class="post-image" src="{{ post.image.url }}"/>
+            <img class="post-image" src="{{ post.display_image.url }}"/>
         </div>
 
         <div class ="post-text" display="inline-block" >
@@ -88,7 +87,7 @@
                     {% csrf_token %}
                     <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
                     <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-                    <input class="image" name="image" type="hidden" value="{{post.image.url}}" style="border: none; display: inline;">
+                    <input class="image" name="display_image" type="hidden" value="{{post.display_image.url}}" style="border: none; display: inline;">
                     <input type="submit" value="Edit Post" style="background-color: white; border: none;">
                 </form>
 
@@ -126,43 +125,9 @@
     <footer>
         <ul>
             <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
             <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
    </footer>
-
-   <!-- PLEASE DO NOT DELETE THIS FORMAT WILL BE NEEDED IN THE FUTURE -->
-   <!-- <script>
-    $(document).ready(function() {
-        //setInterval(function(){
-            $.ajax({
-                type: 'GET',
-                url: "{% url 'getImage' %}",
-                success: function(response) {
-                    $("#front").empty();
-                    for(var key in response.posts) {
-                        prod = response.posts[key].product
-                        
-                        let string = '<img id="post-image" src="'
-                        string = string.concat("{% static 'post_images/")
-                        // <img id='post-image' src="{% static 'post_images/Airpods.jpg' %}"/>
-                        // <img id='post-image' src="{% static 'post_images/Airpods.jpg' %}"/>
-
-                        string = string.concat(prod)
-                        string = string.concat(".jpg' %}", '"/>')
-                        console.log(string)
-
-                    $("#front").append(string);
-                    }
-                },
-                error: function(response) {
-                    alert('Error getting data')
-                }
-            })
-
-        },1000) 
-
-    //}); 
-   </script> -->
 </body>
 </html>

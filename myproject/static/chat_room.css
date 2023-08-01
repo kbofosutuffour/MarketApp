@@ -1,0 +1,102 @@
+
+#top-bar {
+    border-bottom: 2px solid rgb(191, 188, 188)
+}
+
+body {
+    overflow: scroll;
+}
+
+
+
+.chat {
+    width: 60%;
+    padding: 10px 10px 10px 10px;
+    margin: auto;
+    border: 1px solid rgb(191, 188, 188) ;
+    height: 125px;
+}
+
+.chat-image {
+    width: 100px;
+    border-radius: 25%;
+    margin-left: 10%;
+    height: 100px;
+    position: relative;
+    top: 10px
+}
+
+.post-image{
+    width: 80px;
+    border-radius: 25%;
+    margin-left: 10%;
+    height: 80px;
+    position: relative;
+    float: right;
+    top: 10px;
+    right: 10px
+}
+.chat-image-div, .post-image-div {
+    width: 100px;
+    border-color:red;
+    display: inline-block;
+    border-radius: 50px;
+
+}
+
+.post-image-div {
+    position: relative;
+    float: right
+}
+
+.chat-text {
+    display: inline-block;
+    border-color:red;
+    border-width: 10px;
+    margin-left: 40px;
+    width: 200px;
+
+}
+
+.product {
+    font-weight: bold;
+    font-size: x-large
+}
+
+footer {
+    display: block;
+    background-color: white;
+    position: fixed;
+    bottom: 0;
+    /* border: 1px solid rgb(233, 19, 19) ; */
+    /* margin: auto; */
+    width: 50%;
+    margin-left: 25%;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+
+}
+
+.footer_img {
+    width: 50px;
+    display: inline-block;
+    margin-left: 20%;
+}
+
+
+#new-post:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+
+#home, #profile, #chats {
+    width: 50px;
+    transition: 0.5s filter
+}
+
+
+#home:hover, #profile:hover, #chats:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+

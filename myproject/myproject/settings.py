@@ -128,3 +128,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT =  (os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = '/media/'
+
+
+# Email settings taken from:
+# https://www.sitepoint.com/django-send-email/#:~:text=Let%E2%80%99s%20look%20at%20the%20settings%20required%20for%20sending,will%20use%20to%20connect%20with%20the%20SMTP%20server.
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = ''
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
