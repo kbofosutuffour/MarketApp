@@ -25,8 +25,11 @@
         {% endif %}
 
         <div id="search-login">
-            <img id="search" src="{% static 'media/search.png' %}" style="display: block; width: 30px; padding-bottom: 20%"/>
-
+            <div id='search-text'>
+                <input id="text" type="text" name="input" autocomplete="on"><a><img id="search" onclick='moveSearchBar()'  src="{% static 'media/search.png' %}" style="display: inline; width: 30px;"/></a>
+                <p onclick="cancel()" onmouseover="cancel_on_or_off(true)" onmouseleave="cancel_on_or_off(false)" id="cancel">cancel</p>
+            </div>
+            
             {% if user.is_authenticated %}
             <a href="logout" ><button id="login">Logout</button></a>
             {% else %}
@@ -45,86 +48,91 @@
         No posts at the moment.  Add a post or check in later!
     </div>
     {% endif %}
+
+    <div id="search-screen"></div>
     
-    {% for post in posts %}
-
-    <div class="post" >
-        <p hidden>{{post.product}}</p>
-        <p hidden>{{post.username}}</p>
-
-        <div class="post-image-div" display="inline-block" >
-            <img class="post-image" src="{{ post.display_image.url }}"/>
-        </div>
-
-        <div class ="post-text" display="inline-block" >
-
-            <form method="GET" action="productDescription">
-                <input class="product" name="product" type="text" value="{{post.product}}" style="border: none; display: inline;">
-                <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-
-                <input type="submit" value=">" style="background-color: white;display: inline;">
-            </form>
-            <h4 class="username">{{post.username}}</h4>
-            <h3 class="price">${{post.price}}</h3>
-
-        </div>
-
-        <div class="edit-post" id="edit-post" >
-
-            <script type="text/javascript">
-                function edit_post() {
-                    let editButtons = document.getElementsByClassName('edit-post');
-                    for (let i = 0; i < editButtons.length; i++) {
-                        if (editButtons[i].children[2].style.visibility == 'visible') {
-                            editButtons[i].children[2].style.visibility = 'hidden';
-                        } else {
-                            editButtons[i].children[2].style.visibility = 'visible';
-                        }
-                        
-                    }
-                }
-            </script>
-
-            <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
-            <div class="post-drop-down" style="visibility: hidden;">
- 
-                {% if user.is_authenticated and post.username == user.get_username %}
-
-                <form method="POST" action="edit_post">
-                    {% csrf_token %}
-                    <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
-                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-                    <input class="image" name="display_image" type="hidden" value="{{post.display_image.url}}" style="border: none; display: inline;">
-                    <input type="submit" value="Edit Post" style="background-color: white; border: none;">
-                </form>
-
-                {% endif %}
-
-                {% if user.is_authenticated%}
-
-                <form method="GET" action="">
-                    <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
-                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-    
-                    <input type="submit" value="Save Post" style="background-color: white; border: none">
-                </form>
+    <div id="post-screen">
 
 
-                <form method="GET" action="">
-                    <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
-                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-    
-                    <input type="submit" value="Flag Post" style="background-color: white; border: none;">
-                </form>
-                {% endif %}
+        {% for post in posts %}
 
-                
+        <div class="post" >
+            <p hidden>{{post.product}}</p>
+            <p hidden>{{post.username}}</p>
+
+            <div class="post-image-div" display="inline-block" >
+                <img class="post-image" src="{{ post.display_image.url }}"/>
             </div>
 
-        </div>
+            <div class ="post-text" display="inline-block" >
 
-    </div> 
-    {% endfor %}
+                <form method="GET" action="productDescription">
+                    <input class="product" name="product" type="text" value="{{post.product}}" style="border: none; display: inline;">
+                    <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+
+                    <input type="submit" value=">" style="background-color: white;display: inline;">
+                </form>
+                <h4 class="username">{{post.username}}</h4>
+                <h3 class="price">${{post.price}}</h3>
+
+            </div>
+
+            <div class="edit-post" id="edit-post" >
+
+                <script type="text/javascript">
+                    function edit_post() {
+                        let editButtons = document.getElementsByClassName('edit-post');
+                        for (let i = 0; i < editButtons.length; i++) {
+                            if (editButtons[i].children[2].style.visibility == 'visible') {
+                                editButtons[i].children[2].style.visibility = 'hidden';
+                            } else {
+                                editButtons[i].children[2].style.visibility = 'visible';
+                            }
+                            
+                        }
+                    }
+                </script>
+
+                <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
+                <div class="post-drop-down" style="visibility: hidden;">
+    
+                    {% if user.is_authenticated and post.username == user.get_username %}
+
+                    <form method="POST" action="edit_post">
+                        {% csrf_token %}
+                        <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                        <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+                        <input class="image" name="display_image" type="hidden" value="{{post.display_image.url}}" style="border: none; display: inline;">
+                        <input type="submit" value="Edit Post" style="background-color: white; border: none;">
+                    </form>
+
+                    {% endif %}
+
+                    {% if user.is_authenticated%}
+
+                    <form method="GET" action="">
+                        <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                        <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+        
+                        <input type="submit" value="Save Post" style="background-color: white; border: none">
+                    </form>
+
+
+                    <form method="GET" action="">
+                        <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                        <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+        
+                        <input type="submit" value="Flag Post" style="background-color: white; border: none;">
+                    </form>
+                    {% endif %}
+        
+                </div>
+
+            </div>
+
+        </div> 
+        {% endfor %}
+    </div>
 
 
     
@@ -136,5 +144,77 @@
             <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
    </footer>
+
+   <script type="text/javascript">
+    $('#search').on('click', function(e) {
+        e.preventDefault();
+        $('#post-screen').css('display', 'none');
+        $('#search-screen').css('display', 'block');
+
+    });
+
+    $('#text').on('change', function(e) {
+        e.preventDefault();
+        $('#search-screen').empty();
+
+        $.ajax({
+                type: 'GET',
+                url: "/search",
+                success: function(response) {
+                    var temp = "";
+                    var input = document.getElementById('text').value;
+                    console.log(input);
+                    for (var key in response.posts) {
+            
+                        if (response.posts[key].product == input) {
+                            // console.log(response.posts[key].display_image)
+                            temp = temp + `
+
+                            <div class="post" >
+
+                                <div class="post-image-div" display="inline-block" >
+                                    <img class="post-image" src="media/${response.posts[key].display_image}"/>
+                                </div>
+
+                                <div class ="post-text" display="inline-block" >
+
+                                    <form method="GET" action="productDescription">
+                                        <input class="product" name="product" type="text" value="${response.posts[key].product}" style="border: none; display: inline;">
+                                        <input class="username1" name="username" type="hidden" value="${response.posts[key].username}" style="border: none; display: inline;">
+
+                                        <input type="submit" value=">" style="background-color: white;display: inline;">
+                                    </form>
+                                    <h4 class="username">${response.posts[key].username}</h4>
+                                    <h3 class="price">${response.posts[key].product}</h3>
+
+                                </div>
+                            </div>
+                        
+                            `
+                    }
+
+                    }
+
+                    $('#search-screen').append(temp)
+                },
+                error: function(response) {
+
+                }
+
+                });
+
+        
+    });
+
+    $('#cancel').on('click', function(e) {
+        e.preventDefault();
+        $('#search-screen').empty();
+        document.getElementById('text').value = "";
+        $('#search-screen').css('display', 'none');
+        $('#post-screen').css('display', 'block');
+
+    })
+    
+    </script>
 </body>
 </html>

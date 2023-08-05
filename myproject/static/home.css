@@ -3,14 +3,26 @@
 }
 
 #search-login {
+    display: block;
     position: absolute;
     right: 0;
-    top: 5%
+    top: 3%;
+    height: fit-content;
+    /* border: 1px solid red; */
+    width: 500px;
 }
 
+#search-text {
+    position: relative;
+    left: 150px
+
+}
+
+
 #login {
-    position: absolute;
-    right: 0
+    position: relative;
+    top: 10px;
+    left: 400px
 }
 
 
@@ -29,6 +41,29 @@ body {
 @keyframes mymove {
     from {opacity: 1;}
     to {opacity: 0;}
+}
+
+#search {
+    position: relative;
+    left: 20px;
+    top: 10px;
+}
+
+
+#cancel, #text {
+    visibility: hidden;
+    display: inline;
+    position: relative;
+    left: 20px
+}
+
+#text {
+    visibility: hidden;
+}
+
+@keyframes mymove1 {
+    0% {right: 0px;}
+    100% {right: 50px;} 
 }
 
 .message:after {
@@ -85,10 +120,11 @@ body {
     margin-left: 90%;
     bottom: 220px;
     /* border: 1px solid red */
-
-
 }
 
+#search-screen {
+    display: none;
+}
 
 
 .buttons {
@@ -134,7 +170,7 @@ footer {
 }
 
 #new-post {
-    transition: 0.5s filter
+    transition: 0.5s filter;
 }
 
 #new-post:hover {

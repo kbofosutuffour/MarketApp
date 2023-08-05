@@ -1,20 +1,21 @@
-function publish() {
-    let p = document.getElementById('publish');
-    p.style.color = "rgb(84, 166, 237)";
-   
-}
-function publish_out() {
-    let p = document.getElementById('publish');
-    p.style.color = "gray";
+
+function cancel_on_or_off(mouse_on_button) {
+    document.getElementById('cancel').style.color = mouse_on_button? "light-red": "gray";
 }
 
-function cancel() {
-    let p = document.getElementById('cancel');
-    p.style.color = "red";
-   
-}
-function cancel_out() {
-    let p = document.getElementById('cancel');
-    p.style.color = "gray";
+function delete_on_or_off(mouse_on_button) {
+    document.getElementById('delete').style.backgroundColor = mouse_on_button? "red": "rgba(255, 255, 255, 0.274)";
 }
 
+function prompt(on) {
+    var section = document.getElementById('section');
+    var p = document.getElementById('prompt');
+    if (on) {
+        section.style.opacity = '15%';
+        p.style.display = 'inline';
+    } else {
+        section.style.opacity = '100%';
+        p.style.display = 'none';
+
+    }
+}

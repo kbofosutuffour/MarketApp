@@ -51,16 +51,6 @@ class Room(models.Model):
     product = models.CharField(max_length=100)
     image = models.ImageField("images/", default=None)
 
-    #contains a message model/table which holds all conversations between two users
-    # messages = models.ForeignKey(
-    #     Convo,
-    #     on_delete=models.CASCADE,
-    #     default=None,
-    #     null=True
-    # )
-
-
-
 class Message(models.Model):
     """
     Message object is used to hold the data of a singular message

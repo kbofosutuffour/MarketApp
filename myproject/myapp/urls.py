@@ -24,7 +24,10 @@ urlpatterns = [
     path('chat_room', views.chat_room, name='chat_room'),
     path('chat_messaging', views.chat_messaging, name="chat_messaging"),
     path('new_message', views.new_message, name='new_message'),
-    path('load_messages/<str:username1>/<str:username2>/<str:current_user>', views.load_messages, name='load_messages')
+    path('load_messages/<str:username1>/<str:username2>/<str:current_user>', views.load_messages, name='load_messages'),
+    path('search', views.search, name='search'),
+    path('edit_button', views.edit_button, name='edit_button'),
+    path('delete_post', views.delete_post, name='delete_post')
 
     #path('logout', views.logout, name='logout'),
     #path('post/<str:pk>', views.post, name="post") #dynamic urls, where pk is a variable of string type.  This is important for database usage

@@ -17,6 +17,18 @@ body {
 
 }
 
+#prompt {
+    display: none;
+    position: absolute;
+    left: 40%;
+    top: 40%;
+    background-color: white;
+    border: 3px solid black;
+    border-radius: 10%;
+    padding: 10px;
+    z-index: 2;
+}
+
 #profile1 {
     margin: auto;
     padding: 10px 10px 10px 10px;
@@ -28,7 +40,7 @@ body {
 
 }
 
-.section {
+#section {
     width: 60%;
     padding: 10px 10px 10px 10px;
     margin: auto;
@@ -69,7 +81,6 @@ footer {
 
 }
 
-
 .footer_img {
     width: 50px;
     display: inline-block;
@@ -79,3 +90,4 @@ footer {
 #home, #profile, #chats {
     width: 50px;
 }
+

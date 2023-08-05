@@ -26,6 +26,27 @@ def home(request):
 
     return render(request, 'home.html', {'posts': posts, 'number_of_posts': number_of_posts})
 
+def search(request):
+    """
+    View used for the functionality of the search bar of the home screen (home.html)
+    """
+    posts = Post.objects.all()
+    number_of_posts = len(posts)
+    context = {
+        'posts': list(posts.values()),
+        'number_of_posts': number_of_posts
+    }
+    return JsonResponse(context)
+
+def edit_button(request):
+    username = request.POST['username']
+    product = request.POST['product']
+    """
+    View used to open the edit options for a singular post on the home screen (home.html)
+    """
+    return JsonResponse({'username': username, 'product': product})
+
+
 def login(request):
     """
     View representing the functionality of the login screen (login.html)
@@ -230,7 +251,6 @@ def new_post(request):
     return render(request, 'new_post.html', {'form': form})
 
 
-
 def edit_post(request):
     """
     View used for the functionality of the edit post screes (edit_post.html)
@@ -248,52 +268,46 @@ def edit_post(request):
 
         #retrieve the post from the database, make all changes to the post, then redirect user to the home screen
         #TODO: Create an implementation without using a for loop
-        posts = Post.objects.filter(username=request.user.get_username(), product = request.session['old_product'])
-        for post in posts:
-            post.product = form.cleaned_data['product']
-            post.price = form.cleaned_data['price']
-            post.display_image = form.cleaned_data['display_image']
-            post.description = form.cleaned_data['description']
-            post.save()
+        post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
+        post.product = form.cleaned_data['product']
+        post.price = form.cleaned_data['price']
+        post.display_image = form.cleaned_data['display_image']
+        post.description = form.cleaned_data['description']
+        post.save()
 
-            #add additional images to the Image Model, which holds additional images for a unique post
+        #add additional images to the Image Model, which holds additional images for a unique post
 
-            additional_images = request.FILES.getlist('additional_images')
-            additional_images_list = []
-            for additions in additional_images:
-                additional_images_list.append(additions)
+        additional_images = request.FILES.getlist('additional_images')
+        additional_images_list = []
+        for additions in additional_images:
+            additional_images_list.append(additions)
 
-            length = len(additional_images_list)
-            while length != 4:
-                additional_images_list.append(None)
-                length += 1
-            post = Post.objects.get(
-                product=form.cleaned_data['product'], 
-                username = request.user.get_username()
-            )
-            img = Image(
-                post = post,
-                image1 = additional_images_list[0],
-                image2 = additional_images_list[1],
-                image3 = additional_images_list[2],
-                image4 = additional_images_list[3],
-            )
-            img.save()
-            messages.success(request, 'You have successfully edited your post')
+        length = len(additional_images_list)
+        while length != 4:
+            additional_images_list.append(None)
+            length += 1
+        img = Image(
+            post = post,
+            image1 = additional_images_list[0],
+            image2 = additional_images_list[1],
+            image3 = additional_images_list[2],
+            image4 = additional_images_list[3],
+        )
+        img.save()
+        messages.success(request, 'You have successfully edited your post')
 
-            return redirect('/')
+        return redirect('/')
     
     #Creates an empty form for the user to edit their post
     else:
         username = request.user.get_username()
         product = request.POST['product']
-        posts = Post.objects.filter(username=username, product=product)
+        post = Post.objects.get(username=username, product=product)
         display_image = request.POST['display_image']
+        print(display_image)
 
-        #TODO: Create an implementation without using a for loop
-        for post in posts:
-            price = post.price
-            description = post.description
+        price = post.price
+        description = post.description
 
         #form object that will store all data of edited post.  Loaded with the posts initial information
         form = PostForm(
@@ -301,13 +315,23 @@ def edit_post(request):
                     "product": product,
                     "price": price,
                     "description": description,
-                    "display_image": display_image
+                    "display_image": post.display_image
                 }
             )
         
+        form.display_image = display_image
         request.session['old_product'] = product        #temporary dictionary that passes on the product name to different views
 
-    return render(request, 'edit_post.html', {'form': form})
+    return render(request, 'edit_post.html', {'form': form, 'product': product})
+
+def delete_post(request):
+    """
+    function used to delete a post on the edit post screen (edit_post.html)
+    """
+    post = Post.objects.get(username=request.user.get_username(), product = request.POST['product'])
+    post.delete()
+    messages.success(request, 'Your post has been deleted')
+    return redirect('/')
 
 def edit_profile(request):
     """
@@ -565,8 +589,6 @@ def new_message(request):
     product = request.POST['product']
     new_message = request.POST['new_message']
 
-    print(username1, username2, product, new_message)
-    print('testing')
 
     try:
         chatroom = Room.objects.get(username1=username1, username2=username2, product=product)

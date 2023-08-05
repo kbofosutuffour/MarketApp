@@ -21,14 +21,15 @@ body {
 #sell-history {
     border: 1px solid rgb(191, 188, 188) ;
     width: 60%;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 10px 100px 10px;
     margin: auto;
     height: fit-content;
 }
 
 .product {
     font-weight: bold;
-    font-size: x-large
+    font-size: x-large;
+    margin-top: 0;
 }
 
 #profile-image {
@@ -68,25 +69,30 @@ body {
 
 }
 
+
 .post-image {
-    width: 150px;
+    width: 100px;
     border-radius: 25%;
-    margin-left: 10%;
 }
 
 .post-image-div{
-    width: 150px;
+    width: 100px;
     display: inline-block;
     border-radius: 50px;
+    margin-left: 10px;
+
+    margin-top: 10px
+
 
 }
 
 .post-text {
     display: inline-block;
-    border-color:red;
     border-width: 10px;
     margin-left: 40px;
-    width: 200px;
+    width: 600px;
+    position: relative;
+    bottom: 30px;
 
 }
 
