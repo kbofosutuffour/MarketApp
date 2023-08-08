@@ -67,10 +67,8 @@
             <div class ="post-text" display="inline-block" >
 
                 <form method="GET" action="productDescription">
-                    <input class="product" name="product" type="text" value="{{post.product}}" style="border: none; display: inline;">
+                    <input class="product" name="product" type="submit" value="{{post.product}}" style="border: none; display: inline;" readonly>
                     <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-
-                    <input type="submit" value=">" style="background-color: white;display: inline;">
                 </form>
                 <h4 class="username">{{post.username}}</h4>
                 <h3 class="price">${{post.price}}</h3>
@@ -80,17 +78,7 @@
             <div class="edit-post" id="edit-post" >
 
                 <script type="text/javascript">
-                    function edit_post() {
-                        let editButtons = document.getElementsByClassName('edit-post');
-                        for (let i = 0; i < editButtons.length; i++) {
-                            if (editButtons[i].children[2].style.visibility == 'visible') {
-                                editButtons[i].children[2].style.visibility = 'hidden';
-                            } else {
-                                editButtons[i].children[2].style.visibility = 'visible';
-                            }
-                            
-                        }
-                    }
+
                 </script>
 
                 <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
@@ -136,7 +124,7 @@
 
 
     
-    <a href="new_post"><img id="new-post" src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" /></a>
+    <a href="new_post"><img id="new-post" src="{% static 'media/plus_sign.png' %}"  /></a>
     <footer>
         <ul>
             <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
@@ -145,14 +133,19 @@
         </ul>
    </footer>
 
-   <script type="text/javascript">
+   <script type="text/javascript"> 
+   //Contains all JQuery/AJAX functions in the home screen
+
+    //Clears the home screen whenever the user uses the search bar
     $('#search').on('click', function(e) {
         e.preventDefault();
         $('#post-screen').css('display', 'none');
         $('#search-screen').css('display', 'block');
+        document.getElementById('new-post').style.visibility = 'hidden';
 
     });
 
+    //Finds related post based on the users search
     $('#text').on('change', function(e) {
         e.preventDefault();
         $('#search-screen').empty();
@@ -162,12 +155,30 @@
                 url: "/search",
                 success: function(response) {
                     var temp = "";
-                    var input = document.getElementById('text').value;
+                    var prepositions = ['the', 'and', 'or', 'at', 'in', 'of'];
+                    var input = document.getElementById('text').value.toLowerCase().split(" ").filter((value) => {
+                            return !prepositions.includes(value);
+                    });
+
+                    var add_item = false;
                     console.log(input);
+
                     for (var key in response.posts) {
-            
-                        if (response.posts[key].product == input) {
-                            // console.log(response.posts[key].display_image)
+                        prod = response.posts[key].product.toLowerCase().split(" ").filter((value) => {
+                            return ((value != 'and') && (value != 'the'))
+                        });
+                        
+                        desc = response.posts[key].description.toLowerCase().split(" ").filter((value) => {
+                            return ((value != 'and') && (value != 'the'))
+                        });
+
+                        input.forEach(element => {
+                          if (prod.includes(element) || desc.includes(element)) {
+                            add_item = true;
+                          } 
+                        });
+
+                        if (add_item) {
                             temp = temp + `
 
                             <div class="post" >
@@ -179,37 +190,37 @@
                                 <div class ="post-text" display="inline-block" >
 
                                     <form method="GET" action="productDescription">
-                                        <input class="product" name="product" type="text" value="${response.posts[key].product}" style="border: none; display: inline;">
+                                        <input class="product" name="product" type="submit" value="${response.posts[key].product}" style="border: none; display: inline;" readonly>
                                         <input class="username1" name="username" type="hidden" value="${response.posts[key].username}" style="border: none; display: inline;">
 
-                                        <input type="submit" value=">" style="background-color: white;display: inline;">
                                     </form>
                                     <h4 class="username">${response.posts[key].username}</h4>
-                                    <h3 class="price">${response.posts[key].product}</h3>
+                                    <h3 class="price">$${response.posts[key].price}</h3>
 
                                 </div>
                             </div>
-                        
                             `
                     }
+                    add_item = false;
 
                     }
 
-                    $('#search-screen').append(temp)
+                    $('#search-screen').append(temp);
                 },
                 error: function(response) {
 
                 }
 
-                });
+            });
 
-        
     });
 
+    //clears the search screen and restores home screen
     $('#cancel').on('click', function(e) {
         e.preventDefault();
         $('#search-screen').empty();
         document.getElementById('text').value = "";
+        document.getElementById('new-post').style.visibility = 'visible';
         $('#search-screen').css('display', 'none');
         $('#post-screen').css('display', 'block');
 

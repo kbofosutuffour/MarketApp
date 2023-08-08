@@ -36,8 +36,8 @@ class Profile(models.Model):
     """
     username = models.CharField(max_length=500, default=None, unique=True)
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
-    # first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
-    # last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
+    first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
+    last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
 
 class Room(models.Model):
 

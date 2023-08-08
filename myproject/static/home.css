@@ -14,10 +14,19 @@
 
 #search-text {
     position: relative;
-    left: 150px
-
+    left: 150px;
+    height: fit-content;
+    /* animation: moveleft 1s */
+    animation-fill-mode: forwards
 }
 
+
+
+@keyframes moveleft {
+    0% {right: 0px;}
+    100% {left: 0px;
+        right: 10px;} 
+}
 
 #login {
     position: relative;
@@ -27,14 +36,15 @@
 
 
 body {
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .message {
     background-color: green;
     color: white;
     transition: ease-out;
-    animation: mymove 15s;
+    animation: mymove 10s;
     position: absolute;
 }
 
@@ -61,10 +71,6 @@ body {
     visibility: hidden;
 }
 
-@keyframes mymove1 {
-    0% {right: 0px;}
-    100% {right: 50px;} 
-}
 
 .message:after {
     visibility: hidden;
@@ -80,7 +86,12 @@ body {
 
 .product {
     font-weight: bold;
-    font-size: x-large
+    font-size: x-large;
+    background-color: white;
+}
+
+.product:hover {
+    text-decoration-line: underline;
 }
 
 .username {
@@ -170,6 +181,10 @@ footer {
 }
 
 #new-post {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 50px;
     transition: 0.5s filter;
 }
 

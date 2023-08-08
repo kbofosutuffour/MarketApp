@@ -1,55 +1,38 @@
-
-// function edit_post() {
-
-//     let editButtons = document.getElementsByClassName('edit-post');
-//     for (let i = 0; i < editButtons.length; i++) {
-
-//         if (editButtons[i].children[1].style.visibility == 'visible') {
-//             editButtons[i].children[1].style.visibility = 'hidden';
-//         } else {
-//             editButtons[i].children[1].style.visibility = 'visible';
-//         }
-        
-//     }
-// }
-
-function leave_post() {
+//UNFINISHED: Drop-down edit options for each post
+function edit_post() {
+    let editButtons = document.getElementsByClassName('edit-post');
     
-    editButton = document.getElementsByClassName('edit-post')
-    for (var i = 0; i <= editButton.size(); i++) {
-        drop_down = editButton.children[i];
-        drop_down.setAttribute('style', 'display: none');
+    for (let i = 0; i < editButtons.length; i++) {
+        if (editButtons[i].children[2].style.visibility == 'visible') {
+            editButtons[i].children[2].style.visibility = 'hidden';
+        } else {
+            editButtons[i].children[2].style.visibility = 'visible';
+        }
+        
     }
 }
 
-function createID() {
-    let post_list = document.getElementsByClassName('post');
-    target = post_list[len(post_list)-1];
-}
-
-
+//animation when user clicks on search bar
 function moveSearchBar() {
-    let search = document.getElementById('search');
-    let cancel = document.getElementById('cancel');
-    let text = document.getElementById('text');
+    var search_text = document.getElementById('search-text');
 
-    cancel.style.visibility = 'visible';
-    text.style.visibility = 'visible';
+    document.getElementById('cancel').style.visibility = 'visible';
+    document.getElementById('text').style.visibility = 'visible';
 
-    search.style.animation = 'mymove1 1s';
-    search.style.right = '100px';
+    search_text.style.animation = 'moveleft 0.75s';
+    search_text.style.animationFillMode = 'forwards';
 }
 
+//function for when user clicks on cancel
 function cancel() {
-    let search = document.getElementById('search');
-    let cancel = document.getElementById('cancel');
-    let text = document.getElementById('text');
-
-    cancel.style.visibility = 'hidden';
-    text.style.visibility = 'hidden';
+    document.getElementById('cancel').style.visibility = 'hidden';
+    document.getElementById('text').style.visibility = 'hidden';
+    document.getElementById('search-text').style.animation = '';
+    document.getElementById('search-text').style.animationFillMode = 'backwards';
 
 }
 
+//styling for the cancel button
 function cancel_on_or_off(mouse_on_button) {
     document.getElementById('cancel').style.color = mouse_on_button? "red": "gray";
    
