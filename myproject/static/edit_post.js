@@ -7,6 +7,10 @@ function delete_on_or_off(mouse_on_button) {
     document.getElementById('delete').style.backgroundColor = mouse_on_button? "red": "rgba(255, 255, 255, 0.274)";
 }
 
+function submit_on_or_off(mouse_on_button) {
+    document.getElementById('submit').style.backgroundColor = mouse_on_button? "rgb(185, 151, 91)": "rgba(255, 255, 255, 0.274)"
+}
+
 function prompt(on) {
     var section = document.getElementById('section');
     var p = document.getElementById('prompt');

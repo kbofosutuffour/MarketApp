@@ -18,6 +18,7 @@ urlpatterns = [
     path('profile', views.profile, name='profile'),
     path('productDescription', views.productDescription, name="productDescription"),
     path('edit_post', views.edit_post, name="edit_post"),
+    path('save_post', views.save_post, name='save_post'),
     path('edit_profile', views.edit_profile, name="edit_profile"),
     path('forgot_screen', views.forgot_screen, name="forgot_screen"),
     path('reset_password', views.reset_password, name="reset_password"),

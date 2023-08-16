@@ -1,5 +1,5 @@
 #top-bar {
-    border-bottom: 2px solid rgb(191, 188, 188)
+    border-bottom: 7px solid rgb(185, 151, 91);
 }
 
 #search-login {
@@ -13,17 +13,34 @@
     right: 0
 }
 
-
-body {
-    overflow: scroll;
+button:hover, input:hover {
+    background-color: rgb(185, 151, 91);
 }
 
-#sell-history {
+
+
+body {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background-color: rgb(17, 87, 64);
+}
+
+#sell-history, #saved-posts {
+    background-color: white;
     border: 1px solid rgb(191, 188, 188) ;
     width: 60%;
-    padding: 10px 10px 100px 10px;
     margin: auto;
     height: fit-content;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+#posts, #saved-posts-inner {
+    background-color: white;
+    border: 1px solid rgb(191, 188, 188) ;
+
 }
 
 .product {
@@ -60,19 +77,52 @@ body {
 
 #profile1 {
     margin: auto;
-    padding: 10px 10px 10px 10px;
-    /* border: 1px solid red ; */
+    background-color: white;
     border-left: 1px solid rgb(191, 188, 188);
     border-right: 1px solid rgb(191, 188, 188);
     height: 200px;
     width: 60%;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+
 
 }
 
+#selector {
+    background-color: white;
+    display: flex;
+    border: 1px solid rgb(191, 188, 188) ;
+    width: 60%;
+    margin: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+}
 
+#show-sell-history {
+    justify-content: center;
+    text-align: center;
+    width: 50%;
+    height: max-content;
+    border-right: 1px solid rgb(191, 188, 188) ;
+    padding-left: 10px;
+
+}
+
+#show-saved-posts {
+    justify-content: center;
+    text-align: center;
+    width: 50%;
+    height: max-content;
+    border-left: 1px solid rgb(191, 188, 188) ;
+    padding-right: 10px;
+
+}
 .post-image {
     width: 100px;
     border-radius: 25%;
+    height: 120px;
+
 }
 
 .post-image-div{

@@ -12,14 +12,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
     </script>
-    <script src="{% static 'home.js' %}"></script>
+    <script src="{% static 'profile.js' %}"></script>
 
 </head>
 <body>
 
     <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
 
-        <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">My Profile</h2></div>
+        <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%; color: white">My Profile</h2></div>
 
         <div id="search-login">
             <img id="search" src="{% static 'media/search.png' %}" style="display: block; width: 30px; padding-bottom: 20%"/>
@@ -37,23 +37,48 @@
             {% endif %}
         </div>
         <div id="profile-text">
+            {% if hasProfile %}
             <h1 id="profile-name">{{username}}</h1>
+            {% else %}
+            <h1 id="profile-name">Guest</h1>
+            {% endif %}
 
             <a href="edit_profile"><button><h3 id="edit-profile">Edit Profile</h3></button></a>
         </div>
+    </div>
+    <div id="selector" style="display: flex;">
+        <div id="show-sell-history" onclick="sell_history()" onmousedown="pressed_sell_history(true)" onmouseup="pressed_sell_history(false)">Sell History</div>
+        <div id="show-saved-posts" onclick="saved_posts()" onmousedown="pressed_saved_posts(true)" onmouseup="pressed_saved_posts(false)">Saved Posts</div>
     </div>
 
     <div id="sell-history">
     <p>Sell History</p>
 
         {% for post in posts %}
-        <div class="post">
+        <div id="posts">
             <div class="post-image-div" display="inline-block" >
                 <img class="post-image" src="{{ post.display_image.url }}"/>
             </div>
             <div class ="post-text" display="inline-block" >
                 <h3 class="product">{{post.product}}</h3>
                 <h3 class="price">${{post.price}}</h3>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div id="saved-posts" style="display: none;">
+    <p>Saved Posts</p>
+
+        {% for saved_post in saved_posts %}
+        <div id="saved-posts-inner">
+            <div class="post-image-div" display="inline-block" >
+                <img class="post-image" src="{{ saved_post.display_image.url }}"/>
+            </div>
+            <div class ="post-text" display="inline-block" >
+                <h3 class="product">{{saved_post.product}}</h3>
+                <h3 class="price">${{saved_post.price}}</h3>
             </div>
         </div>
         {% endfor %}

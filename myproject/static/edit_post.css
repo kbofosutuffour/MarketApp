@@ -1,11 +1,17 @@
-body {
-    overflow: scroll;
-}
-
-
 #top-bar {
-    border-bottom: 2px solid rgb(191, 188, 188)
+    border-bottom: 7px solid rgb(185, 151, 91);
 }
+
+body {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background-color: rgb(17, 87, 64);
+}
+
+button:hover {
+    background-color: rgb(185, 151, 91);
+}
+
 
 
 #profile-text {
@@ -41,6 +47,7 @@ body {
 }
 
 #section {
+    background-color: white;
     width: 60%;
     padding: 10px 10px 10px 10px;
     margin: auto;

@@ -18,11 +18,7 @@
 
     <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
 
-        {% if user.is_authenticated %}
-            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Welcome, {{user.username}}!</h2></div>
-        {% else %}
-            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Welcome, Guest!</h2></div>
-        {% endif %}
+        <div style="margin-right: 90%; display: inline; width: fit-content; color: white"><h2 style="position: relative; top:25%">Home</h2></div>
 
         <div id="search-login">
             <div id='search-text'>
@@ -49,7 +45,7 @@
     </div>
     {% endif %}
 
-    <div id="search-screen"></div>
+    <div id="search-screen"></div> <!-- DO NOT DELETE -->
     
     <div id="post-screen">
 
@@ -77,9 +73,7 @@
 
             <div class="edit-post" id="edit-post" >
 
-                <script type="text/javascript">
-
-                </script>
+                <script type="text/javascript"></script> <!-- DO NOT DELETE -->
 
                 <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
                 <div class="post-drop-down" style="visibility: hidden;">
@@ -90,6 +84,8 @@
                         {% csrf_token %}
                         <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
                         <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+                        <input name="price" type="hidden" value="{{post.price}}">
+                        <input name="description" type="hidden" value="{{post.description}}">
                         <input class="image" name="display_image" type="hidden" value="{{post.display_image.url}}" style="border: none; display: inline;">
                         <input type="submit" value="Edit Post" style="background-color: white; border: none;">
                     </form>
@@ -98,18 +94,18 @@
 
                     {% if user.is_authenticated%}
 
-                    <form method="GET" action="">
+                    <form method="POST" action="save_post">
+                        {% csrf_token %}
                         <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
                         <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-        
                         <input type="submit" value="Save Post" style="background-color: white; border: none">
                     </form>
 
 
-                    <form method="GET" action="">
+                    <form method="POST" action="">
+                        {% csrf_token %}
                         <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
                         <input class="username1" name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-        
                         <input type="submit" value="Flag Post" style="background-color: white; border: none;">
                     </form>
                     {% endif %}

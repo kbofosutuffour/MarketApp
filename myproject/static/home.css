@@ -1,5 +1,5 @@
 #top-bar {
-    border-bottom: 2px solid rgb(191, 188, 188)
+    border-bottom: 7px solid rgb(185, 151, 91);
 }
 
 #search-login {
@@ -10,6 +10,10 @@
     height: fit-content;
     /* border: 1px solid red; */
     width: 500px;
+}
+
+button:hover {
+    background-color: rgb(185, 151, 91);
 }
 
 #search-text {
@@ -38,6 +42,7 @@
 body {
     overflow-y: scroll;
     overflow-x: hidden;
+    background-color: rgb(17, 87, 64);
 }
 
 .message {
@@ -46,6 +51,7 @@ body {
     transition: ease-out;
     animation: mymove 10s;
     position: absolute;
+    animation-fill-mode: forwards;
 }
 
 @keyframes mymove {
@@ -77,6 +83,7 @@ body {
 }
 
 .post {
+    background-color: white;
     width: 60%;
     padding: 10px 10px 10px 10px;
     margin: auto;
@@ -174,6 +181,7 @@ footer {
     width: 50px;
     display: inline-block;
     margin-left: 20%;
+    border-radius: 50%;
 }
 
 #search {
@@ -184,23 +192,33 @@ footer {
     position: fixed;
     right: 20px;
     bottom: 20px;
+    border-radius: 50%;
     width: 50px;
     transition: 0.5s filter;
 }
 
 #new-post:hover {
-    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+    filter: invert(61%) sepia(70%) saturate(286%) hue-rotate(360deg) brightness(89%) contrast(81%);      
       
 }
 
-#home, #profile, #chats {
+#home, #profile {
     width: 50px;
-    transition: 0.5s filter
+    transition: 0.5s filter;
+    border-radius: 50%;
+    border: 3px solid black;
+}
+
+#chats {
+    width: 50px;
+    transition: 0.5s filter;
+    border-radius: 50%;
+    border: 1.75px solid black;
 }
 
 
 #home:hover, #profile:hover, #chats:hover {
-    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
-      
+
+    filter: invert(61%) sepia(70%) saturate(286%) hue-rotate(360deg) brightness(89%) contrast(81%);      
 }
 

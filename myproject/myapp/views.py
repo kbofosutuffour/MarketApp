@@ -304,7 +304,6 @@ def edit_post(request):
         product = request.POST['product']
         post = Post.objects.get(username=username, product=product)
         display_image = request.POST['display_image']
-        print(display_image)
 
         price = post.price
         description = post.description
@@ -442,21 +441,22 @@ def profile(request):
     posts = Post.objects.filter(username=request.user.get_username())
     try:
         profile = Profile.objects.get(username=request.user.get_username())
+        saved_posts = profile.saved_posts.all()
         hasProfile = True
         context = {
             'profile': profile,
             'posts': posts,
+            'saved_posts': saved_posts,
             'hasProfile': hasProfile,
             'username': request.user.get_username()
-
         }
+
     except: 
         hasProfile = False
         context = {
             'posts': posts,
             'hasProfile': hasProfile,
             'username': request.user.get_username()
-
         }
 
     return render(request, 'profile.html', context)
@@ -638,3 +638,25 @@ def load_messages(request, username1, username2, current_user):
     }
 
     return JsonResponse(context)
+
+def save_post(request):
+    """
+    function used to save/unsave a post for the user
+    """
+    
+    username = request.POST['username']
+    product = request.POST['product']
+    post = Post.objects.get(username=username, product=product)
+    profile = Profile.objects.get(username=request.user.get_username())
+    if len(profile.saved_posts.filter(username=username, product=product)) != 0:
+        profile.saved_posts.remove(post)
+        profile.save()
+        post_string = "You have unsaved '" + post.product + "' from user " + post.username
+    else:
+        profile.saved_posts.add(post)
+        profile.save()
+        post_string = "You have saved '" + post.product + "' from user " + post.username
+
+    messages.success(request, post_string)
+    return redirect('/')
+    

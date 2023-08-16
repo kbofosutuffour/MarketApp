@@ -15,7 +15,7 @@
     <div id = 'top-bar' style="width: 100%; margin-bottom: 5px; height: 50px">
 
         {% if user.is_authenticated %}
-            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%">Edit Post</h2></div>
+            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="color: white; position: relative; top:25%">Edit Post</h2></div>
 
         {% endif %}
 
@@ -47,9 +47,9 @@
             <p>Describe your product</p><input type="password" name="description"/><br>
             <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
 
-            <button type="submit" style="background-color: rgba(252, 252, 252, 0.274)">Upload</button>
+            <button id="submit" type="submit" onmousedown="submit_on_or_off(true)" onmouseenter="submit_on_or_off(true)" onmouseout="submit_on_or_off(false)" style="background-color: rgba(252, 252, 252, 0.274)">Upload</button>
         </form>
-        <button id="delete" style="background-color: rgba(252, 252, 252, 0.274);" onmouseenter="delete_on_or_off(true)" onmouseout="delete_on_or_off(false)" onclick="prompt(true)">Delete</button>
+        <button id="delete" style="background-color: rgba(252, 252, 252, 0.274);" onmousedown="delete_on_or_off(true)" onmouseenter="delete_on_or_off(true)" onmouseout="delete_on_or_off(false)" onclick="prompt(true)">Delete</button>
 
     </div>
 

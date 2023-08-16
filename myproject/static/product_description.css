@@ -2,6 +2,8 @@
 #image-div {
     float: left;
     width: 45%;
+    position: relative;
+    top: 20px
 }
 
 #right {
@@ -16,7 +18,8 @@
 }
 
 #image0 {
-    height: 570px;
+    height: 550px;
+    width: auto;
     float: right;
     display: inline;
 }
@@ -69,6 +72,7 @@
 #description {
     display: block;
     border-top: 1px solid gray;
+
 
 }
 

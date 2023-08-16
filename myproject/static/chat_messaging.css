@@ -1,11 +1,17 @@
-
 #top-bar {
-    border-bottom: 2px solid rgb(191, 188, 188)
+    border-bottom: 7px solid rgb(185, 151, 91);
 }
 
 body {
-    overflow: hidden;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background-color: rgb(17, 87, 64);
 }
+
+button:hover, input:hover {
+    background-color: rgb(185, 151, 91);
+}
+
 
 #chat-window {
     margin: auto;
@@ -42,6 +48,7 @@ body {
 }
 
 .chat {
+    background-color: white;
     width: 60%;
     padding: 10px 10px 0px 10px;
     margin: auto;
@@ -64,7 +71,6 @@ body {
     width: 50%;
     padding: 10px 10px 10px 10px;
     height: 70px */
-    background-color: white;
     position: absolute;
     left: 25%;
     bottom: 100px;
