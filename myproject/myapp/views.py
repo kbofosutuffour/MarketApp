@@ -8,6 +8,7 @@ from .models import *
 from django.template import Context, Template
 from django.http import JsonResponse
 from .forms import *
+from django.views.generic.edit import FormView
 
 """
     A view function is a Python function that takes a Web request and returns a Web response (geeksforgeeks.org).
@@ -15,7 +16,6 @@ from .forms import *
     webpage screens and pass information between screens.
     
 """
-
 
 def home(request):
     """
@@ -191,37 +191,38 @@ def reset_password(request):
     #default, simply load the page
     return render(request, 'reset_password.html')
 
-        
-
-def new_post(request):
+class NewPostView(FormView):
     """
     View representing the functionality of the new_post screen (new_post.html)
     """
-
-    #If the user is not logged in, redirect to the home page (guests should not be able to create new posts)
-    if User.username is None:
-        messages.info(request, 'Must have an account to create a new post')
-        return redirect('/')
- 
+    form_class = PostForm
+    template_name = "new_post.html"  # Replace with your template.
+    success_url = '/returnHome'
     
-    form = PostForm(request.POST, request.FILES)        #form object stores all data the user inputs for a new post
+    def post(self, request, *args, **kwargs):
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
 
-    #if the user has submitted a post, validate the post and redirect user to the home page
-    if form.is_valid():
-        np = form.save(commit=False)
-        user = request.user.get_username()
-        np.username = user
-        np.save()
+        if form.is_valid():
+            np = form.save(commit=False)
+            np.username = request.user.get_username()
+            np.save()
 
+            return self.form_valid(form, request)
 
-        #add additional images to the Image Model, which holds additional images for a unique post
-        additional_images = request.FILES.getlist('additional_images')
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form, request):
+        form.username = request.user.get_username()
+        files = form.cleaned_data["additional_images"]
         additional_images_list = []
-        for additions in additional_images:
+
+        for additions in files:
             additional_images_list.append(additions)
 
         length = len(additional_images_list)
-        while length != 4:
+        while length < 4:
             additional_images_list.append(None)
             length += 1
         post = Post.objects.get(
@@ -237,55 +238,73 @@ def new_post(request):
         )
         img.save()
 
-
         messages.success(request, "Your post has been successfully uploaded!")
-        return redirect('/')
-    
-    #Creates an empty form if page has loaded for the first time
-    else:
-        print(form.errors)
-        print('test')
-        form = PostForm()
-    
+        return super().form_valid(form)
 
-    return render(request, 'new_post.html', {'form': form})
-
-
-def edit_post(request):
+class EditPostView(FormView):
     """
     View used for the functionality of the edit post screes (edit_post.html)
     """
 
-    #If the user is not logged in, redirect them to the home page (guests should not be able to edit posts)
-    if User.username is None:
-        messages.info(request, 'Must have an account to edit your profile')
-        return redirect('/')
+    form_class = PostForm
+    template_name = "edit_post.html"  # Replace with your template.
+    success_url = '/returnHome'
+    initial = {}
+
+    def set_initial(self, form, request):
+        username = request.user.get_username()
+        product = request.POST['product']
+        post = Post.objects.get(username=username, product=product)
+        price = post.price
+        description = post.description
+
+        #form object that will store all data of edited post.  Loaded with the posts initial information
+        self.initial = {
+            "product": product,
+            "price": price,
+            "description": description,
+            "display_image": post.display_image
+        }
     
-    form = PostForm(request.POST, request.FILES)
+        request.session['old_product'] = product
 
-    #If the user has submitted their edits for a post
-    if form.is_valid():
+    def get_initial(self):
+        return self.initial
+    
+    def post(self, request, *args, **kwargs):
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        
+        if form.is_valid():
+            post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
+            post.product = form.cleaned_data['product']
+            post.price = form.cleaned_data['price']
+            post.display_image = form.cleaned_data['display_image']
+            post.description = form.cleaned_data['description']
+            post.save()
 
-        #retrieve the post from the database, make all changes to the post, then redirect user to the home screen
-        #TODO: Create an implementation without using a for loop
-        post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
-        post.product = form.cleaned_data['product']
-        post.price = form.cleaned_data['price']
-        post.display_image = form.cleaned_data['display_image']
-        post.description = form.cleaned_data['description']
-        post.save()
 
-        #add additional images to the Image Model, which holds additional images for a unique post
+            return self.form_valid(form, request)
 
-        additional_images = request.FILES.getlist('additional_images')
+        else:
+            self.set_initial(form, request)
+            print(self.initial)
+            return self.form_invalid(form)
+
+    def form_valid(self, form, request):
+        files = form.cleaned_data["additional_images"]
         additional_images_list = []
-        for additions in additional_images:
+        for additions in files:
             additional_images_list.append(additions)
 
         length = len(additional_images_list)
-        while length != 4:
+        while length < 4:
             additional_images_list.append(None)
             length += 1
+        post = Post.objects.get(
+            product=form.cleaned_data['product'], 
+            username = request.user.get_username()
+        )
         img = Image(
             post = post,
             image1 = additional_images_list[0],
@@ -294,43 +313,24 @@ def edit_post(request):
             image4 = additional_images_list[3],
         )
         img.save()
-        messages.success(request, 'You have successfully edited your post')
 
-        return redirect('/')
+        messages.success(request, "Your post has been successfully edited!")
+        return super().form_valid(form)
     
-    #Creates an empty form for the user to edit their post
-    else:
-        username = request.user.get_username()
-        product = request.POST['product']
-        post = Post.objects.get(username=username, product=product)
-        display_image = request.POST['display_image']
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        return response
 
-        price = post.price
-        description = post.description
-
-        #form object that will store all data of edited post.  Loaded with the posts initial information
-        form = PostForm(
-                initial = {
-                    "product": product,
-                    "price": price,
-                    "description": description,
-                    "display_image": post.display_image
-                }
-            )
-        
-        form.display_image = display_image
-        request.session['old_product'] = product        #temporary dictionary that passes on the product name to different views
-
-    return render(request, 'edit_post.html', {'form': form, 'product': product})
 
 def delete_post(request):
     """
     function used to delete a post on the edit post screen (edit_post.html)
     """
-    post = Post.objects.get(username=request.user.get_username(), product = request.POST['product'])
+    post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
     post.delete()
     messages.success(request, 'Your post has been deleted')
     return redirect('/')
+
 
 def edit_profile(request):
     """
@@ -391,7 +391,6 @@ def edit_profile(request):
     return render(request, 'edit_profile.html', context)
 
 
-
 def getImage(request):
     """
     DO NOT DELETE, MAY BE USED FOR CHAT FEATURE
@@ -399,11 +398,13 @@ def getImage(request):
     posts = Post.objects.all()
     return JsonResponse({'posts': list(posts.values())})
 
+
 def returnHome(request):
     """
     View used to redirect user to the home screen
     """
     return redirect('/')
+
 
 def avatar(request):
     """
@@ -476,7 +477,6 @@ def productDescription(request):
     except:
         additional_images = None
 
-
     context = {
         'profile': profile,
         'post': post,
@@ -484,6 +484,7 @@ def productDescription(request):
     }
 
     return render(request, 'product_description.html', context)
+
 
 def chat_room(request):
     """
@@ -538,6 +539,7 @@ def chat_room(request):
         
         return render(request, 'chat_room.html', context)
 
+
 def chat_messaging(request):
     """
     View used to render the chat messaging pate (chat_messaging.html)
@@ -559,16 +561,13 @@ def chat_messaging(request):
     for p in posts:
         if p.username == request.user.get_username() or p.username == username1:
             post = p
- 
 
     try:
         chatrooms = Room.objects.get(username1=username1, username2=request.user.get_username(), product=post.product)
     except:
         chatrooms = Room.objects.get(username2=username1, username1=request.user.get_username(), product=post.product)
 
-   
     messages = Message.objects.filter(room=chatrooms)
-
     context = {
         'chatrooms': chatrooms,
         'messages': messages,
@@ -577,8 +576,8 @@ def chat_messaging(request):
         'username2': request.user.get_username(),
         'product': product,
     }
-    
     return render(request, 'chat_messaging.html', context)
+
 
 def new_message(request):
     """
@@ -598,7 +597,6 @@ def new_message(request):
 
     m = Message(value=new_message, room=chatroom,username=request.user.get_username())
     m.save()
-
     return HttpResponse('Message sent successfully')
 
 def load_messages(request, username1, username2, current_user):
@@ -636,8 +634,8 @@ def load_messages(request, username1, username2, current_user):
             'current_user': current_user
         # 'product': product
     }
-
     return JsonResponse(context)
+
 
 def save_post(request):
     """
