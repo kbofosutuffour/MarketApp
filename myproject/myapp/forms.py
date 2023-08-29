@@ -17,7 +17,6 @@ class MultipleFileField(forms.FileField):
         kwargs.setdefault("widget", MultipleFileInput())
         super().__init__(*args, **kwargs)
         
-
     def clean(self, data, initial=None):
         single_file_clean = super().clean
         if isinstance(data, (list, tuple)):

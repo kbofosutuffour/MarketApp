@@ -191,9 +191,12 @@ def reset_password(request):
     #default, simply load the page
     return render(request, 'reset_password.html')
 
+
 class NewPostView(FormView):
     """
     View representing the functionality of the new_post screen (new_post.html)
+    Format used based on django documentation (version 4.2): 
+    https://docs.djangoproject.com/en/4.2/topics/http/file-uploads/#uploading-multiple-files
     """
     form_class = PostForm
     template_name = "new_post.html"  # Replace with your template.
@@ -244,6 +247,8 @@ class NewPostView(FormView):
 class EditPostView(FormView):
     """
     View used for the functionality of the edit post screes (edit_post.html)
+    Format used based on django documentation (version 4.2): 
+    https://docs.djangoproject.com/en/4.2/topics/http/file-uploads/#uploading-multiple-files
     """
 
     form_class = PostForm
