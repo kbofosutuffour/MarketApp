@@ -22,3 +22,36 @@ img {
     width: 250px;
     border-color: rgb(210, 210, 210);
 }
+
+.user-input {
+    width: 100%;
+    outline: 0;
+    border: 0;
+    border-bottom: 1px solid #BABABA;
+    padding: 10px 0;
+    background: transparent;
+}
+
+.submit-btn {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 20px;
+    background-color: white;
+    color: #115740;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+a {
+    margin-bottom: 10px; 
+    text-decoration: none;
+    color: gray;
+    font-family: 'Inter';
+}
+
+a:hover {
+    color: white;
+}

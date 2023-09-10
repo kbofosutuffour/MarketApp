@@ -6,14 +6,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'register.css' %}">
+    <link rel="stylesheet" href="..\static\register.css">
     <script src="{% static 'register.js' %}"></script>
     <title>H2H | Register</title>
 </head>
-<body style = "background-color: white">
+<body style = "background-color: #115740">
     <div id="box">
-        <img src="{% static 'media/default_image.png' %}" />
-        <h1>Welcome to H2H!</h1> <br>
+        <img src="{% static 'media/wm_logo_white.png' %}" style="margin-top: 10%; width: 60%;"/>
+        <h1 style="color: white;">Welcome to Market App William & Mary</h1>
+        <h2 style="color: white;">Create your account:</h2>
         <!-- <div id="input">
             <div class="user-pass">
                 <input type="text" id="username" placeholder="Please Enter your School Email Here" required>
@@ -34,23 +35,19 @@
 
             <form method="POST" action="register">
                 {% csrf_token %}
-                <p>Username:</p>
-                    <input type="text" name="username" placeholder="Enter your username">
-                <p>Email:</p>
-                    <input type="text" name="email" placeholder="Enter your school email" >
-                <p>Password:</p>
-                    <input type="password" name="password" placeholder="Enter your password">        
-                <p>Confirm Password:</p>
-                    <input type="password" name="password2" placeholder="Confirm your password"><br>
+                <!-- <p>Username:</p> -->
+                    <input type="text" class="user-input" name="username" placeholder="Enter your username">
+                <!-- <p>Email:</p> -->
+                    <input type="text" class="user-input" name="email" placeholder="Enter your school email" >
+                <!-- <p>Password:</p> -->
+                    <input type="password" class="user-input" name="password" placeholder="Enter your password">        
+                <!-- <p>Confirm Password:</p> -->
+                    <input type="password"  class="user-input" name="password2" placeholder="Confirm your password"><br>
                 
-                <input type="submit">
+                <input type="submit" class="submit-btn">
             </form>
         </div>
-
-
-        <div>
-
-        </div>
+        <div> <a href="login">Already have an account? Click here!</a></div>
     </div>
 </body>
 </html>
