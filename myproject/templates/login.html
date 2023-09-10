@@ -6,20 +6,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'login_style.css' %}">
+    <link rel="stylesheet" href="..\static\login_style.css">
+    <link rel="stylesheet" href="https://fonts.google.com/specimen/Inter">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="{% static 'login_script.js' %}"></script>
     <title>H2H | Login Page</title>
 </head>
 <body style = "background-color: white">
     <div id="box">
-        <img src="{% static 'media/default_image.png' %}" />
-        <h1>Welcome to H2H!</h1> <br>
+        <img src="{% static 'media/wm_logo.png' %}" style="margin-top: 15%; width: 60%;"/>
+        <h1>Welcome to Market App <br> at William and Mary!</h1> <br>
 
         {% for message in messages %}
         <h5 style="color: red">{{message}}</h5>
         {% endfor %}
         
-        <h3>Please enter your login information</h3>
+        <h3 style="margin-top: 5px">Please enter your login information: </h3>
         <div id="input">
             <!-- <div class="user-pass">
                 <input type="text" id="username" name = "username" placeholder="Enter ID" required>
@@ -33,13 +35,14 @@
             <form method="POST" action="login">
                 {% csrf_token %}
                 
-                <input type="text" name="username" placeholder="Enter username"/><br>
-                <input type="password" name="password" placeholder="Enter password"/><br>
-                <input type="submit"/>
+                <input type="text" name="username" class="user-input" placeholder="Enter username"/><br>
+                <input type="password" name="password" class="user-input" placeholder="Enter password"/><br>
+                <i class="far fa-eye" id="togglePwd" style="margin-left: 90%; transform: translate(0, -150%); cursor: pointer;"></i>
+                <input type="submit" class="submit-btn" value="Log In"/>
             </form>
 
-            <div style="margin: 10px; color: gray">Forgot username and/or password? <a href="forgot_screen"><span style="margin: 3px">Click here!</span></a></div>
-            <div style="margin: 10px; color: gray;"><a><span style="margin: 3px">Don't have an account? <a href="register">Click here!</a></span></a></div>
+            <div> <a href="forgot_screen">Forgot username and/or password? Click here!</a></div>
+            <div> <a href="register">Don't have an account? Click here!</a></div>
 
         </div>
 

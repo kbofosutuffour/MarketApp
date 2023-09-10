@@ -1,3 +1,7 @@
+body {
+    font-family: 'Inter';
+}
+
 #box {
     text-align: center;
     margin: auto;
@@ -5,6 +9,7 @@
 }
 
 img {
+    margin-top: 20%;
     width: 50%;
 }
 
@@ -22,12 +27,52 @@ img {
     border-color:rgb(193, 193, 255);
 }
 
-#username, #password {
+/* #username, #password {
     width: 250px;
-    border-color: rgb(210, 210, 210);
+    border-color: rgb(0 96 28);
+} */
+
+.user-input {
+    width: 100%;
+    outline: 0;
+    border: 0;
+    border-bottom: 2px solid #BABABA;
+    padding: 10px 0;
+    background: transparent;
+}
+
+.far fa-eye {
+    margin-left: -30px;
+    cursor: pointer;
+}
+
+.submit-btn {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 20px;
+    background-color: #115740;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+a {
+    margin-bottom: 10px; 
+    text-decoration: none;
+    color: gray;
+    font-family: 'Inter';
+}
+
+a:hover {
+    color: #115740;
 }
 
 #warning {
     display: none;
     color: red;
 }
+
+/* TODO: fix fonts, figure out text sizing/spacing, add password visibility toggle ability, make a style reference for colors */
