@@ -2,24 +2,18 @@
 
 Message from Kwaku Ofosu
 
-July 15, 2023
+September 9th, 2023
 
-TL:DR: This new repository contains backend implementation for the marketapp using Django
+Hello everyone!  I am including instructions on how to run the app on your local computer.  These instructions assume that you have both Python installed (i.e. via Anaconda) and an IDE text editor installed such as VS Code.
 
-Hello all, I've once again created a new repository for our market app project.  I appreciate everyone's patience as I continue to experiment with the development of this project.
+**How to run the project (in a development server)**
+1. Install Django on your local computer.  For more details, please see their official installation documentation here: [https://docs.djangoproject.com/en/4.2/topics/install/](url).  If you are using Anaconda, you can also consider installing Django in a virtual environment by running the corresponding pip commands inside of the running virtual environment.
+2. Pull the project information from the repository.
+3. Open your computers command prompt and change the current directory path to this project, specifically the myproject folder.  One thing you can do is open the marketapp folder in your file explorer, right-click on the _myproject_ folder, and copy as path.  Then, paste "cd [path]" into the terminal.  If you have python installed through Anaconda, make sure to open the command prompt inside of Anaconda Navigator.
+4. Run the command _python manage.py runserver_.  Assuming everything works well, the command line should then display a url that contains the server that the app is currently running in (Starting development server at [url]).  To close the project, press CTRL+C.
 
-This week I've started working on this project again.  One of our major setbacks was creating a backend implementation.  Many of us now know how difficult it can be to implement our prototype design without a source that can store information, such as profile info, images, etc.  After some time looking around online, I decided to reconsider using Django, a python-based backend framework.  _freeCodeCamp_ provides a free video tutorial that provides a solid introduction to the basics of Django.  Here is the link to the website with the tutorial: https://www.freecodecamp.org/news/backend-web-development-with-python-full-course/.  This has been of great help to me so far.
-
-This repository contains all of the HTML/CSS/JS files we had in our preceeding repository all encoded in a Django project.  I've had to adjust the layout of the files, but essentially the HTML files are located in myproject/myapp/templates, and the CSS/JS files are located in myproject/myapp/static.  The directory of course now contains other files involved with Django's backend implementation.  If anyone has any questions on the layout, don't hesitate to ask me (Kwaku); hopefully I can be of assistance, but please understand I am still in the learning process as well.
-
-At the moment, I've developed an interface where users can create accounts, log in to the website, and create new posts.  All of the profile information is stored in the embedded sqlite file, which hopefully has the same information in the repository as does my local computer.  After I clean up a few things with the login and profile tasks, I will look into the backend of our chat room task.  Thankfully, the video also provides a chat room tutorial, so hopefully this will not be too much of a hassle for me to implement.
-
-There's still a consideratble amount of front-end that the profile and login webpages could use, and other aspects of the app still need to be created as well.  Hopefully with the introduction of the backend to the project, it will be a lot easier to create the other html pages.  I'm still not sure if the information that other pull from this repository will run the same as it does on my local computer, but fingers crossed.  If you don't have Django downloaded yet, please do so with these instructions: https://www.djangoproject.com/download/
-
-I hope that a demo version of the project can be released before the Fall 2023 semester starts, that way we all will have a good start to develop more ideas for the project.  Thank you all for committing your time to this project, and hopefully we can continue to make this idea into a reality
+If you have any further questions about installation or anything else about the app, please don't hesistate to ask me!
 
 Best,
-
 Kwaku Ofosu
 
-p.s. I did not proofread this message for spelling errors
