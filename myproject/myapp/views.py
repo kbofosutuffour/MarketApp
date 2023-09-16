@@ -206,11 +206,19 @@ class NewPostView(FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
-        if form.is_valid():
-            np = form.save(commit=False)
-            np.username = request.user.get_username()
-            np.save()
-
+        if 'upload' in request.POST:
+            if form.is_valid():
+                np = form.save(commit=False)
+                np.username = request.user.get_username()
+                np.draft = False
+                np.save()
+            return self.form_valid(form, request)
+        elif 'save_as_draft' in request.POST:
+            if form.is_valid():
+                np = form.save(commit=False)
+                np.username = request.user.get_username()
+                np.draft = True
+                np.save()
             return self.form_valid(form, request)
 
         else:
@@ -502,47 +510,43 @@ def chat_room(request):
     except:
         messages.info(request, 'Must have an account to chat with others')
         return redirect('/')
-
+    
+    #If information has been sent form a productDescription page...
     if len(request.GET.keys()) != 0:
 
         username1 = request.GET['username1']
         product = request.GET['product']
 
-        profiles = Profile.objects.filter(username=username1)
-        user_profiles = Profile.objects.filter(username=request.user.get_username())
-        posts = Post.objects.filter(username=username1, product=product)
+        profile = Profile.objects.get(username=username1)
+        user_profile = Profile.objects.get(username=request.user.get_username())
+        post = Post.objects.get(username=username1, product=product)
 
-        for p in posts:
-            post = p
-        for pro in profiles:
-            profile = pro
-        for u in user_profiles:
-            user_profile = u
+        try:
+            chatroom = Room.objects.get(product=product, username1=username1, username2=request.user.get_username())
+            print(chatroom)
+        except:
+            chatroom = Room(
+                username1 = username1,
+                profile_picture1 = profile.profile_picture,
+                username2 = request.user.get_username(),
+                profile_picture2 = user_profile.profile_picture,
+                product = post.product,
+                image = post.display_image
+            )
+            chatroom.save()
 
-        chatroom = Room(
-            username1 = username1,
-            profile_picture1 = profile.profile_picture,
-            username2 = request.user.get_username(),
-            profile_picture2 = user_profile.profile_picture,
-            product = post.product,
-            image = post.display_image
-        )
-        chatroom.save()
 
-        chatrooms = Room.objects.filter(username1=username1, username2=request.user.get_username())
-        return render(request, 'chat_room.html', {'chatrooms': chatrooms, 'current_user': request.user.get_username()})
+    chatrooms = Room.objects.filter(username1 = request.user.get_username())
+    chatrooms2 = Room.objects.filter(username2 = request.user.get_username())
+    print(chatrooms, chatrooms2)
+    number_of_chats = len(chatrooms) + len(chatrooms2)
 
-    else:
-        chatrooms = Room.objects.filter(username1 = request.user.get_username())
-        chatrooms2 = Room.objects.filter(username2 = request.user.get_username())
-        number_of_chats = len(chatrooms) + len(chatrooms2)
-
-        context = {'chatrooms': chatrooms, 
-                    'chatrooms2': chatrooms2, 
-                    'current_user': request.user.get_username(),
-                    'number_of_chats': number_of_chats}
-        
-        return render(request, 'chat_room.html', context)
+    context = {'chatrooms': chatrooms, 
+                'chatrooms2': chatrooms2, 
+                'current_user': request.user.get_username(),
+                'number_of_chats': number_of_chats}
+    
+    return render(request, 'chat_room.html', context)
 
 
 def chat_messaging(request):

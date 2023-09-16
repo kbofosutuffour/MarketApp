@@ -95,6 +95,8 @@ body {
     font-weight: bold;
     font-size: x-large;
     background-color: white;
+    width: 90%;
+    overflow: hidden;
 }
 
 .product:hover {
@@ -125,10 +127,10 @@ body {
 
 .post-text {
     display: inline-block;
-    border-color:red;
     border-width: 10px;
     margin-left: 40px;
-    width: 200px;
+    width: 50%;
+
 
 }
 
