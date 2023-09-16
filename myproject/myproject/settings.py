@@ -11,7 +11,16 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import os 
+import os
+import environ
+
+
+# Email settings taken from:
+# https://www.sitepoint.com/django-send-email/#:~:text=Let%E2%80%99s%20look%20at%20the%20settings%20required%20for%20sending,will%20use%20to%20connect%20with%20the%20SMTP%20server.
+
+env = environ.Env()
+environ.Env.read_env()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -134,8 +143,12 @@ MEDIA_URL = '/media/'
 # https://www.sitepoint.com/django-send-email/#:~:text=Let%E2%80%99s%20look%20at%20the%20settings%20required%20for%20sending,will%20use%20to%20connect%20with%20the%20SMTP%20server.
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = ''
+EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+
+# Custom setting. To email
+RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')

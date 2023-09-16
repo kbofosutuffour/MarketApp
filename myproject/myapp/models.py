@@ -17,6 +17,7 @@ class Post(models.Model):
         image (imagefield): An image the user has selected to represent the product
         description (textfield): A brief description of the product created by the user
         price (decimalfield): The selling price of the product
+        draft (booleanfield): Whether or not a post is a draft
     """
 
     product = models.CharField(max_length=100)
@@ -25,6 +26,7 @@ class Post(models.Model):
     display_image = models.ImageField("Display Image", upload_to="posts")
     description = models.TextField(max_length=1000, blank=True)
     price = models.DecimalField(decimal_places=2, max_digits=9)
+    draft = models.BooleanField(blank=False, default=False)
 
 class Profile(models.Model):
     """
@@ -32,13 +34,19 @@ class Profile(models.Model):
 
     Attributes: 
         username (charfield): Name created by the user
-        profile_picture (charfield): A user's selected profile picture 
+        profile_picture (charfield): A user's selected profile picture
+        first_name (charfield): A user's defined first name
+        last_name (charfield): A user's defined last name
+        email (charfield): A user's defined email
+        saved_posts (manytomanyfield): A users list of saved posts
+        drafts (manytomanyfield): A users list of drafted posts
     """
     username = models.CharField(max_length=500, default=None, unique=True)
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     saved_posts = models.ManyToManyField(Post)
+    drafts = models.ManyToManyField(Post, related_name="drafts")
 
 class Room(models.Model):
 

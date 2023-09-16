@@ -33,7 +33,7 @@ class PostForm(forms.ModelForm):
 	class Meta:
 		model = Post
 		fields = '__all__'
-		exclude = ['username', 'date']
+		exclude = ['username', 'date', 'draft']
                 
 	def __init__(self, *args, **kwargs):
 		super(PostForm, self).__init__(*args, **kwargs)
