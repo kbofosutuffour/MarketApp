@@ -8,7 +8,8 @@ from myapp.views import NewPostView, EditPostView
     different webpages interract with each other
 """
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.loader, name='loader'),
+    path('home', views.home, name='home'),
     path('login', views.login, name='login'),
     path('logout', views.logout, name='logout'),
     path('verify', views.verify, name='verify'),

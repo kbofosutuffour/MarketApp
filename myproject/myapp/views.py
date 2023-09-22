@@ -21,6 +21,12 @@ import datetime
     
 """
 
+def loader(request):
+    """
+    View representing the functionality of the loader screen (loader.html)
+    """
+    return render(request, 'loader.html')
+
 def home(request):
     """
     View representing the functionality of the home screen (home.html)
