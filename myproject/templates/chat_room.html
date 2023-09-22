@@ -99,7 +99,7 @@
 
             <form method="GET" action="chat_messaging">
                 
-                <input class="product" name="username1" type="text" value="{{chatroom.username1}}" style="border: none; display: inline;">
+                <input class="product" name="username1" type="text" value="{{chatroom.username1}}" style="border: none; display: inline;" readonly>
                 <input name="image" type="hidden" value="{{chatroom.image}}">
                 <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
                 <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
@@ -129,7 +129,7 @@
 
             <form method="GET" action="chat_messaging">
                 
-                <input class="product" name="username2" type="text" value="{{chatroom.username2}}" style="border: none; display: inline;">
+                <input class="product" name="username2" type="text" value="{{chatroom.username2}}" style="border: none; display: inline;" readonly>
                 <input name="image" type="hidden" value="{{chatroom.image}}">
                 <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
                 <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
@@ -150,13 +150,13 @@
     {% endif %}
     {% endfor %}
 
-    <footer>
-        <ul>
-            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
-        </ul>
-   </footer>
+    <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+        <div id="footer">
+                <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+                <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+                <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+        </div>
+    </div>
     
 </body>
 </html>

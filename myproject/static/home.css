@@ -1,9 +1,16 @@
 #top-bar {
     border-bottom: 7px solid rgb(185, 151, 91);
+    background-color: rgb(17, 87, 64);
+    position: sticky;
+    top: 0;
+    height: 80px;
+    width: 90%;
+    z-index: 1
 }
 
 #search-login {
-    display: block;
+    display: flex;
+    flex-direction: row;
     position: absolute;
     right: 0;
     top: 3%;
@@ -35,7 +42,7 @@ button:hover {
 #login {
     position: relative;
     top: 10px;
-    left: 400px
+    right: 10px
 }
 
 
@@ -50,7 +57,9 @@ body {
     color: white;
     transition: ease-out;
     animation: mymove 10s;
-    position: absolute;
+    position: fixed;
+    top: 100px;
+    left: 100px;
     animation-fill-mode: forwards;
 }
 
@@ -60,6 +69,7 @@ body {
 }
 
 #search {
+    display: none;
     position: relative;
     left: 20px;
     top: 10px;
@@ -83,19 +93,21 @@ body {
 }
 
 .post {
+    display: flex;
+    flex-direction: row;
     background-color: white;
+    z-index: -1;
     width: 60%;
-    padding: 10px 10px 10px 10px;
     margin: auto;
     border: 1px solid rgb(191, 188, 188) ;
-    height: 225px;
+    height: 200px;
 }
 
 .product {
     font-weight: bold;
     font-size: x-large;
     background-color: white;
-    width: 90%;
+    width: 100%;
     overflow: hidden;
 }
 
@@ -107,7 +119,6 @@ body {
     font-weight: lighter;
 }
 
-
 .post-image {
     width: 150px;
     border-radius: 25%;
@@ -117,9 +128,13 @@ body {
     top: 10px
 }
 
+#post-screen {
+    z-index: -2;
+    padding-bottom: 150px;
+}
+
 .post-image-div {
     width: 150px;
-    border-color:red;
     display: inline-block;
     border-radius: 50px;
 
@@ -129,16 +144,12 @@ body {
     display: inline-block;
     border-width: 10px;
     margin-left: 40px;
-    width: 50%;
-
+    width: 70%;
+    padding-top: 20px;
 
 }
 
 .edit-post {
-    display: inline-block;
-    position: relative;
-    margin-left: 90%;
-    bottom: 220px;
     /* border: 1px solid red */
 }
 
@@ -165,24 +176,23 @@ body {
     width: 50px;
 }
 
-footer {
-    display: block;
+#footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15%;
+    margin: auto;
+    padding-top: 20px;
     background-color: white;
-    position: fixed;
-    bottom: 0;
-    /* border: 1px solid rgb(233, 19, 19) ; */
-    /* margin: auto; */
-    width: 50%;
-    margin-left: 25%;
-    border-top-left-radius: 50%;
-    border-top-right-radius: 50%;
-
+    width: 60%;
+    border-top: 3px solid rgb(185, 151, 91)
 }
+
 
 .footer_img {
     width: 50px;
     display: inline-block;
-    margin-left: 20%;
     border-radius: 50%;
 }
 
@@ -192,10 +202,13 @@ footer {
 
 #new-post {
     position: fixed;
-    right: 20px;
-    bottom: 20px;
+    margin: auto;
+    bottom: 5%;
     border-radius: 50%;
-    width: 50px;
+    width: 75px;
+    left: 50%; 
+    transform: translateX(-50%);
+    z-index: 3;
     transition: 0.5s filter;
 }
 
@@ -224,3 +237,18 @@ footer {
     filter: invert(61%) sepia(70%) saturate(286%) hue-rotate(360deg) brightness(89%) contrast(81%);      
 }
 
+@media (max-width: 700px) {
+    .post {
+        width: 100%;
+        height: 200px;
+    }
+    #footer {
+        width: 100%;
+        border-top: 7px solid rgb(185, 151, 91);
+        border-radius: 0%;
+        gap: 18%
+    }
+    .post-text {
+        width: 55%;
+    }
+}

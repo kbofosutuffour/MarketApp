@@ -46,20 +46,20 @@
             <!-- <p>Enter the name of your product</p><input type="text" name="product"/><br>
             <p>Describe your product</p><input type="password" name="description"/><br>
             <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
-
-            <button id="submit" type="submit" onmousedown="submit_on_or_off(true)" onmouseenter="submit_on_or_off(true)" onmouseout="submit_on_or_off(false)" style="background-color: rgba(252, 252, 252, 0.274)">Upload</button>
+            <button id="submit" class="submit-btn" name='upload' type="submit" onmousedown="submit_on_or_off(true)" onmouseenter="submit_on_or_off(true)" onmouseout="submit_on_or_off(false)" >Upload</button>
+            <button class="submit-btn" name="save_as_draft" type="submit" >Save As Draft</button>
         </form>
-        <button id="delete" style="background-color: rgba(252, 252, 252, 0.274);" onmousedown="delete_on_or_off(true)" onmouseenter="delete_on_or_off(true)" onmouseout="delete_on_or_off(false)" onclick="prompt(true)">Delete</button>
+        <button id="delete" class="submit-btn" onmousedown="delete_on_or_off(true)" onmouseenter="delete_on_or_off(true)" onmouseout="delete_on_or_off(false)" onclick="prompt(true)">Delete</button>
 
     </div>
 
     
-    <footer>
-        <ul>
-            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
-        </ul>
-   </footer>
+    <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+        <div id="footer">
+                <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+                <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+                <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+        </div>
+    </div>
 </body>
 </html>

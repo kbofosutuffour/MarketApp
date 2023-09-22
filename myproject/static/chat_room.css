@@ -16,7 +16,6 @@ button:hover {
 .chat {
     background-color: white;
     width: 60%;
-    padding: 10px 10px 10px 10px;
     margin: auto;
     border: 1px solid rgb(191, 188, 188) ;
     height: 125px;
@@ -68,24 +67,24 @@ button:hover {
     font-size: x-large
 }
 
-footer {
-    display: block;
+#footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15%;
+    margin: auto;
+    padding-top: 20px;
     background-color: white;
-    position: fixed;
-    bottom: 0;
-    /* border: 1px solid rgb(233, 19, 19) ; */
-    /* margin: auto; */
-    width: 50%;
-    margin-left: 25%;
-    border-top-left-radius: 50%;
-    border-top-right-radius: 50%;
-
+    width: 60%;
+    border-top: 3px solid rgb(185, 151, 91)
 }
+
+
 
 .footer_img {
     width: 50px;
     display: inline-block;
-    margin-left: 20%;
 }
 
 
@@ -105,3 +104,17 @@ footer {
       
 }
 
+@media (max-width: 700px) {
+    .chat {
+        width: 100%;
+    }
+    #footer {
+        width: 100%;
+        border-top: 7px solid rgb(185, 151, 91);
+        border-radius: 0%;
+        gap: 18%
+    }
+    .post-text {
+        width: 55%;
+    }
+}

@@ -37,3 +37,13 @@ function cancel_on_or_off(mouse_on_button) {
     document.getElementById('cancel').style.color = mouse_on_button? "red": "gray";
    
 }
+
+
+function guest_post_error() {
+    var message = document.createElement('h5');
+    message.classList.add("message");
+    message.innerHTML = "Please login or create an account to make a new post";
+    document.body.appendChild(message);
+    console.log(message);
+
+}

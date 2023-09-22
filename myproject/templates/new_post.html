@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H2H | Create New Post</title>
-    <link rel="stylesheet" href="..\static\new_post.css">
+    <link rel="stylesheet" href="{% static 'new_post.css' %}">
     <script src="{% static 'new_post.js' %}"></script>
 
 
@@ -39,19 +39,20 @@
             <p>Describe your product</p><input type="password" name="description"/><br>
             <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
 
-            <button type="submit" name="upload">Upload</button>
-            <button type="submit" name="save_as_draft">Save As Draft</button>
+            <button type="submit" class="submit-btn" name="upload">Upload</button>
+            <button type="submit" class="submit-btn" name="save_as_draft">Save As Draft</button>
 
         </form>
     </div>
 
     
-    <footer>
-        <ul>
-            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
-        </ul>
-   </footer>
+    <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+        <div id="footer">
+                <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+                <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+                <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+        </div>
+    </div>
+    
 </body>
 </html>

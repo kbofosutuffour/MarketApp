@@ -45,27 +45,31 @@
     <div id="selector" style="display: flex;">
         <div id="show-sell-history" onclick="sell_history()" onmousedown="pressed_sell_history(true)" onmouseup="pressed_sell_history(false)">Sell History</div>
         <div id="show-saved-posts" onclick="saved_posts()" onmousedown="pressed_saved_posts(true)" onmouseup="pressed_saved_posts(false)">Saved Posts</div>
+        <div id="show-drafts" onclick="drafts()" onmousedown="pressed_drafts(true)" onmouseup="pressed_drafts(false)">Drafts</div>
+
     </div>
 
     <div id="sell-history">
-    <p>Sell History</p>
+    <p class="text">Sell History</p>
 
         {% for post in posts %}
-        <div id="posts">
-            <div class="post-image-div" display="inline-block" >
-                <img class="post-image" src="{{ post.display_image.url }}"/>
+            {% if not post.draft %}
+            <div id="posts">
+                <div class="post-image-div" display="inline-block" >
+                    <img class="post-image" src="{{ post.display_image.url }}"/>
+                </div>
+                <div class ="post-text" display="inline-block" >
+                    <h3 class="product">{{post.product}}</h3>
+                    <h3 class="price">${{post.price}}</h3>
+                </div>
             </div>
-            <div class ="post-text" display="inline-block" >
-                <h3 class="product">{{post.product}}</h3>
-                <h3 class="price">${{post.price}}</h3>
-            </div>
-        </div>
+            {% endif %}
         {% endfor %}
 
     </div>
 
     <div id="saved-posts" style="display: none;">
-    <p>Saved Posts</p>
+    <p class="text">Saved Posts</p>
 
         {% for saved_post in saved_posts %}
         <div id="saved-posts-inner">
@@ -79,29 +83,42 @@
         </div>
         {% endfor %}
 
-        {% for draft in drafts %}
-        <div id="drafts-inner">
-            <div class="post-image-div" display="inline-block" >
-                <img class="post-image" src="{{ draft.display_image.url }}"/>
-            </div>
-            <div class ="post-text" display="inline-block" >
-                <h3 class="product">{{draft.product}}</h3>
-                <h3 class="price">${{draft.price}}</h3>
-            </div>
-        </div>
-        {% endfor %}
-
-
     </div>
 
+    <div id="drafts" style="display: none;">
+        <p class="text">Drafts</p>
+    
+            {% for draft in drafts %}
+            <div id="drafts-inner">
+                <div class="post-image-div" display="inline-block" >
+                    <img class="post-image" src="{{ draft.display_image.url }}"/>
+                </div>
+                <div class ="post-text" display="inline-block" >
+                    <form method="POST" action="edit_post">
+                        {% csrf_token %}
+                        <input class="product" name="product" type="hidden" value="{{draft.product}}" style="border: none; display: inline;">
+                        <input class="username1" name="username" type="hidden" value="{{draft.username}}" style="border: none; display: inline;">
+                        <input name="price" type="hidden" value="{{draft.price}}">
+                        <input name="description" type="hidden" value="{{draft.description}}">
+                        <input class="image" name="display_image" type="hidden" value="{{draft.display_image.url}}" style="border: none; display: inline;">
+                        <input type="submit" value="{{draft.product}}" style="background-color: white; border: none;">
+                    </form>
+                    <h3 class="product">{{draft.product}}</h3>
+                    <h3 class="price">${{draft.price}}</h3>
+                </div>
+            </div>
 
-    <footer>
-        <ul>
-            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
-        </ul>
-   </footer>
+            {% endfor %}
+
+        </div>
+
+        <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+            <div id="footer">
+                    <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+                    <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+                    <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+            </div>
+        </div>
 
 </body>
 </html>

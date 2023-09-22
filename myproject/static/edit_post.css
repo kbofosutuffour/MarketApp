@@ -49,10 +49,11 @@ button:hover {
 #section {
     background-color: white;
     width: 60%;
-    padding: 10px 10px 10px 10px;
+    padding: 0px 10px 0px 10px;
     margin: auto;
     border: 1px solid rgb(191, 188, 188) ;
     height: fit-content;
+    margin-bottom: 100px;
 }
 
 #cancel {
@@ -64,6 +65,21 @@ button:hover {
 
 }
 
+.submit-btn {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    height: 50px;
+    width: 100%;
+    border: none;
+    background-color: #115740;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+
 #publish {
     color: gray;
     width: fit-content;
@@ -74,24 +90,23 @@ button:hover {
 
 }
 
-footer {
-    display: block;
+#footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15%;
+    margin: auto;
+    padding: 20px 10px 0px 10px;
     background-color: white;
-    position: fixed;
-    bottom: 0;
-    /* border: 1px solid rgb(233, 19, 19) ; */
-    /* margin: auto; */
-    width: 50%;
-    margin-left: 25%;
-    border-top-left-radius: 50%;
-    border-top-right-radius: 50%;
-
+    width: 60%;
+    border-top: 3px solid rgb(185, 151, 91)
 }
+
 
 .footer_img {
     width: 50px;
     display: inline-block;
-    margin-left: 20%;
 }
 
 #home, #profile, #chats {

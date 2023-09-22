@@ -9,6 +9,10 @@ from django.template import Context, Template
 from django.http import JsonResponse
 from .forms import *
 from django.views.generic.edit import FormView
+from django.conf import settings
+from django.core.mail import send_mail
+import random
+import datetime
 
 """
     A view function is a Python function that takes a Web request and returns a Web response (geeksforgeeks.org).
@@ -53,7 +57,7 @@ def login(request):
     """
 
     #If the user has hit the submit button
-    if request.method == "POST":
+    if request.POST:
         username = request.POST['username']
         password = request.POST['password']
 
@@ -68,7 +72,11 @@ def login(request):
             except:
                 return redirect('avatar')
             
-            return redirect('/')
+            #send the user a verification code
+            code = random.randint(10000,99999)
+            send_code(request, code)
+
+            return render(request, 'verify.html', {'code': code})
         
         #else, reload the login screen and display error message
         else:
@@ -85,6 +93,55 @@ def logout(request):
     """
     auth.logout(request)
     return redirect('home')
+
+def verify(request):
+    """
+    View used for the verification screen (verify.html)
+    """
+
+    if request.POST:
+        code = request.POST['code']
+        input = request.POST['input']
+        if input == code or request.user.get_username() == 'admin':
+            return redirect('/')
+        else:
+            messages.info(request, 'credentials invalid')
+            return render(request, 'verify.html', {'code': code})
+    
+    return render(request, 'verify.html')
+
+def send_code(request, code):
+    """
+    Function used to send the user their verification code via email
+    """
+    admin_acconts = ['admin'] #please add your account username to avoid verification codes
+
+    date = datetime.datetime.now()
+    date = date.strftime("%B %d, %Y")
+    message = f"""
+    H2H
+    W&M Market App
+    marketappwm@gmail.com\n
+    {date}
+
+    Dear user,
+        Your verification code is {code}.  Please do not share this code with anyone.  Please do not reply to this email.  
+        Thank you for using our services.
+
+    Sincerely,
+    H2H MarketApp Team
+    """
+
+    user = User.objects.get(username = request.user.get_username())
+
+    #send user an email if they are not an admin
+    if user.username not in admin_acconts:
+        send_mail(
+                subject="H2H Account Verification Code",
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email]
+            )
 
 def register(request):
     """
@@ -206,23 +263,31 @@ class NewPostView(FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
 
-        if 'upload' in request.POST:
-            if form.is_valid():
-                np = form.save(commit=False)
-                np.username = request.user.get_username()
-                np.draft = False
-                np.save()
-            return self.form_valid(form, request)
-        elif 'save_as_draft' in request.POST:
-            if form.is_valid():
-                np = form.save(commit=False)
-                np.username = request.user.get_username()
-                np.draft = True
-                np.save()
-            return self.form_valid(form, request)
+        if form.is_valid():
+            np = form.save(commit=False)
+            np.username = request.user.get_username()
+            np.save()
 
+            user = Profile.objects.get(username = request.user.get_username())
+            post = Post.objects.get(username = request.user.get_username(), product = np.product)
+
+            if 'save_as_draft' in request.POST:
+                user.drafts.add(post)
+                post.draft = True
+            elif 'upload' in request.POST:
+                post.draft = False
+
+            post.save()
+            return self.form_valid(form, request)
+ 
         else:
-            return self.form_invalid(form)
+            
+            if request.user.get_username():
+                print('username')
+                return self.form_invalid(form)
+            else:
+                messages.error(request, "Login or create an account to make a post")
+                return redirect('/')
 
     def form_valid(self, form, request):
         form.username = request.user.get_username()
@@ -287,21 +352,30 @@ class EditPostView(FormView):
     def post(self, request, *args, **kwargs):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        
         if form.is_valid():
+
+            #save the user info
             post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
             post.product = form.cleaned_data['product']
             post.price = form.cleaned_data['price']
             post.display_image = form.cleaned_data['display_image']
             post.description = form.cleaned_data['description']
+
+            #save as draft or post
+            user = Profile.objects.get(username = request.user.get_username())
+            if 'save_as_draft' in request.POST:
+                print('draft')
+                user.drafts.add(post)
+                post.draft = True
+            elif 'upload' in request.POST:
+                print('upload')
+                user.drafts.remove(post)
+                post.draft = False
+
             post.save()
-
-
             return self.form_valid(form, request)
-
         else:
             self.set_initial(form, request)
-            print(self.initial)
             return self.form_invalid(form)
 
     def form_valid(self, form, request):
@@ -456,11 +530,14 @@ def profile(request):
     try:
         profile = Profile.objects.get(username=request.user.get_username())
         saved_posts = profile.saved_posts.all()
+        drafts = profile.drafts.all()
+        print(drafts)
         hasProfile = True
         context = {
             'profile': profile,
             'posts': posts,
             'saved_posts': saved_posts,
+            'drafts': drafts,
             'hasProfile': hasProfile,
             'username': request.user.get_username()
         }
