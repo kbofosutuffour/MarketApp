@@ -1,4 +1,4 @@
-const timeout = setTimeout(goHome, 600000);
+const timeout = setTimeout(goHome, 5000);
 
 function goHome() {
     window.location.href=("home")
