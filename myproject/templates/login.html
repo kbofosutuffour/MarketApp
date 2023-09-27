@@ -6,10 +6,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="..\static\login_style.css">
+    <link rel="stylesheet" href="..\static\login.css">
     <link rel="stylesheet" href="https://fonts.google.com/specimen/Inter">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script src="{% static 'login_script.js' %}"></script>
+    <script src="{% static 'login.js' %}"></script>
     <title>H2H | Login Page</title>
 </head>
 <body style = "background-color: white">
@@ -18,26 +18,16 @@
         <h1>Welcome to Market App <br> at William and Mary!</h1> <br>
 
         {% for message in messages %}
-        <h5 style="color: red">{{message}}</h5>
+        <h5 class="messages" style="color: red">{{message}}</h5>
         {% endfor %}
         
         <h3 style="margin-top: 5px">Please enter your login information: </h3>
         <div id="input">
-            <!-- <div class="user-pass">
-                <input type="text" id="username" name = "username" placeholder="Enter ID" required>
-                <button id="send-code">Send Code</button>
-            </div><br>
-            <div class="user-pass">
-                <input type="password" id="password" name = "password" placeholder="Enter password" required>
-            </div><br>
-            <div id="warning"><label>Username or password incorrect</label></div>
-            <button id="submit" onclick="verify()">Submit</button> -->
             <form method="POST" action="login">
                 {% csrf_token %}
-                
                 <input type="text" name="username" class="user-input" placeholder="Enter username"/><br>
-                <input type="password" name="password" class="user-input" placeholder="Enter password"/><br>
-                <i class="far fa-eye" id="togglePwd" style="margin-left: 90%; transform: translate(0, -150%); cursor: pointer;"></i>
+                <input id="password" type="password" name="password" class="user-input" placeholder="Enter password"/><br>
+                <i class="far fa-eye" id="togglePwd" style="margin-left: 90%; transform: translate(0, -150%); cursor: pointer;" onclick="togglePassword()"></i>
                 <input type="submit" class="submit-btn" value="Log In"/>
             </form>
 

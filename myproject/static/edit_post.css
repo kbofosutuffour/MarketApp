@@ -90,6 +90,38 @@ button:hover {
 
 }
 
+.form-input {
+    width: 100%;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    border-left: none;
+    border-right: none;
+    outline: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 60px;
+
+}
+
+.form-input-label {
+    width: 80%;
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+    outline: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 30px;
+
+}
+
+label {
+    color: gray
+}
+
+
+
 #footer {
     display: flex;
     flex-direction: row;
@@ -113,3 +145,15 @@ button:hover {
     width: 50px;
 }
 
+@media (max-width: 700px) {
+    #section {
+        width: 100%;
+    }
+    #footer {
+        width: 100%;
+        border-top: 7px solid rgb(185, 151, 91);
+        border-radius: 0%;
+        gap: 18%
+    }
+
+}

@@ -12,9 +12,11 @@ class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 
-class MultipleFileField(forms.FileField):
+class MultipleFileField(forms.FileField):	
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("widget", MultipleFileInput())
+        kwargs.setdefault("widget", MultipleFileInput(attrs={
+				'class': 'form-input-label',
+			}))
         super().__init__(*args, **kwargs)
         
     def clean(self, data, initial=None):
@@ -29,15 +31,33 @@ class MultipleFileField(forms.FileField):
 class PostForm(forms.ModelForm):
     
 	additional_images = MultipleFileField()
-	# additional_images = forms.ImageField(required=False, label="Additional Images", widget=MultipleFileInput())
+
 	class Meta:
 		model = Post
 		fields = '__all__'
-		exclude = ['username', 'date', 'draft']
+		exclude = ['username', 'date', 'draft', 'sold', 'selling', 'pending']
+		widgets = {
+			'product': forms.TextInput(attrs={
+				'placeholder': 'Product',
+				'class': 'form-input'
+			}),
+			'display_image': forms.FileInput(attrs={
+				'class': 'form-input-label'
+			}),
+			'description': forms.Textarea(attrs={
+				'placeholder': 'Description',
+				'class': 'form-input'
+			}),
+			'price': forms.NumberInput(attrs={
+				'plsceholder': 'Price',
+				'class': 'form-input-label'
+			}),
+		}
                 
 	def __init__(self, *args, **kwargs):
 		super(PostForm, self).__init__(*args, **kwargs)
 		self.fields['additional_images'].required = False
+		self.fields['status'].required = False
 		
 
 class ProfileForm(forms.ModelForm):
@@ -48,11 +68,53 @@ class ProfileForm(forms.ModelForm):
 		exclude = ['username', 'saved_posts']
 
 
+
 class EditPostForm(forms.ModelForm):
 
 	class Meta:
 		model = Post
 		fields = '__all__'
-		exclude = ['username', 'date']
+		exclude = ['username', 'date', 'sold', 'selling', 'pending']
+		widgets = {
+			'product': forms.TextInput(attrs={
+				'placeholder': 'Product',
+				'class': 'form-input'
+			}),
+			'display_image': forms.FileInput(attrs={
+				'class': 'form-input-label'
+			}),
+			'description': forms.Textarea(attrs={
+				'placeholder': 'Description',
+				'class': 'form-input'
+			}),
+			'price': forms.NumberInput(attrs={
+				'plsceholder': 'Price',
+				'class': 'form-input-label'
+			}),
+		}
 
+	def __init__(self, *args, **kwargs):
+		super(EditPostForm, self).__init__(*args, **kwargs)
+		self.fields['additional_images'].required = False
+		self.fields['status'].required = False
+		
+
+
+class MessageForm(forms.ModelForm):
+
+	class Meta:
+		model = Message
+		fields = '__all__'
+		exclude = ['date', 'username', 'room']
+		widgets = {
+			'value': forms.TextInput(attrs={
+				'placeholder': 'Type your message here',
+				'id': 'keyboard-text',
+			}),
+		}
+	
+	def __init__(self, *args, **kwargs):
+		super(MessageForm, self).__init__(*args, **kwargs)
+		self.fields['value'].required = False
+		self.fields['image'].required = False
 

@@ -1,10 +1,18 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 import datetime
 
 """
     Django models act as objects to represent a table of a database.  Creating a new model object creates a new instance in
     its corresponding table in the sqlite3 document.
 """
+
+
+class Category(models.Model):
+    category = models.CharField(max_length=50)
+
+    def __str__(self) -> str:
+        return self.category
 
 class Post(models.Model):
     """
@@ -19,14 +27,29 @@ class Post(models.Model):
         price (decimalfield): The selling price of the product
         draft (booleanfield): Whether or not a post is a draft
     """
+    class Status(models.TextChoices):
+        SELLING = "SELLING", _("SELLING")
+        PENDING = "PENDING", _("PENDING")
+        SOLD = "SOLD", _("SOLD")
 
+        
     product = models.CharField(max_length=100)
     username = models.CharField(max_length=500, default=None)
     date = models.DateTimeField(auto_now=True)
-    display_image = models.ImageField("Display Image", upload_to="posts")
+    display_image = models.ImageField("Display Image:", upload_to="posts")
     description = models.TextField(max_length=1000, blank=True)
-    price = models.DecimalField(decimal_places=2, max_digits=9)
+    price = models.DecimalField("Price:", decimal_places=2, max_digits=9)
     draft = models.BooleanField(blank=False, default=False)
+    category = models.ManyToManyField(Category)
+    status = models.CharField(
+        choices = Status.choices,
+        default = Status.SELLING,
+        max_length=8,
+    )
+
+    def __str__(self) -> str:
+        return self.product
+
 
 class Profile(models.Model):
     """
@@ -48,6 +71,9 @@ class Profile(models.Model):
     saved_posts = models.ManyToManyField(Post)
     drafts = models.ManyToManyField(Post, related_name="drafts")
 
+    def __str__(self) -> str:
+        return self.username
+
 class Room(models.Model):
 
     """
@@ -65,6 +91,7 @@ class Message(models.Model):
     Message object is used to hold the data of a singular message
     """
     value = models.CharField(max_length=1000000)
+    image = models.ImageField(upload_to="message_images", default=None, null=True)
     date = models.DateTimeField(default=datetime.datetime.now, blank=True)
     username = models.CharField(max_length=1000000)
     room = models.ForeignKey(

@@ -1,7 +1,7 @@
 @import url(https://fonts.google.com/specimen/Inter);
 
 img {
-    width: 70%;
+    width: 20%;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -13,9 +13,19 @@ img {
     /* font-family: 'arial'; */
     font-size: 40px;
     color: white;
-    left: 20%;
-    top: 20%;
-    position: absolute;
-    transform: rotate(-20deg);
+    left: 37.5%;
+    top: 30%;
+    position: fixed;
+    transform: rotate(-25deg);
     z-index: 2;
+}
+
+@media (max-width: 700px) {
+    img {
+        width: 75%;
+    }
+    .title {
+        top: 25%;
+        left: 17.5%
+    }
 }

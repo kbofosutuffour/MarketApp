@@ -29,15 +29,24 @@
     <div class="section">
         <form method="POST" action="new_post" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form.as_p }}
+            {{ form.product }}
+
+            <label>Display Image:</label> {{ form.display_image }}
+            <div class="form-input">
+                <label>Additional Images:</label> {{ form.additional_images }}
+
+            </div>
+
+            {{ form.description }}
+
+            <label>Price:</label> {{ form.price }}
+
+            <div class="form-input">
+                <label>Category:</label> {{ form.category }}
+            </div>
 
             {{ form.errors }}
             {{ form.non_field_errors }}
-
-
-            <!-- <p>Enter the name of your product</p><input type="text" name="product"/><br>
-            <p>Describe your product</p><input type="password" name="description"/><br>
-            <p>Enter your desired selling price: $</p><input type="password" name="price"/><br> -->
 
             <button type="submit" class="submit-btn" name="upload">Upload</button>
             <button type="submit" class="submit-btn" name="save_as_draft">Save As Draft</button>

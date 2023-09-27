@@ -52,7 +52,7 @@
 
 
         {% for post in posts %}
-        {% if not post.draft %}
+        {% if not post.draft and post.status == "SELLING" %}
 
         <div class="post" >
 
@@ -191,6 +191,7 @@
                         });
 
                         if (add_item) {
+                            console.log(response.posts[key].display_image);
                             temp = temp + `
 
                             <div class="post" >

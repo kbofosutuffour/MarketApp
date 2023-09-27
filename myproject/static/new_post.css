@@ -20,6 +20,7 @@ button:hover {
     padding: 0px 10px 10px 10px;
     margin: auto;
     border: 1px solid rgb(191, 188, 188);
+    margin-bottom: 150px
 }
 
 #cancel {
@@ -28,7 +29,6 @@ button:hover {
     display: inline;
     position: relative;
     left: 95%;
-
 }
 
 #publish {
@@ -38,7 +38,6 @@ button:hover {
     position: relative;
     left: 92.5%;
     display: inline
-
 }
 
 .submit-btn {
@@ -70,8 +69,6 @@ button:hover {
     border-top: 3px solid rgb(185, 151, 91)
 }
 
-
-
 .footer_img {
     width: 50px;
     display: inline-block;
@@ -80,3 +77,48 @@ button:hover {
 #home, #profile, #chats {
     width: 50px;
 }
+
+@media (max-width: 700px) {
+    .section {
+        width: 100%;
+    }
+    #footer {
+        width: 100%;
+        border-top: 7px solid rgb(185, 151, 91);
+        border-radius: 0%;
+        gap: 18%
+    }
+
+}
+
+.form-input {
+    width: 100%;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    border-left: none;
+    border-right: none;
+    outline: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 60px;
+
+}
+
+.form-input-label {
+    width: 80%;
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+    outline: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 30px;
+
+}
+
+label {
+    color: gray
+}
+
+

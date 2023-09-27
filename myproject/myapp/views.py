@@ -78,11 +78,7 @@ def login(request):
             except:
                 return redirect('avatar')
             
-            #send the user a verification code
-            code = random.randint(10000,99999)
-            send_code(request, code)
-
-            return render(request, 'verify.html', {'code': code})
+            return redirect('loader')
         
         #else, reload the login screen and display error message
         else:
@@ -100,27 +96,45 @@ def logout(request):
     auth.logout(request)
     return redirect('home')
 
+def email(request):
+    """
+    View used to generate a random code and render the email page (email.html)
+    """
+    code = random.randint(10000,99999)
+    code = str(code)
+    return render(request, 'email.html', {'code': code})
+
 def verify(request):
     """
     View used for the verification screen (verify.html)
     """
+    code = request.POST['code']
+    email = request.POST['email']
 
-    if request.POST:
-        code = request.POST['code']
+    if 'input' in request.POST:
         input = request.POST['input']
-        if input == code or request.user.get_username() == 'admin':
-            return redirect('/')
+        if input == code:
+            return render(request, 'register.html', {'email': email})
         else:
             messages.info(request, 'credentials invalid')
-            return render(request, 'verify.html', {'code': code})
-    
-    return render(request, 'verify.html')
+            return render(request, 'verify.html', {'email': email, 'code': code})
+    else:
+        send_code(request, code, email)
 
-def send_code(request, code):
+    
+    return render(request, 'verify.html', {'email': email, 'code': code})
+
+def init_verify(request):
+    email = request.POST['email']
+    code = random.randint(10000,99999)
+    # return redirect('verify')
+    return render(request, 'verify.html', {'email': email, 'code': code})
+
+
+def send_code(request, code, email):
     """
     Function used to send the user their verification code via email
     """
-    admin_acconts = ['admin'] #please add your account username to avoid verification codes
 
     date = datetime.datetime.now()
     date = date.strftime("%B %d, %Y")
@@ -138,16 +152,14 @@ def send_code(request, code):
     H2H MarketApp Team
     """
 
-    user = User.objects.get(username = request.user.get_username())
-
-    #send user an email if they are not an admin
-    if user.username not in admin_acconts:
-        send_mail(
-                subject="H2H Account Verification Code",
-                message=message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user.email]
-            )
+    #send user an email
+    print(code)
+    send_mail(
+            subject="H2H Account Verification Code",
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email]
+        )
 
 def register(request):
     """
@@ -240,7 +252,6 @@ def reset_password(request):
 
         #If the password and confirmation password do not match, reload the page and display an error message
         if password != password1:
-            print('test')
             messages.error(request, 'Passwords did not match')
             return redirect('reset_password')
         
@@ -262,7 +273,7 @@ class NewPostView(FormView):
     https://docs.djangoproject.com/en/4.2/topics/http/file-uploads/#uploading-multiple-files
     """
     form_class = PostForm
-    template_name = "new_post.html"  # Replace with your template.
+    template_name = "new_post.html"  # replace with your template.
     success_url = '/returnHome'
     
     def post(self, request, *args, **kwargs):
@@ -277,11 +288,15 @@ class NewPostView(FormView):
             user = Profile.objects.get(username = request.user.get_username())
             post = Post.objects.get(username = request.user.get_username(), product = np.product)
 
+            # making the post a draft if the user has choosen so
             if 'save_as_draft' in request.POST:
                 user.drafts.add(post)
                 post.draft = True
             elif 'upload' in request.POST:
                 post.draft = False
+
+            # setting the status of a post (default selling)
+            post.status = "SELLING"
 
             post.save()
             return self.form_valid(form, request)
@@ -289,7 +304,6 @@ class NewPostView(FormView):
         else:
             
             if request.user.get_username():
-                print('username')
                 return self.form_invalid(form)
             else:
                 messages.error(request, "Login or create an account to make a post")
@@ -297,20 +311,25 @@ class NewPostView(FormView):
 
     def form_valid(self, form, request):
         form.username = request.user.get_username()
+
+        # retrieving any additional images for a post, then adding them to a list
         files = form.cleaned_data["additional_images"]
         additional_images_list = []
 
         for additions in files:
             additional_images_list.append(additions)
 
+        # filling empty space, since an Image object must contain 4 images
         length = len(additional_images_list)
         while length < 4:
             additional_images_list.append(None)
             length += 1
+
         post = Post.objects.get(
             product=form.cleaned_data['product'], 
             username = request.user.get_username()
         )
+
         img = Image(
             post = post,
             image1 = additional_images_list[0],
@@ -318,6 +337,7 @@ class NewPostView(FormView):
             image3 = additional_images_list[2],
             image4 = additional_images_list[3],
         )
+
         img.save()
 
         messages.success(request, "Your post has been successfully uploaded!")
@@ -370,13 +390,15 @@ class EditPostView(FormView):
             #save as draft or post
             user = Profile.objects.get(username = request.user.get_username())
             if 'save_as_draft' in request.POST:
-                print('draft')
                 user.drafts.add(post)
                 post.draft = True
             elif 'upload' in request.POST:
-                print('upload')
                 user.drafts.remove(post)
                 post.draft = False
+
+            # whether a post is SELLING, PENDING, or SOLD
+            post.status = request.POST["status"]
+            print(post.status, request.POST["status"])
 
             post.save()
             return self.form_valid(form, request)
@@ -385,19 +407,26 @@ class EditPostView(FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form, request):
+        # holds any additional images
         files = form.cleaned_data["additional_images"]
+
+        # adding all images to a list, then creating an Image object containing each image
         additional_images_list = []
         for additions in files:
             additional_images_list.append(additions)
 
         length = len(additional_images_list)
+
+        #Filling empty spaces since an Image object must contain 4 items
         while length < 4:
             additional_images_list.append(None)
             length += 1
+
         post = Post.objects.get(
             product=form.cleaned_data['product'], 
             username = request.user.get_username()
         )
+
         img = Image(
             post = post,
             image1 = additional_images_list[0],
@@ -537,7 +566,6 @@ def profile(request):
         profile = Profile.objects.get(username=request.user.get_username())
         saved_posts = profile.saved_posts.all()
         drafts = profile.drafts.all()
-        print(drafts)
         hasProfile = True
         context = {
             'profile': profile,
@@ -557,6 +585,26 @@ def profile(request):
         }
 
     return render(request, 'profile.html', context)
+
+def other_profile(request):
+    """
+    View used for the funcitonality of the profile page (profile.html)
+    """
+
+    username = request.POST['username']
+
+    posts = Post.objects.filter(username=username)
+    profile = Profile.objects.get(username=username)
+
+    context = {
+        'profile': profile,
+        'posts': posts,
+        'username': username,
+        'other_profile': True
+    }
+
+    return render(request, 'profile.html', context)
+
 
 
 def productDescription(request):
@@ -606,7 +654,6 @@ def chat_room(request):
 
         try:
             chatroom = Room.objects.get(product=product, username1=username1, username2=request.user.get_username())
-            print(chatroom)
         except:
             chatroom = Room(
                 username1 = username1,
@@ -621,7 +668,6 @@ def chat_room(request):
 
     chatrooms = Room.objects.filter(username1 = request.user.get_username())
     chatrooms2 = Room.objects.filter(username2 = request.user.get_username())
-    print(chatrooms, chatrooms2)
     number_of_chats = len(chatrooms) + len(chatrooms2)
 
     context = {'chatrooms': chatrooms, 
@@ -636,38 +682,39 @@ def chat_messaging(request):
     """
     View used to render the chat messaging pate (chat_messaging.html)
     """
-    if request.method == "POST":
-        pass
-    
-    try:
-        username1 = request.GET['username1']
-    except:
-        username1 = request.GET['username2']
-
     product = request.GET['product']
 
-    profile = Profile.objects.get(username=username1)
-    user_profile = Profile.objects.get(username=request.user.get_username())
+    try:
+        otherUser = request.GET['username1']
+    except:
+        otherUser = request.GET['username2']
+
     posts = Post.objects.filter(product=product)
 
     for p in posts:
-        if p.username == request.user.get_username() or p.username == username1:
+        if p.username == request.user.get_username() or p.username == otherUser:
             post = p
 
     try:
-        chatrooms = Room.objects.get(username1=username1, username2=request.user.get_username(), product=post.product)
+        chatroom = Room.objects.get(username1=otherUser, username2=request.user.get_username(), product=post.product)
     except:
-        chatrooms = Room.objects.get(username2=username1, username1=request.user.get_username(), product=post.product)
+        chatroom = Room.objects.get(username2=otherUser, username1=request.user.get_username(), product=post.product)
 
-    messages = Message.objects.filter(room=chatrooms)
+    messages = Message.objects.filter(room=chatroom)    
+
+    #send a new form to the chat_messaging screen for the Message model
+    form = MessageForm()    
+    
     context = {
-        'chatrooms': chatrooms,
+        'chatrooms': chatroom,
         'messages': messages,
         'current_user': request.user.get_username(),
-        'username1': username1,
+        'username1': otherUser,
         'username2': request.user.get_username(),
         'product': product,
+        'form': form
     }
+
     return render(request, 'chat_messaging.html', context)
 
 
@@ -678,18 +725,25 @@ def new_message(request):
     username1 = request.POST['username1']
     username2 = request.POST['username2']
     product = request.POST['product']
-    new_message = request.POST['new_message']
-
 
     try:
         chatroom = Room.objects.get(username1=username1, username2=username2, product=product)
     except:
         chatroom = Room.objects.get(username2=username1, username1=username2, product=product)
 
+    form = MessageForm(data=request.POST, files=request.FILES)
 
-    m = Message(value=new_message, room=chatroom,username=request.user.get_username())
-    m.save()
-    return HttpResponse('Message sent successfully')
+    #If the user has submitted data, verify all information is provided then save the profile
+    if form.is_valid():
+        np = form.save(commit=False)
+        np.username = request.user.get_username()
+        np.room = chatroom
+        np.save()
+
+        return JsonResponse({'error': False, 'message': 'Uploaded Successfully'})
+    else:
+        print(form.errors)
+        return JsonResponse({'error': True, 'errors': form.errors})
 
 def load_messages(request, username1, username2, current_user):
     """
@@ -718,13 +772,11 @@ def load_messages(request, username1, username2, current_user):
     else:
         context = {
             'messages': list(messages.values()),
-        
             'profile_picture1': chatroom.profile_picture2.url,
             'profile_picture2': chatroom.profile_picture1.url,
             'username1': username1,
             'username2': username2,
             'current_user': current_user
-        # 'product': product
     }
     return JsonResponse(context)
 

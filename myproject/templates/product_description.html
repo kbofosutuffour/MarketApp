@@ -14,7 +14,7 @@
 </head>
 <body>
 
-
+    
     <div id="image-div">
         <div id="images">
             <img src="{{ post.display_image.url }}" id="image0" style="display: inline;"/>
@@ -43,7 +43,11 @@
     <div id="right">
         <div id="profile">
             <img id="profile-picture" src="{{ profile.profile_picture.url }}" />
-            <h2 id="username">{{ profile.username }}</h2>
+            <form method="POST" action="other_profile">
+                {% csrf_token %}
+                <input id=username type="submit" name="username" class="user-input" value="{{profile.username}}"/><br>
+            </form>
+            <!-- <h2 id="username">{{ profile.username }}</h2> -->
         </div>
     
         <div id ="description">

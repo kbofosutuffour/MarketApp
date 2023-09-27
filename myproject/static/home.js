@@ -42,7 +42,7 @@ function cancel_on_or_off(mouse_on_button) {
 function guest_post_error() {
     var message = document.createElement('h5');
     message.classList.add("message");
-    message.innerHTML = "Please login or create an account to make a new post";
+    message.innerHTML = "Please login or create an account to make a new post.";
     document.body.appendChild(message);
     console.log(message);
 

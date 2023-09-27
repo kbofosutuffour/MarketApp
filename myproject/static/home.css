@@ -59,7 +59,9 @@ body {
     animation: mymove 10s;
     position: fixed;
     top: 100px;
-    left: 100px;
+    left: 20px;
+    width: 10%;
+    padding: 10px;
     animation-fill-mode: forwards;
 }
 
@@ -107,8 +109,8 @@ body {
     font-weight: bold;
     font-size: x-large;
     background-color: white;
-    width: 100%;
-    overflow: hidden;
+    width: fit-content;
+    border: 1px solid red
 }
 
 .product:hover {
@@ -146,6 +148,7 @@ body {
     margin-left: 40px;
     width: 70%;
     padding-top: 20px;
+    overflow: hidden
 
 }
 
@@ -250,5 +253,8 @@ body {
     }
     .post-text {
         width: 55%;
+    }
+    .message {
+        width: 40%
     }
 }

@@ -26,7 +26,7 @@
  
     </div>
 
-    <div id="profile1">
+    <div id="profile-section">
         <div id="profile-image-div">
             {% if not hasProfile %}
             <img id="profile-image" src="{% static 'media/empty_profile.jpg' %}"/>
@@ -46,17 +46,17 @@
             {% csrf_token %}
             {{ form.as_p }}
 
-            <button type="submit">Upload</button>
+            <button class="submit-btn" type="submit">Upload</button>
         </form>
     </div>
 
     
-    <footer>
-        <ul>
-            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
-        </ul>
-   </footer>
+    <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+        <div id="footer">
+                <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+                <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+                <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+        </div>
+    </div>
 </body>
 </html>
