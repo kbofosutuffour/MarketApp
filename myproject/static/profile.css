@@ -155,8 +155,8 @@ body {
     gap: 15%;
     margin: auto;
     padding-top: 20px;
-    background-color: white;
     width: 60%;
+    background-color: rgb(17, 87, 64);
     border-top: 3px solid rgb(185, 151, 91)
 }
 
@@ -199,6 +199,7 @@ body {
     #footer {
         width: 100%;
         border-top: 7px solid rgb(185, 151, 91);
+        background-color: rgb(17, 87, 64);
         border-radius: 0%;
         gap: 18%
     }

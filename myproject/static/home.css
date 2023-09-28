@@ -184,14 +184,15 @@ body {
     gap: 15%;
     margin: auto;
     padding-top: 20px;
-    background-color: white;
+    background-color: rgb(17, 87, 64);
     width: 60%;
     border-top: 3px solid rgb(185, 151, 91)
+    
 }
 
 
 .footer_img {
-    width: 50px;
+    width: 40px;
     display: inline-block;
     border-radius: 50%;
 }
@@ -220,15 +221,11 @@ body {
 #home, #profile {
     width: 50px;
     transition: 0.5s filter;
-    border-radius: 50%;
-    border: 3px solid black;
 }
 
 #chats {
     width: 50px;
     transition: 0.5s filter;
-    border-radius: 50%;
-    border: 1.75px solid black;
 }
 
 
