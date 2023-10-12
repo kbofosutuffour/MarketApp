@@ -24,9 +24,14 @@
         <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%; color: white">My Profile</h2></div>
         {% endif %}
  
+        {% if user.is_authenticated %}
+        <a href="logout" ><button id="login">Logout</button></a>
+        {% else %}
+        <a href="login" ><button id="login">Login</button></a>
+        {% endif %}   
     </div>
 
-    <div id="profile1">
+    <div id="profile-window">
         <div id="profile-image-div">
             {% if hasProfile or other_profile %}
             <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
@@ -41,7 +46,9 @@
             <h1 id="profile-name">Guest</h1>
             {% endif %}
 
+            {% if hasProfile %}
             <a href="edit_profile"><button><h3 id="edit-profile">Edit Profile</h3></button></a>
+            {% endif %}
         </div>
     </div>
     <div id="selector" style="display: flex;">
@@ -77,7 +84,7 @@
 
                     <div class="edit-post">
         
-                        <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
+                        <div class="buttons" onclick=edit_post(event) ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
                         <div class="post-drop-down" style="visibility: hidden;">
             
                             {% if user.is_authenticated and post.username == user.get_username %}

@@ -39,12 +39,6 @@ button:hover {
         right: 10px;} 
 }
 
-#login {
-    position: relative;
-    top: 10px;
-    right: 10px
-}
-
 
 body {
     overflow-y: scroll;
@@ -78,6 +72,22 @@ body {
 }
 
 
+#categories {
+    display: grid;
+    margin: auto;
+    grid-template-columns: auto auto auto;
+    gap: 10px 30px;
+    width: 40%;
+    grid-auto-rows: 50px;
+}
+
+.category-item {
+    display: none;
+    background-color: white;
+    text-align: center;
+}
+
+
 #cancel, #text {
     visibility: hidden;
     display: inline;
@@ -85,10 +95,23 @@ body {
     left: 20px
 }
 
+#cancel {
+    color: white;
+}
+
 #text {
     visibility: hidden;
 }
 
+.empty-search {
+    margin: auto;
+    background-color: white;
+    border-radius: 10%;
+    text-align: center;
+    padding: 10px;
+    border: 5px solid rgb(185, 151, 91);
+    margin-bottom: 20px;
+}
 
 .message:after {
     visibility: hidden;

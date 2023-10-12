@@ -42,16 +42,13 @@ function pressed_drafts(pressed) {
     }
 }
 
-//Unfinished, similar to edit_post in home.js
-function edit_post() {
-    let editButtons = document.getElementsByClassName('edit-post');
-    
-    for (let i = 0; i < editButtons.length; i++) {
-        if (editButtons[i].children[1].style.visibility == 'visible') {
-            editButtons[i].children[1].style.visibility = 'hidden';
-        } else {
-            editButtons[i].children[1].style.visibility = 'visible';
-        }
-        
+//Drop-down edit options for each post
+function edit_post(event) {
+    let editButton = event.target.parentElement.parentElement.parentElement;
+    console.log(editButton.children)
+    if (editButton.children[1].style.visibility == 'visible') {
+        editButton.children[1].style.visibility = 'hidden';
+    } else {
+        editButton.children[1].style.visibility = 'visible';
     }
 }

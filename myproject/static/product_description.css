@@ -59,21 +59,26 @@
     display: inline;
 }
 #profile-picture {
+    display: inline;
     width: 70px;
 }
 
-#username {
+#username-form {
     display: inline;
     position: relative;
-    bottom: 30px
+}
 
+#username-button {
+    height: 30px;
+    font-size: large;
+    position: relative;
+    background-color: transparent;
+    cursor: pointer;
 }
 
 #description {
     display: block;
     border-top: 1px solid gray;
-
-
 }
 
 #product {
@@ -114,10 +119,7 @@
     transition: 0.5s filter
 }
 
-#new-post:hover {
-    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
-      
-}
+
 
 
 
@@ -130,11 +132,5 @@
 #home, #profile, #chats {
     width: 50px;
     transition: 0.5s filter
-}
-
-
-#home:hover, #profile:hover, #chats:hover {
-    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
-      
 }
 

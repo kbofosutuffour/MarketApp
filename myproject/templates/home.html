@@ -26,12 +26,7 @@
                 <!-- <a><img id="search" onclick='moveSearchBar()'  src="{% static 'media/search.png' %}" style="width: 30px;"/></a> -->
                 <p onclick="cancel()" onmouseover="cancel_on_or_off(true)" onmouseleave="cancel_on_or_off(false)" id="cancel">cancel</p>
             </div>
-            
-            {% if user.is_authenticated %}
-            <a href="logout" ><button id="login">Logout</button></a>
-            {% else %}
-            <a href="login" ><button id="login">Login</button></a>
-            {% endif %}   
+        
         </div>
  
     </div>
@@ -47,6 +42,20 @@
     {% endif %}
 
     <div id="search-screen"></div> <!-- DO NOT DELETE -->
+    <div id="categories">
+        <div class="category-item" >Furniture</div>
+        <div class="category-item" >Clothing</div>
+        <div class="category-item" >Free Stuff</div>
+        <div class="category-item" >Vehicles</div>
+        <div class="category-item" >W&M Merch</div>
+        <div class="category-item" >Hobbies</div>
+        <div class="category-item" >Office Supplies</div>
+        <div class="category-item" >Dorm Goods</div>
+        <div class="category-item" >Food</div>
+        <div class="category-item" >Entertainment</div>
+        <div class="category-item" >Books/Textbooks</div>
+        <div class="category-item" >Misc.</div>
+    </div>
     
     <div id="post-screen">
 
@@ -75,7 +84,7 @@
 
                 <script type="text/javascript"></script> <!-- DO NOT DELETE -->
 
-                <div class="buttons" onclick=edit_post() ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
+                <div class="buttons" onclick=edit_post(event) ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
                 <div class="post-drop-down" style="visibility: hidden;">
     
                     {% if user.is_authenticated and post.username == user.get_username %}
@@ -117,8 +126,8 @@
         </div>
         {% endif %}
         {% endfor %}
-    </div>
 
+    </div>
 
     {% if user.is_authenticated %}
     <a href="new_post"><img id="new-post" src="{% static 'media/plus_sign.png' %}"/></a>
@@ -150,12 +159,83 @@
 
     $('#search-footer').on('click', function(e) {
         e.preventDefault();
+        $('#search-screen').empty();
         $('#post-screen').css('display', 'none');
         $('#search-screen').css('display', 'block');
         $('#search').css('display', 'block');
+        $('#categories').css('display', 'grid');
+
+        var category_items = document.getElementsByClassName('category-item');
+        for (let i = 0; i < category_items.length; i++) {
+            category_items[i].style.display = 'inline';
+        }
         document.getElementById('new-post').style.visibility = 'hidden';
 
     });
+
+    $('.category-item').on('click', function(e) {
+        e.preventDefault();
+        $('#search-screen').empty();
+        var category = e.target.innerHTML;
+
+        var category_items = document.getElementsByClassName('category-item');
+        for (let i = 0; i < category_items.length; i++) {
+            category_items[i].style.display = 'none';
+        }
+
+        $.ajax({
+                type: 'GET',
+                url: "/search",
+                success: function(response) {
+                    var temp = "";
+
+                    for (var key in response.posts) {
+                        console.log(response.posts[key].category);
+
+                        if (response.posts[key].category == category.toUpperCase()) {
+                            console.log(response.posts[key].display_image);
+                            temp = temp + `
+
+                            <div class="post" >
+
+                                <div class="post-image-div" display="inline-block" >
+                                    <img class="post-image" src="media/${response.posts[key].display_image}"/>
+                                </div>
+
+                                <div class ="post-text" display="inline-block" >
+
+                                    <form method="GET" action="productDescription">
+                                        <input class="product" name="product" type="submit" value="${response.posts[key].product}" style="border: none; display: inline;" readonly>
+                                        <input class="username1" name="username" type="hidden" value="${response.posts[key].username}" style="border: none; display: inline;">
+
+                                    </form>
+                                    <h4 class="username">${response.posts[key].username}</h4>
+                                    <h3 class="price">$${response.posts[key].price}</h3>
+
+                                </div>
+                            </div>
+                            `
+                        }
+                    }
+
+                    if (!temp.length) {
+                        temp += `<div class="empty-search">There are no posts in the ${category} category.  Please try another search.</div>`
+                        for (let i = 0; i < category_items.length; i++) {
+                            category_items[i].style.display = 'inline';
+                        }
+                    }
+
+                    $('#search-screen').append(temp);
+                },
+                error: function(response) {
+
+                }
+
+            });
+
+    })
+
+
 
     //Finds related post based on the users search
     $('#text').on('change', function(e) {
@@ -173,7 +253,6 @@
                     });
 
                     var add_item = false;
-                    console.log(input);
 
                     for (var key in response.posts) {
                         prod = response.posts[key].product.toLowerCase().split(" ").filter((value) => {
@@ -237,6 +316,14 @@
         $('#search-screen').css('display', 'none');
         $('#search').css('display', 'none');
         $('#post-screen').css('display', 'block');
+        
+        var category_items = document.getElementsByClassName('category-item');
+        for (let i = 0; i < category_items.length; i++) {
+            category_items[i].style.display = 'none';
+        }
+
+        $('#categories').css('display', 'none');
+
 
     })
     

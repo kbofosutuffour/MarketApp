@@ -27,10 +27,25 @@ class Post(models.Model):
         price (decimalfield): The selling price of the product
         draft (booleanfield): Whether or not a post is a draft
     """
+    
     class Status(models.TextChoices):
         SELLING = "SELLING", _("SELLING")
         PENDING = "PENDING", _("PENDING")
         SOLD = "SOLD", _("SOLD")
+
+    class Category(models.TextChoices):
+        CLOTHING = "CLOTHING", _("CLOTHING")
+        FURNITURE = "FURNITURE", _("FURNITURE")
+        FREE_STUFF = "FREE STUFF", _("FREE STUFF")
+        VEHICLES = "VEHICLES", _("VEHICLES")
+        TECHNOLOGY = "TECHNOLOGY", _("TECHNOLOGY")
+        HOBBIES = "HOBBIES", _("HOBBIES")
+        OFFICE_SUPPLIES = "OFFICE SUPPLIES", _("OFFICE SUPPLIES")
+        DORM_GOODS = "DORM_GOODS", _("DORM_GOODS")
+        FOOD = "FOOD", _("FOOD")
+        ENTERTAINMENT = "ENTERTAINMENT", _("ENTERTAINMENT")
+        BOOKS = "BOOKS", _("BOOKS")
+        MISC = "MISC.", _("MISC.")
 
         
     product = models.CharField(max_length=100)
@@ -40,7 +55,11 @@ class Post(models.Model):
     description = models.TextField(max_length=1000, blank=True)
     price = models.DecimalField("Price:", decimal_places=2, max_digits=9)
     draft = models.BooleanField(blank=False, default=False)
-    category = models.ManyToManyField(Category)
+    category = models.CharField(
+        choices = Category.choices,
+        default= Category.MISC,
+        max_length=15
+    )
     status = models.CharField(
         choices = Status.choices,
         default = Status.SELLING,

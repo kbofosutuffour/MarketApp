@@ -43,11 +43,10 @@
     <div id="right">
         <div id="profile">
             <img id="profile-picture" src="{{ profile.profile_picture.url }}" />
-            <form method="POST" action="other_profile">
+            <form id="username-form" method="POST" action="other_profile">
                 {% csrf_token %}
-                <input id=username type="submit" name="username" class="user-input" value="{{profile.username}}"/><br>
+                <input id="username-button" type="submit" name="username" class="user-input" value="{{profile.username}}"/><br>
             </form>
-            <!-- <h2 id="username">{{ profile.username }}</h2> -->
         </div>
     
         <div id ="description">

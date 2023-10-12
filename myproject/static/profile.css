@@ -9,8 +9,9 @@
 }
 
 #login {
-    position: absolute;
-    right: 0
+    position: relative;
+    right: 10px;
+    bottom: 10px;
 }
 
 button:hover, input:hover {
@@ -75,6 +76,7 @@ body {
     width: 150px;
     border-radius: 25%;
     margin-left: 10%;
+    margin-top: 10%;
     display: auto;
     
 }
@@ -98,7 +100,7 @@ body {
 
 }
 
-#profile1 {
+#profile-window {
     margin: auto;
     background-color: white;
     border-left: 1px solid rgb(191, 188, 188);
@@ -151,6 +153,7 @@ body {
     height: 120px;
 
 }
+
 
 .post-image-div{
     width: 100px;
@@ -218,7 +221,7 @@ body {
         height: 200px;
     }
 
-    #selector, #sell-history, #saved-posts, #drafts, #profile1{
+    #selector, #sell-history, #saved-posts, #drafts, #profile-window{
         width: 100%;
     }
     #footer {
