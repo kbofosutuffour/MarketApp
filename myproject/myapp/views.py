@@ -689,11 +689,8 @@ def chat_messaging(request):
     except:
         otherUser = request.GET['username2']
 
-    posts = Post.objects.filter(product=product)
-
-    for p in posts:
-        if p.username == request.user.get_username() or p.username == otherUser:
-            post = p
+    post = Post.objects.get(product=product)
+    print(product)
 
     try:
         chatroom = Room.objects.get(username1=otherUser, username2=request.user.get_username(), product=post.product)
@@ -745,17 +742,17 @@ def new_message(request):
         print(form.errors)
         return JsonResponse({'error': True, 'errors': form.errors})
 
-def load_messages(request, username1, username2, current_user):
+def load_messages(request, username1, username2, current_user, product):
     """
     function used to asynchronously load messages in any given chat room
     """
 
     try:
         flip = False
-        chatroom = Room.objects.get(username1=username1, username2=username2)
+        chatroom = Room.objects.get(username1=username1, username2=username2, product=product)
     except:
         flip = True
-        chatroom = Room.objects.get(username1=username2, username2=username1)
+        chatroom = Room.objects.get(username1=username2, username2=username1, product=product)
 
     
     messages = Message.objects.filter(room=chatroom)
@@ -801,4 +798,37 @@ def save_post(request):
 
     messages.success(request, post_string)
     return redirect('/')
+    
+def user_settings(request):
+    """
+    view used for the settings screen (settings.html)
+    """
+
+    profile = Profile.objects.get(username=request.user.get_username())
+    context = {
+        'profile': profile
+    }
+
+    return render(request, 'settings.html', context)
+
+
+def change_password(request):
+    """
+    view used to change a users password (settings.html)
+    """
+    user = User.objects.get(username = request.user.get_username())
+
+    password = request.POST['password']
+    confirm_password = request.POST['password']
+    if password == confirm_password:
+        try:
+            user.set_password(password)
+            user.save()
+            messages.success(request, "Your password has been successfully changed")
+        except:
+            messages.error(request, "There was an error while changing your password.  Please try again")
+    else:
+        messages.error(request, "Passwords do not match.  Please try again")
+    
+    redirect('settings.html')
     

@@ -38,7 +38,7 @@
             setInterval(function() {
                 $.ajax({
                     type: 'GET',
-                    url: "load_messages/{{username1}}/{{username2}}/{{current_user}}",
+                    url: "load_messages/{{username1}}/{{username2}}/{{current_user}}/{{product}}",
                     success: function(response) {
                         $("#chat-window").empty();
                         for (var key in response.messages) {

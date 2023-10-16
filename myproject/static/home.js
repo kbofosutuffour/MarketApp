@@ -15,6 +15,8 @@ function moveSearchBar() {
 
     document.getElementById('cancel').style.visibility = 'visible';
     document.getElementById('text').style.visibility = 'visible';
+    document.getElementById('search-text').style.visibility = 'visible';
+
 
     search_text.style.animation = 'moveleft 0.75s';
     search_text.style.animationFillMode = 'forwards';
@@ -25,7 +27,9 @@ function cancel() {
     document.getElementById('cancel').style.visibility = 'hidden';
     document.getElementById('text').style.visibility = 'hidden';
     document.getElementById('search-text').style.animation = '';
+    document.getElementById('search-text').style.visibility = 'hidden';
     document.getElementById('search-text').style.animationFillMode = 'backwards';
+
 
 }
 
