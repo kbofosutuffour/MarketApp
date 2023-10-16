@@ -98,10 +98,10 @@ class Room(models.Model):
     """
     Room table is used to hold data on a conversation between two users
     """
-    username1 = models.CharField(max_length=500, default=None)
-    profile_picture1 = models.ImageField("images/", default=None)
-    username2 = models.CharField(max_length=500, default=None)
-    profile_picture2 = models.ImageField("images/", default=None)
+    seller = models.CharField(max_length=500, default=None)
+    seller_profile_picture = models.ImageField(verbose_name="seller_picture",upload_to="images/", default=None)
+    buyer = models.CharField(max_length=500, default=None)
+    buyer_profile_picture = models.ImageField(verbose_name="buyer_picture",upload_to="images/", default=None)
     product = models.CharField(max_length=100)
     image = models.ImageField("images/", default=None)
 

@@ -473,7 +473,6 @@ def edit_profile(request):
         profile = Profile(username=request.user.get_username())
         hasProfile = False
 
-
     form = ProfileForm(request.POST, request.FILES)
 
     #If the user has submitted their edits for their profile
@@ -645,33 +644,33 @@ def chat_room(request):
     #If information has been sent form a productDescription page...
     if len(request.GET.keys()) != 0:
 
-        username1 = request.GET['username1']
         product = request.GET['product']
 
-        profile = Profile.objects.get(username=username1)
-        user_profile = Profile.objects.get(username=request.user.get_username())
-        post = Post.objects.get(username=username1, product=product)
+        seller = Profile.objects.get(username=request.GET['seller'])
+        buyer = Profile.objects.get(username=request.user.get_username())
+        post = Post.objects.get(username=seller.username, product=product)
 
         try:
-            chatroom = Room.objects.get(product=product, username1=username1, username2=request.user.get_username())
+            chatroom = Room.objects.get(product=product, buyer=request.user.get_username(), seller=seller.username)
         except:
             chatroom = Room(
-                username1 = username1,
-                profile_picture1 = profile.profile_picture,
-                username2 = request.user.get_username(),
-                profile_picture2 = user_profile.profile_picture,
+                buyer=request.user.get_username(),
+                buyer_profile_picture = buyer.profile_picture,
+                seller = seller.username,
+                seller_profile_picture = seller.profile_picture,
                 product = post.product,
                 image = post.display_image
             )
             chatroom.save()
 
 
-    chatrooms = Room.objects.filter(username1 = request.user.get_username())
-    chatrooms2 = Room.objects.filter(username2 = request.user.get_username())
-    number_of_chats = len(chatrooms) + len(chatrooms2)
+    buyer_chatrooms = Room.objects.filter(buyer = request.user.get_username())
+    seller_chatrooms = Room.objects.filter(seller = request.user.get_username())
 
-    context = {'chatrooms': chatrooms, 
-                'chatrooms2': chatrooms2, 
+    number_of_chats = len(buyer_chatrooms) + len(seller_chatrooms)
+
+    context = {'buyer_chatrooms': buyer_chatrooms, 
+                'seller_chatrooms': seller_chatrooms, 
                 'current_user': request.user.get_username(),
                 'number_of_chats': number_of_chats}
     
@@ -682,32 +681,32 @@ def chat_messaging(request):
     """
     View used to render the chat messaging pate (chat_messaging.html)
     """
+    print(request)
     product = request.GET['product']
-
-    try:
-        otherUser = request.GET['username1']
-    except:
-        otherUser = request.GET['username2']
+    buyer = request.GET['buyer']
+    seller = request.GET['seller']
 
     post = Post.objects.get(product=product)
-    print(product)
+    print(buyer, seller, 'buyer-seller')
 
     try:
-        chatroom = Room.objects.get(username1=otherUser, username2=request.user.get_username(), product=post.product)
+        chatroom = Room.objects.get(buyer=buyer, seller=seller, product=post.product)
+        print(chatroom, buyer, seller, 'testing')
     except:
-        chatroom = Room.objects.get(username2=otherUser, username1=request.user.get_username(), product=post.product)
+        messages.error(request, "There was an error with loading the chat room.  Please try again")
+        redirect('/')
 
-    messages = Message.objects.filter(room=chatroom)    
+    user_messages = Message.objects.filter(room=chatroom)    
 
     #send a new form to the chat_messaging screen for the Message model
     form = MessageForm()    
     
     context = {
         'chatrooms': chatroom,
-        'messages': messages,
+        'messages': user_messages,
         'current_user': request.user.get_username(),
-        'username1': otherUser,
-        'username2': request.user.get_username(),
+        'buyer': buyer,
+        'seller': seller,
         'product': product,
         'form': form
     }
@@ -719,15 +718,8 @@ def new_message(request):
     """
     View/function used to store a new message into our database, specifically the Message model
     """
-    username1 = request.POST['username1']
-    username2 = request.POST['username2']
-    product = request.POST['product']
 
-    try:
-        chatroom = Room.objects.get(username1=username1, username2=username2, product=product)
-    except:
-        chatroom = Room.objects.get(username2=username1, username1=username2, product=product)
-
+    chatroom = Room.objects.get(seller=request.POST['seller'], buyer=request.POST['buyer'], product=request.POST['product'])
     form = MessageForm(data=request.POST, files=request.FILES)
 
     #If the user has submitted data, verify all information is provided then save the profile
@@ -742,39 +734,23 @@ def new_message(request):
         print(form.errors)
         return JsonResponse({'error': True, 'errors': form.errors})
 
-def load_messages(request, username1, username2, current_user, product):
+def load_messages(request, seller, buyer, current_user, product):
     """
     function used to asynchronously load messages in any given chat room
     """
 
-    try:
-        flip = False
-        chatroom = Room.objects.get(username1=username1, username2=username2, product=product)
-    except:
-        flip = True
-        chatroom = Room.objects.get(username1=username2, username2=username1, product=product)
-
-    
+    chatroom = Room.objects.get(buyer=buyer, seller=seller, product=product)
     messages = Message.objects.filter(room=chatroom)
 
-    if not flip:
-        context = {
-            'messages': list(messages.values()),
-            'profile_picture1': chatroom.profile_picture1.url,
-            'profile_picture2': chatroom.profile_picture2.url,
-            'username1': username1,
-            'username2': username2,
-            'current_user': current_user
-        }
-    else:
-        context = {
-            'messages': list(messages.values()),
-            'profile_picture1': chatroom.profile_picture2.url,
-            'profile_picture2': chatroom.profile_picture1.url,
-            'username1': username1,
-            'username2': username2,
-            'current_user': current_user
+    context = {
+        'messages': list(messages.values()),
+        'seller_profile_picture': chatroom.seller_profile_picture.url,
+        'buyer_profile_picture': chatroom.buyer_profile_picture.url,
+        'seller': seller,
+        'buyer': buyer,
+        'current_user': current_user
     }
+
     return JsonResponse(context)
 
 

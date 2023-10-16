@@ -38,20 +38,20 @@
             setInterval(function() {
                 $.ajax({
                     type: 'GET',
-                    url: "load_messages/{{username1}}/{{username2}}/{{current_user}}/{{product}}",
+                    url: "load_messages/{{seller}}/{{buyer}}/{{current_user}}/{{product}}",
                     success: function(response) {
                         $("#chat-window").empty();
                         for (var key in response.messages) {
 
                             var temp = "<div class=\"chat\">";
                             var image = response.messages[key].image ? `<div><img class="chat-image" src="media/${response.messages[key].image}"/></div>` : ""
-                                if (response.username1 == response.messages[key].username) {
+                                if (response.seller == response.messages[key].username) {
                                     temp += `
                                     <div class="chat-image-div" display="inline-block" >
-                                        <img class="chat-image" src="${response.profile_picture1}"/></div>`;
-                                } else if (response.username2 == response.messages[key].username) {
+                                        <img class="chat-image" src="${response.seller_profile_picture}"/></div>`;
+                                } else if (response.buyer == response.messages[key].username) {
                                     temp += `<div class="chat-image-div" display="inline-block" >
-                                        <img class="chat-image" src="${response.profile_picture2}"/></div>`;
+                                        <img class="chat-image" src="${response.buyer_profile_picture}"/></div>`;
                                 }
                             temp += `<div class ="chat-text" display="inline-block">
                                 <div><p class="chat-username">${response.messages[key].username}</p></div>
@@ -85,8 +85,8 @@
                     <input id="message-image" type="file" name="image" accept="image/*">
                 </div>
                 {{ form.non_field_errors }}
-                <input type="hidden" id="username1" name="username1" value="{{username1}}">
-                <input type="hidden" id="username2" name="username2" value="{{username2}}">
+                <input type="hidden" id="username1" name="buyer" value="{{buyer}}">
+                <input type="hidden" id="username2" name="seller" value="{{seller}}">
                 <input type="hidden" id="product" name="product" value="{{product}}">
                 <input type="hidden" id="current_user" name="current_user" value="{{current_user}}">
                 <button id="send" class="submit-btn" type="submit">Send</button>
