@@ -8,15 +8,16 @@
     z-index: 1
 }
 
-#search-login {
+#search-container {
     display: flex;
     flex-direction: row;
     position: absolute;
-    right: 0;
+    right: 100px;
     top: 3%;
+    border-radius: 30px;
+    background-color: white;
     height: fit-content;
-    /* border: 1px solid red; */
-    width: 500px;
+    width: fit-content;
 }
 
 button:hover {
@@ -25,24 +26,26 @@ button:hover {
 
 #search-text {
     position: relative;
-    left: 150px;
+    visibility: hidden;
     height: fit-content;
-    /* animation: moveleft 1s */
     animation-fill-mode: forwards
 }
 
+#search-icon {
+    width: 30px;
+}
+#text {
+    width: 60%;
+    visibility: hidden;
+    border: none;
+    background: none
+}
 
 
 @keyframes moveleft {
     0% {right: 0px;}
     100% {left: 0px;
         right: 10px;} 
-}
-
-#login {
-    position: relative;
-    top: 10px;
-    right: 10px
 }
 
 
@@ -59,7 +62,9 @@ body {
     animation: mymove 10s;
     position: fixed;
     top: 100px;
-    left: 100px;
+    left: 20px;
+    width: 10%;
+    padding: 10px;
     animation-fill-mode: forwards;
 }
 
@@ -76,6 +81,22 @@ body {
 }
 
 
+#categories {
+    display: grid;
+    margin: auto;
+    grid-template-columns: auto auto auto;
+    gap: 10px 30px;
+    width: 40%;
+    grid-auto-rows: 50px;
+}
+
+.category-item {
+    display: none;
+    background-color: white;
+    text-align: center;
+}
+
+
 #cancel, #text {
     visibility: hidden;
     display: inline;
@@ -83,10 +104,20 @@ body {
     left: 20px
 }
 
-#text {
-    visibility: hidden;
+#cancel {
+    color: white;
 }
 
+
+.empty-search {
+    margin: auto;
+    background-color: white;
+    border-radius: 10%;
+    text-align: center;
+    padding: 10px;
+    border: 5px solid rgb(185, 151, 91);
+    margin-bottom: 20px;
+}
 
 .message:after {
     visibility: hidden;
@@ -107,8 +138,8 @@ body {
     font-weight: bold;
     font-size: x-large;
     background-color: white;
-    width: 100%;
-    overflow: hidden;
+    width: fit-content;
+    border: 1px solid red
 }
 
 .product:hover {
@@ -146,6 +177,7 @@ body {
     margin-left: 40px;
     width: 70%;
     padding-top: 20px;
+    overflow: hidden
 
 }
 
@@ -204,11 +236,10 @@ body {
 #new-post {
     position: fixed;
     margin: auto;
-    bottom: 5%;
+    bottom: 12.5%;
     border-radius: 50%;
-    width: 75px;
-    left: 50%; 
-    transform: translateX(-50%);
+    width: 70px;
+    left: 72.5%; 
     z-index: 3;
     transition: 0.5s filter;
 }
@@ -247,5 +278,8 @@ body {
     }
     .post-text {
         width: 55%;
+    }
+    .message {
+        width: 40%
     }
 }

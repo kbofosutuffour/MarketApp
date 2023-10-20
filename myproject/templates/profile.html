@@ -18,100 +18,157 @@
 <body>
 
     <div id = 'top-bar' style="width: 100%; margin-bottom: 5px;">
-
+        {% if other_profile %}
+        <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%; color: white">User Profile</h2></div>
+        {% else %}
         <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%; color: white">My Profile</h2></div>
-
+        {% endif %}
  
+        {% if user.is_authenticated %}
+        <a href="logout" ><button id="login">Logout</button></a>
+        {% else %}
+        <a href="login" ><button id="login">Login</button></a>
+        {% endif %}   
     </div>
 
-    <div id="profile1">
+    <div id="profile-window">
         <div id="profile-image-div">
-            {% if hasProfile %}
+            {% if hasProfile or other_profile %}
             <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
             {% else %}
             <img id="profile-image" src="{% static 'media/empty_profile.jpg' %}"/>
             {% endif %}
         </div>
         <div id="profile-text">
-            {% if hasProfile %}
+            {% if hasProfile or other_profile %}
             <h1 id="profile-name">{{username}}</h1>
             {% else %}
             <h1 id="profile-name">Guest</h1>
             {% endif %}
 
-            <a href="edit_profile"><button><h3 id="edit-profile">Edit Profile</h3></button></a>
+            {% if hasProfile %}
+            <a href="user_settings"><button id="settings">Settings</button></a>
+            {% endif %}
         </div>
     </div>
     <div id="selector" style="display: flex;">
         <div id="show-sell-history" onclick="sell_history()" onmousedown="pressed_sell_history(true)" onmouseup="pressed_sell_history(false)">Sell History</div>
-        <div id="show-saved-posts" onclick="saved_posts()" onmousedown="pressed_saved_posts(true)" onmouseup="pressed_saved_posts(false)">Saved Posts</div>
-        <div id="show-drafts" onclick="drafts()" onmousedown="pressed_drafts(true)" onmouseup="pressed_drafts(false)">Drafts</div>
-
+        {% if not other_profile %}
+            <div id="show-saved-posts" onclick="saved_posts()" onmousedown="pressed_saved_posts(true)" onmouseup="pressed_saved_posts(false)">Saved Posts</div>
+            <div id="show-drafts" onclick="drafts()" onmousedown="pressed_drafts(true)" onmouseup="pressed_drafts(false)">Drafts</div>
+        {% endif %}
     </div>
 
-    <div id="sell-history">
-    <p class="text">Sell History</p>
+    <div id="post-window">
+        <div id="sell-history">
+        <p id="text">Sell History</p>
 
-        {% for post in posts %}
-            {% if not post.draft %}
-            <div id="posts">
-                <div class="post-image-div" display="inline-block" >
-                    <img class="post-image" src="{{ post.display_image.url }}"/>
+            {% for post in posts %}
+                {% if not post.draft %}
+                <div class="posts">
+                    <div class="post-image-div" display="inline-block" >
+                        <img class="post-image" src="{{ post.display_image.url }}"/>
+                    </div>
+                    <div class ="post-text" display="inline-block" >
+                        <h3 class="product">{{post.product}}</h3>
+                        {% if post.status == "SOLD" %}
+                        <h3 class="sold">SOLD</h3>
+                        {% elif post.status == "PENDING" %}
+                        <h3 class="pending">PENDING</h3>
+                        {% elif post.status == "SELLING" %}
+                        <h3 class="selling">SELLING</h3>
+                        {% endif %}
+
+                        <h3 class="price">${{post.price}}</h3>
+                    </div>
+
+                    <div class="edit-post">
+        
+                        <div class="buttons" onclick=edit_post(event) ><a><img src="{% static 'media/edit_post.png' %}" style="width: 20px"></a></div>
+                        <div class="post-drop-down" style="visibility: hidden;">
+            
+                            {% if user.is_authenticated and post.username == user.get_username %}
+        
+                            <form method="POST" action="edit_post">
+                                {% csrf_token %}
+                                <input name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                                <input name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+                                <input name="price" type="hidden" value="{{post.price}}">
+                                <input name="description" type="hidden" value="{{post.description}}">
+                                <input name="display_image" type="hidden" value="{{post.display_image.url}}" style="border: none; display: inline;">
+                                <input type="submit" value="Edit Post" style="background-color: white; border: none;">
+                            </form>
+        
+                            {% endif %}
+        
+                            {% if user.is_authenticated%}
+        
+       
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <input name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
+                                <input name="username" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
+                                <input type="submit" value="Flag Post" style="background-color: white; border: none;">
+                            </form>
+                            {% endif %}
+                
+                        </div>
+        
+                    </div>
                 </div>
-                <div class ="post-text" display="inline-block" >
-                    <h3 class="product">{{post.product}}</h3>
-                    <h3 class="price">${{post.price}}</h3>
-                </div>
-            </div>
-            {% endif %}
-        {% endfor %}
-
-    </div>
-
-    <div id="saved-posts" style="display: none;">
-    <p class="text">Saved Posts</p>
-
-        {% for saved_post in saved_posts %}
-        <div id="saved-posts-inner">
-            <div class="post-image-div" display="inline-block" >
-                <img class="post-image" src="{{ saved_post.display_image.url }}"/>
-            </div>
-            <div class ="post-text" display="inline-block" >
-                <h3 class="product">{{saved_post.product}}</h3>
-                <h3 class="price">${{saved_post.price}}</h3>
-            </div>
-        </div>
-        {% endfor %}
-
-    </div>
-
-    <div id="drafts" style="display: none;">
-        <p class="text">Drafts</p>
-    
-            {% for draft in drafts %}
-            <div id="drafts-inner">
-                <div class="post-image-div" display="inline-block" >
-                    <img class="post-image" src="{{ draft.display_image.url }}"/>
-                </div>
-                <div class ="post-text" display="inline-block" >
-                    <form method="POST" action="edit_post">
-                        {% csrf_token %}
-                        <input class="product" name="product" type="hidden" value="{{draft.product}}" style="border: none; display: inline;">
-                        <input class="username1" name="username" type="hidden" value="{{draft.username}}" style="border: none; display: inline;">
-                        <input name="price" type="hidden" value="{{draft.price}}">
-                        <input name="description" type="hidden" value="{{draft.description}}">
-                        <input class="image" name="display_image" type="hidden" value="{{draft.display_image.url}}" style="border: none; display: inline;">
-                        <input type="submit" value="{{draft.product}}" style="background-color: white; border: none;">
-                    </form>
-                    <h3 class="product">{{draft.product}}</h3>
-                    <h3 class="price">${{draft.price}}</h3>
-                </div>
-            </div>
-
+                {% endif %}
             {% endfor %}
 
         </div>
 
+        {% if not other_profile %}
+            <div id="saved-posts" style="display: none;">
+            <p class="text">Saved Posts</p>
+
+                {% for saved_post in saved_posts %}
+                <div class="saved-posts-inner">
+                    <div class="post-image-div" display="inline-block" >
+                        <img class="post-image" src="{{ saved_post.display_image.url }}"/>
+                    </div>
+                    <div class ="post-text" display="inline-block" >
+                        <h3 class="product">{{saved_post.product}}</h3>
+                        <h3 class="price">${{saved_post.price}}</h3>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+
+            
+            <div id="drafts" style="display: none;">
+                <p class="text">Drafts</p>
+            
+                    {% for draft in drafts %}
+                    <div class="drafts-inner">
+                        <div class="post-image-div" display="inline-block" >
+                            <img class="post-image" src="{{ draft.display_image.url }}"/>
+                        </div>
+                        <div class ="post-text" display="inline-block" >
+                            <form method="POST" action="edit_post">
+                                {% csrf_token %}
+                                <input name="product" type="hidden" value="{{draft.product}}" style="border: none; display: inline;">
+                                <input name="username" type="hidden" value="{{draft.username}}" style="border: none; display: inline;">
+                                <input name="price" type="hidden" value="{{draft.price}}">
+                                <input name="description" type="hidden" value="{{draft.description}}">
+                                <input name="display_image" type="hidden" value="{{draft.display_image.url}}" style="border: none; display: inline;">
+                                <input type="submit" value="{{draft.product}}" style="background-color: white; border: none;">
+                            </form>
+                            <h3 class="product">{{draft.product}}</h3>
+                            <h3 class="price">${{draft.price}}</h3>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            {% endif %}
+            
+        </div>
         <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
             <div id="footer">
                     <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home-05.png' %}" id="home"/></a></div>

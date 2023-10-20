@@ -22,26 +22,24 @@
     </div>
     {% endif %}
 
-    {% for chatroom in chatrooms %}
-    {% if chatroom.username2 == current_user %}
+    {% for chatroom in buyer_chatrooms %}
 
     <div class="chat" >
 
         <div class="chat-image-div" display="inline-block" >
-            <img class="chat-image" src="{{ chatroom.profile_picture1.url }}"/>
+            <img class="chat-image" src="{{ chatroom.seller_profile_picture.url }}"/>
         </div>
 
         <div class ="chat-text" display="inline-block" >
 
             <form method="GET" action="chat_messaging">
                 
-                <input class="product" name="username1" type="text" value="{{chatroom.username1}}" style="border: none; display: inline;">
+                <input class="product" name="seller" type="text" value="{{chatroom.seller}}" style="border: none; display: inline;">
+                <input class="product" name="buyer" type="hidden" value="{{chatroom.buyer}}" style="border: none; display: inline;">
                 <input name="image" type="hidden" value="{{chatroom.image}}">
-                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
-                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
+                <input name="buyer_profile_picture" type="hidden" value="{{chatroom.buyer_profile_picture}}">
+                <input name="seller_profile_picture" type="hidden" value="{{chatroom.seller_profile_picture}}">
                 <input name="product" type="hidden" value="{{chatroom.product}}">
-
-
 
                 <input type="submit" value=">" style="background-color: white;display: inline;">
             </form>
@@ -53,59 +51,25 @@
         </div>
         
     </div>
-
-    {% else %}
-    <div class="chat" >
-
-        <div class="chat-image-div" display="inline-block" >
-            <img class="chat-image" src="{{ chatroom.profile_picture2.url }}"/>
-        </div>
-
-        <div class ="chat-text" display="inline-block" >
-
-            <form method="GET" action="chat_messaging">
-                
-                <input class="product" name="username2" type="text" value="{{chatroom.username2}}" style="border: none; display: inline;">
-                <input name="image" type="hidden" value="{{chatroom.image}}">
-                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
-                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
-                <input name="product" type="hidden" value="{{chatroom.product}}">
-
-
-
-                <input type="submit" value=">" style="background-color: white;display: inline;">
-            </form>
-
-        </div>
-
-        <div class="post-image-div" display="inline-block" >
-            <img class="post-image" src="{{ chatroom.image.url }}"/>
-        </div>
-        
-    </div>
-    {% endif %}
     {% endfor %}
 
-    {% for chatroom in chatrooms2 %}
-    {% if chatroom.username2 == current_user %}
-
+    {% for chatroom in seller_chatrooms %}
     <div class="chat" >
 
         <div class="chat-image-div" display="inline-block" >
-            <img class="chat-image" src="{{ chatroom.profile_picture1.url }}"/>
+            <img class="chat-image" src="{{ chatroom.buyer_profile_picture.url }}"/>
         </div>
 
         <div class ="chat-text" display="inline-block" >
 
             <form method="GET" action="chat_messaging">
                 
-                <input class="product" name="username1" type="text" value="{{chatroom.username1}}" style="border: none; display: inline;" readonly>
+                <input class="product" name="buyer" type="text" value="{{chatroom.buyer}}" style="border: none; display: inline;" readonly>
+                <input class="product" name="seller" type="hidden" value="{{chatroom.seller}}" style="border: none; display: inline;">
                 <input name="image" type="hidden" value="{{chatroom.image}}">
-                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
-                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
+                <input name="buyer_profile_picture" type="hidden" value="{{chatroom.buyer_profile_picture}}">
+                <input name="seller_profile_picture" type="hidden" value="{{chatroom.seller_profile_picture}}">
                 <input name="product" type="hidden" value="{{chatroom.product}}">
-
-
 
                 <input type="submit" value=">" style="background-color: white;display: inline;">
             </form>
@@ -117,37 +81,6 @@
         </div>
         
     </div>
-
-    {% else %}
-    <div class="chat" >
-
-        <div class="chat-image-div" display="inline-block" >
-            <img class="chat-image" src="{{ chatroom.profile_picture2.url }}"/>
-        </div>
-
-        <div class ="chat-text" display="inline-block" >
-
-            <form method="GET" action="chat_messaging">
-                
-                <input class="product" name="username2" type="text" value="{{chatroom.username2}}" style="border: none; display: inline;" readonly>
-                <input name="image" type="hidden" value="{{chatroom.image}}">
-                <input name="profile_picture1" type="hidden" value="{{chatroom.profile_picture1}}">
-                <input name="profile_picture2" type="hidden" value="{{chatroom.profile_picture2}}">
-                <input name="product" type="hidden" value="{{chatroom.product}}">
-
-
-
-                <input type="submit" value=">" style="background-color: white;display: inline;">
-            </form>
-
-        </div>
-
-        <div class="post-image-div" display="inline-block" >
-            <img class="post-image" src="{{ chatroom.image.url }}"/>
-        </div>
-        
-    </div>
-    {% endif %}
     {% endfor %}
 
     <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">

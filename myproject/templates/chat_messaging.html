@@ -15,7 +15,7 @@
 
         {% if user.is_authenticated %}
             <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="position: relative; top:25%; color: white">Chats</h2></div>
-      {% endif %}
+        {% endif %}
 
     </div>
     
@@ -26,7 +26,6 @@
                 element.scrollTop = element.scrollHeight;
                 var b = document.body;
                 b.style.backgroundColor = "red"
-                // setInterval(updateScroll,1000)
             }
         </script>
         
@@ -39,23 +38,32 @@
             setInterval(function() {
                 $.ajax({
                     type: 'GET',
-                    url: "load_messages/{{username1}}/{{username2}}/{{current_user}}",
+                    url: "load_messages/{{seller}}/{{buyer}}/{{current_user}}/{{product}}",
                     success: function(response) {
                         $("#chat-window").empty();
                         for (var key in response.messages) {
+
                             var temp = "<div class=\"chat\">";
-                                console.log(response.messages)
-                                if (response.username1 == response.messages[key].username) {
-                                    temp += "<div class=\"chat-image-div\" display=\"inline-block\" ><img class=\"chat-image\" src=\"" + response.profile_picture1 + "\"/></div>";
-                                } else if (response.username2 == response.messages[key].username) {
-                                    temp += "<div class=\"chat-image-div\" display=\"inline-block\" ><img class=\"chat-image\" src=\"" + response.profile_picture2 + "\"/></div>";
+                            var image = response.messages[key].image ? `<div><img class="chat-image" src="media/${response.messages[key].image}"/></div>` : ""
+                                if (response.seller == response.messages[key].username) {
+                                    temp += `
+                                    <div class="chat-image-div" display="inline-block" >
+                                        <img class="chat-image" src="${response.seller_profile_picture}"/></div>`;
+                                } else if (response.buyer == response.messages[key].username) {
+                                    temp += `<div class="chat-image-div" display="inline-block" >
+                                        <img class="chat-image" src="${response.buyer_profile_picture}"/></div>`;
                                 }
-                            temp += "<div class =\"chat-text\" display=\"inline-block\" ><div><p class='chat-username'>" + response.messages[key].username + "</p></div><div><p class='chat-value'>" + response.messages[key].value + "</p></div><div><p class='chat-date'>" + response.messages[key].date + "</p></div><div class=\"chat-bubble\"></div></div></div>";
+                            temp += `<div class ="chat-text" display="inline-block">
+                                <div><p class="chat-username">${response.messages[key].username}</p></div>
+                                <div><p class="chat-value">${response.messages[key].value}</p></div>
+                                ${image}
+                                <div><p class="chat-date">"${response.messages[key].date}</p></div>
+                                <div class="chat-bubble"></div></div></div>`;
                             $("#chat-window").append(temp);
                         }
-                        
                     },
                     error: function(response) {
+                        console.log(response.errors)
     
                     }
 
@@ -64,71 +72,82 @@
             });
 
             })
-
-        // $(document).ready(function() {
-        //     var h = $("#chat-window")[0].scrollHeight;
-        //     console.log('testing again');
-        //     console.log(h);
-        //     // document.getElementById('#chat-window').scrollHeight = 400
-        //     t = $("#chat-window")[0].scrollTop;
-        //     console.log(t);
-        //     $("#chat-window").get(0).scrollTo(h);
-
-        
-        //     }
-        // )
-
-        // });
+            
     </script>
 
     <div id="keyboard">
-        <form id="message-form" style="display: inline;">
+        <form id="message-form" method="POST" action="" style="display: inline;" enctype="multipart/form-data" novalidate="">
             {% csrf_token %}
-            <input id="keyboard-text" type="text" name="new_message">
-            <input type="hidden" id="username1" name="username1" value="{{username1}}">
-            <input type="hidden" id="username2" name="username2" value="{{username2}}">
-            <input type="hidden" id="product" name="product" value="{{product}}">
-            <input type="hidden" id="current_user" name="current_user" value="{{current_user}}">
-            <!-- <input type="hidden" id="room_id" name="room_id" value="{{chatroom.details.id}}"> -->
+            <div id="keyboard-input">
+                {% csrf_token %}
+                {{ form.value }}
+                <div class="file-input">
+                    <input id="message-image" type="file" name="image" accept="image/*">
+                </div>
+                {{ form.non_field_errors }}
+                <input type="hidden" id="username1" name="buyer" value="{{buyer}}">
+                <input type="hidden" id="username2" name="seller" value="{{seller}}">
+                <input type="hidden" id="product" name="product" value="{{product}}">
+                <input type="hidden" id="current_user" name="current_user" value="{{current_user}}">
+                <button id="send" class="submit-btn" type="submit">Send</button>
+            </div>
 
-            <input id="send" type="submit">
         </form>
 
     </div>
 
     <!-- Script used to save a message into a Message model (save the message into the database) -->
+    <!-- based on https://learnbatta.com/blog/django-image-and-file-upload-using-ajax-21/ -->
     <script type="text/javascript">
-        $(document).on('submit','#message-form',function(e){
-          e.preventDefault();
-      
-          $.ajax({
-            type:'POST',
-            url:'/new_message',
-            data:{
-                new_message: $('#keyboard-text').val(),
-                current_user: $('#current_user').val(),
-                username1: $('#username1').val(),
-                username2: $('#username2').val(),
-                product: $('#product').val(),
+ 
+        $('#message-form').submit(function(e){
+            e.preventDefault();
+            var f = document.getElementById('message-form')
+            var formData = new FormData(f);
+
+            $.ajax({
+                type:'POST',
+                contentType: false,
+                processData: false,
+                url:'/new_message',
+                data: formData,
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-            },
-            success: function(data){
-               //alert(data)
-            }
-          });
+                success: function (response) {
+                    $('.error').remove();
+                    console.log(response)
+                    if(response.error){
+                        $.each(response.errors, function(name, error){
+                            error = '<small class="text-muted error">' + error + '</small>'
+                        })
+                    }
+
+                }
+            });
+
+        // here we empty the keyboard and image input for the next message
           document.getElementById('keyboard-text').value = '';
+
+          old_message_parent = document.getElementById('message-image').parentElement;
+          old_message_parent.children[0].remove();
+
+          new_message_input = document.createElement('input');
+          new_message_input.setAttribute('type', 'file');
+          new_message_input.setAttribute('name', 'image');
+          new_message_input.setAttribute('id', 'message-image');
+          new_message_input.setAttribute('accepts', 'image/*');
+          old_message_parent.appendChild(new_message_input);
 
         });
       </script>
 
+<div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+    <div id="footer">
+            <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+            <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+            <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+    </div>
+</div>
 
-    <footer>
-        <ul>
-            <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
-            <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
-            <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
-        </ul>
-   </footer>
     
 </body>
 

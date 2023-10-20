@@ -9,8 +9,13 @@
 }
 
 #login {
-    position: absolute;
-    right: 0
+    position: relative;
+    right: 10px;
+    bottom: 10px;
+}
+
+#settings {
+    height: fit-content;
 }
 
 button:hover, input:hover {
@@ -30,26 +35,52 @@ body {
     width: 60%;
     margin: auto;
     height: fit-content;
+    margin-bottom: 150px
 }
 
-#posts, #saved-posts-inner, #drafts-inner {
+.posts, .saved-posts-inner, .drafts-inner {
     background-color: white;
     border: 1px solid rgb(191, 188, 188) ;
+    padding: 10px 0px;
+    height: fit-content;
+    display: flex;
+    flex-direction: row
 
 }
 
 .product {
     font-weight: bold;
     font-size: x-large;
-    margin-top: 0;
+    padding-top: 2.5px;
     width: 80%;
     overflow: hidden;
+}
+
+.buttons {
+    position: relative;
+    left: 70%;
+    top: 10px
+}
+
+.sold {
+    color: green
+}
+.selling {
+    color: blue
+}
+.pending {
+    color: yellow
+}
+
+#text {
+    margin-left: 10px
 }
 
 #profile-image {
     width: 150px;
     border-radius: 25%;
     margin-left: 10%;
+    margin-top: 10%;
     display: auto;
     
 }
@@ -60,6 +91,7 @@ body {
     /* border: 1px solid blue ; */
     display: inline;
     float: left;
+    height: fit-content;
 
 }
 
@@ -72,7 +104,7 @@ body {
 
 }
 
-#profile1 {
+#profile-window {
     margin: auto;
     background-color: white;
     border-left: 1px solid rgb(191, 188, 188);
@@ -126,12 +158,12 @@ body {
 
 }
 
+
 .post-image-div{
     width: 100px;
     display: inline-block;
     border-radius: 50px;
     margin-left: 10px;
-
     margin-top: 10px
 
 
@@ -193,7 +225,7 @@ body {
         height: 200px;
     }
 
-    #selector, #sell-history, #saved-posts, #drafts, #profile1{
+    #selector, #sell-history, #saved-posts, #drafts, #profile-window{
         width: 100%;
     }
     #footer {
@@ -209,3 +241,4 @@ body {
 
 
 }
+
