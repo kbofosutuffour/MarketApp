@@ -85,12 +85,12 @@
     margin-top: 30px
 }
 
-#footer {
+/* #footer {
     position: relative;
     top: 100px;
     margin-bottom: 0px;
 
-}
+} */
 
 #message {
     position: relative;
@@ -120,10 +120,18 @@
 }
 
 
-
+#footer {
+    position: fixed bottom;
+    width: 100%;
+    border-top: 7px solid rgb(185, 151, 91);
+    border-radius: 0%;
+    gap: 18%
+     
+}
 
 
 .footer_img {
+    
     width: 50px;
     display: inline-block;
     margin-left: 20%;

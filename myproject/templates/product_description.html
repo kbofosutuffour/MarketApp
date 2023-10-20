@@ -54,34 +54,36 @@
             <p id="desc">{{post.description}}</p>
         </div>
 
-<<<<<<< HEAD
-        <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
-            <div id="footer">
-                <h2 id="price">${{post.price}}</h2>
+
+                <!-- <h2 id="price">${{post.price}}</h2>
                 <form method="GET" action="chat_room">
                     <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
-                    <input class="username1" name="username1" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
-=======
-        <div id="footer">
+                    <input class="username1" name="username1" type="hidden" value="{{post.username}}" style="border: none; display: inline;"> -->
+
+        
             <h2 id="price">${{post.price}}</h2>
             <form method="GET" action="chat_room">
                 <input class="product" name="product" type="hidden" value="{{post.product}}" style="border: none; display: inline;">
                 <input class="username1" name="seller" type="hidden" value="{{post.username}}" style="border: none; display: inline;">
->>>>>>> 4fefa22715ee6198b09a0fe1e41d932f2b0be187
 
                     <input id="message" type="submit" value="Message" style="background-color: white;display: inline;margin: auto; padding-top: 5px;">
-                </form>
-            </div>
-        </div>
+            </form>
     </div>
 
     <a href="new_post"><img id="new-post" src="{% static 'media/plus_sign.png' %}" style="position: sticky; right: 10px; width: 50px; margin-left: 90%;" /></a>
-    <footer>
+    <!-- <footer>
         <ul>
             <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
             <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
             <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
         </ul>
-   </footer>
+   </footer> -->
 </body>
+<footer>
+    <ul>
+        <li class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></li>
+        <li class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></li>
+        <li class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></li>
+    </ul>
+</footer>
 </html>
