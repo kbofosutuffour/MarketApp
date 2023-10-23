@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "marketappv1",
+			"path": "../marketappv1"
+		},
+		{
+			"name": "marketappv1-1",
+			"path": "../../marketappv1-1"
+		}
+	],
+	"settings": {}
+}
