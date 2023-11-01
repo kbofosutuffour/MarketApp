@@ -27,6 +27,9 @@
   <link href="css/style.css" rel="stylesheet" />
   <!-- responsive style -->
   <link href="css/responsive.css" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
@@ -71,16 +74,21 @@
               <h2>
                 Introducing
               </h2>
-              <h3>
+              <h3 id="h2h-laptop" >
                 Hand2Hand 
               </h3>
-              <div>
-                <a href="#subscribe_tag">
+              <h3 id="h2h-mobile" >
+                Hand2Hand
+              </h3>
+              <div style="display: block;">
+                <a id="subscribe_tag" href="#subscribe_tag">
                   Subscribe Now
                 </a>
               </div>
             </div>
           </div>
+
+          <!--Right side of introduction portion-->
           <div class="col-md-5">
             <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
               <ol class="carousel-indicators">
@@ -91,7 +99,7 @@
               <div class="carousel-inner">
                 <div class="carousel-item active">
                   <div class="img-box">
-                    <img src="images/slider-img.png" alt="" />
+                    <img src="images/phone_home.png" alt="" style="height: 500px;" />
                   </div>
                 </div>
                 <div class="carousel-item">
@@ -273,10 +281,14 @@
       </a>
     </div> -->
     <div class="detail-box">
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-        do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        Ut enim ad minim veniam
+      <p style="text-align: center; margin: 10px 100px">
+        Welcome to Hand2Hand, the marketplace app designed by William and Mary students with a dual purpose in mind: 
+        helping students and saving the environment. We understand the need for a safe and reliable platform where 
+        students can buy, sell, trade, and give away items they no longer need. That's why we've created Hand2Hand, 
+        a college-wide marketplace where verified students can participate in a sustainable and socially responsible way. 
+        By using your college email to authenticate your identity, we can ensure a secure environment and eliminate 
+        the risk of scams. Our goal is to foster a more tight-knit community at William and Mary and improve the 
+        quality of life for all students. Join us in our mission to reduce waste and create a more sustainable future.
       </p>
     </div>
   </section>
@@ -298,34 +310,31 @@
             <div class="box">
               <div class="head-box">
                 <div class="img-box">
-                  <img src="images/cloud-download.png" alt="" />
+                  <i id = "search_icon" class="fa fa-search"></i>
                 </div>
                 <h6>
-                  Download The App!
+                  Featured
                 </h6>
               </div>
               <div class="detail-box">
                 <p>
-                  This is a random paragraph! This is a random paragraph.
-                  This is a random paragraph. This is a random paragraph.
-                  This is a random paragraph. This is a random paragraph.
+                  Check out trending items for sell by your peers.  Search by category
                 </p>
               </div>
             </div>
             <div class="box">
               <div class="head-box">
                 <div class="img-box">
-                  <img src="images/trophy_.png" alt="" />
+                  <img src="images/chat.png" alt="" />
                 </div>
                 <h6>
-                  Easy to Customize
+                  Chats
                 </h6>
               </div>
               <div class="detail-box">
                 <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna
-                  aliqua. Ut enim ad minim veniam
+                  The chat feature allows users to communicate in real time.  
+                  Ask about items, pricing, and other things related to your products!
                 </p>
               </div>
             </div>
@@ -337,7 +346,7 @@
           </div>
           <div class="col-md-4">
             <div class="main-img-box">
-              <img src="images/download-img.png" alt="" />
+              <img src="images/phone_home.png" alt="" />
             </div>
           </div>
           <div class="col-md-4">
@@ -347,14 +356,12 @@
                   <img src="images/playstore.png" alt="" />
                 </div>
                 <h6>
-                  Connect Your Store
+                  Posts
                 </h6>
               </div>
               <div class="detail-box">
                 <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna
-                  aliqua. Ut enim ad minim veniam
+                  Create posts to advertize your products.  Browse products for students, from students, by students!
                 </p>
               </div>
             </div>
@@ -404,7 +411,7 @@
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
               </p>
               <a href="">
-                Read More
+                Read More <!--Rocket Pitch-->
               </a>
             </div>
           </div>
@@ -431,12 +438,12 @@
             Subscribe For Updates
           </h2>
         </div>
-        <form action="" class="layout_padding2-top">
-          <input type="email" placeholder="Enter your email (Subscribe)" />
+        <!-- <form action="" class="layout_padding2-top">
+          <input type="email" placeholder="Enter your school email (Subscribe)" />
           <button>
             subscribe
           </button>
-        </form>
+        </form> -->
       </div>
     </section>
   </a>
@@ -488,17 +495,24 @@
   <!-- <section class="contact_section layout_padding"> -->
         <div class="footer_section layout_padding">
          <div class="container">
-            <div class="input_btn_main">
-               <input type="text" class="mail_text1" placeholder="Enter your email" name="Enter your email">
+            <!-- <div class="input_btn_main">
+               <input type="text" class="mail_text1" placeholder="Enter your school email" name="Enter your email">
                <div class="subscribe_bt"><a href="#">Subscribe</a></div>
+            </div> -->
+
+            <!-- Google Form-->
+            <div id="google-form">
+              <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe4k-iupbevq-Lruo8iTk_pdE3HauUH9UUsfO9yt9wz7APTbA/viewform?embedded=true" width="640" height="934" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
             </div>
+
          </div>
-      </div>
+        </div>
+
   <!-- </section> -->
 
   <!-- end contact section -->
   <!-- info section -->
-  <section class="info_section layout_padding-top">
+  <!-- <section class="info_section layout_padding-top">
     <div class="info_logo-box">
       <h2>
         UXOS
@@ -583,16 +597,16 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- end info section -->
   <!-- footer section -->
-  <section class="container-fluid footer_section">
+  <!-- <section class="container-fluid footer_section">
     <p>
       &copy; 2019 All Rights Reserved. Design by
       <a href="https://html.design/">Free Html Templates</a>
     </p>
-  </section>
+  </section> -->
   <!-- footer section -->
 
   <script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
