@@ -437,21 +437,21 @@ a:focus {
   margin: 0;
   width: 30px;
   height: 30px;
-  background-color: black; 
+  background-color: #1d1e31; 
   opacity: 1;
 }
 
 .slider_section .carousel-indicators li.active {
-  background-color: #B5E2FA;
+  background-color: #B5E2Fa;
 }
 
 .feature_section {
-  background-color: #B5E2FA; /* About Us*/
+  background-color: #B5E2Fa; /* About Us*/
   font-family: 'Poppins', sans-serif;
 }
 
 .feature_section .box {
-  background-color: #f9f7f3;
+  background-color: #B5E2Fa;
   padding: 15px;
   margin: 45px 0;
 }
@@ -517,7 +517,7 @@ a:focus {
 }
 
 .download_section .box {
-  background-color: #333456;
+  background-color: #1d1e31;
   padding: 15px;
   margin: 45px 0;
   color: #f9f7f3;
@@ -578,22 +578,22 @@ a:focus {
 
 .download_section .btn-1:hover {
   background-color: transparent;
-  color: #8c60bd;
+  color: #1d1e31;
 }
 
 .download_section .btn-2 {
   display: inline-block;
   padding: 10px 40px;
-  background-color: #323559;
+  background-color: #1d1e31;
   color: #f9f7f3;
   border-radius: 0;
-  border: 1px solid #323559;
+  border: 1px solid #1d1e31;
   margin-top: 25px;
 }
 
 .download_section .btn-2:hover {
   background-color: transparent;
-  color: #323559;
+  color: #1d1e31;
 }
 
 .download_section .main-img-box {
@@ -647,15 +647,15 @@ a:focus {
 .about_section .detail-box.b-1 a {
   display: inline-block;
   padding: 10px 40px;
-  background-color: #8c60bd;
+  background-color: #1d1e31;
   color: #f9f7f3;
   border-radius: 0;
-  border: 1px solid #8c60bd;
+  border: 1px solid #1d1e31;
 }
 
 .about_section .detail-box.b-1 a:hover {
   background-color: transparent;
-  color: #8c60bd;
+  color: #2b2278;
 }
 
 .subscribe_section {
@@ -692,7 +692,7 @@ a:focus {
   display: inline-block;
   padding: 0 0;
   background-color: black;
-  color: #f9f7f3;
+  color: #ffffff;
   border-radius: 0;
   border-color: transparent;
   font-weight: bold;
