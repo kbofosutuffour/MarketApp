@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -20,11 +20,10 @@ import {
 import {
   Colors,
   DebugInstructions,
+  Header,
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-
-import axios from 'axios';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -56,54 +55,27 @@ function Section({children, title}: SectionProps): JSX.Element {
   );
 }
 
-function Post(): JSX.Element {
-  return (
-    <View style={styles.post}>
-      <View style={styles.postImageContainer}></View>
-      <View style={styles.postText}></View>
-      <View style={styles.editPost}></View>
-    </View>
-  );
-}
-
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
-    backgroundColor: 'rgb(17, 87, 64)',
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-
-  // const [posts, setPosts] = useState({});
-
-  // useEffect(() => {
-  //   axios.get().then(res => {
-  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //     const data = <res className="data"></res>();
-  //   })
-  // }
-  // );
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <StatusBar backgroundColor={backgroundStyle.backgroundColor} />
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={backgroundStyle.backgroundColor}
+      />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
+        <Header />
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Text>Home</Text>
-          <View style={styles.searchContainer}>
-            {/* search-container */}
-            <View>
-              <Text>search</Text>
-            </View>
-            <View>
-              <Text>cancel</Text>
-            </View>
-          </View>
-          <Post />
           <Section title="Step One">
             Edit <Text style={styles.highlight}>AHHHHH</Text> to change this
             screen and then come back to see your edits.
@@ -140,37 +112,6 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
-  },
-  searchContainer: {
-    // flex: 1,
-    display: 'flex',
-    flexDirection: 'row',
-  },
-  post: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  postImageContainer: {
-    width: '35%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  postText: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  product: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    backgroundColor: 'white',
-    width: 'auto',
-  },
-  username: {
-    fontWeight: '200',
-  },
-  editPost: {
-    backgroundColor: 'white',
   },
 });
 

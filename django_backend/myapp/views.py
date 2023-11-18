@@ -10,7 +10,11 @@ from django.http import JsonResponse
 from .forms import *
 from django.views.generic.edit import FormView
 from django.conf import settings
-from django.core.mail import send_mail
+from rest_framework import viewsets, permissions
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import *
 import random
 import datetime
 
@@ -27,6 +31,179 @@ def loader(request):
     """
     return render(request, 'loader.html')
 
+class Posts(viewsets.ModelViewSet):
+    """
+    View to lists all of the posts in the system
+    """
+
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    # def list(self, request):
+    #     queryset = Post.objects.all()
+    #     serializer = PostSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+
+    # def retrieve(self, request, pk=None):
+    #     queryset = Post.objects.all()
+    #     user = get_object_or_404(queryset, pk=pk)
+    #     serializer = PostSerializer(user)
+    #     return Response(serializer.data)
+    
+    # def create(self, request):
+    #     serializer = PostSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         #create the post, then save it as a draft for the user
+    #         serializer.username = request.get_username()
+    #         serializer.save()
+
+    #         user = Profile.objects.get(username = request.user.get_username())
+    #         post = Post.objects.get(username = request.user.get_username(), product = np.product)
+
+    #         # making the post a draft if the user has choosen so
+    #         if 'save_as_draft' in request.data:
+    #             user.drafts.add(post)
+    #             post.draft = True
+    #         elif 'upload' in request.data:
+    #             post.draft = False
+
+    #         # setting the status of a post (default selling)
+    #         post.status = "SELLING"
+
+    #         post.save()
+    
+    # def update(self, request, pk=None):
+    #     serializer = PostSerializer(data=request.data)
+    #     if serializer.is_valid():
+
+    #         #save the user info
+    #         post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
+    #         post.product = serializer.cleaned_data['product']
+    #         post.price = serializer.cleaned_data['price']
+    #         post.display_image = serializer.cleaned_data['display_image']
+    #         post.description = serializer.cleaned_data['description']
+
+    #         #save as draft or post
+    #         user = Profile.objects.get(username = request.user.get_username())
+    #         if 'save_as_draft' in request.data:
+    #             user.drafts.add(post)
+    #             post.draft = True
+    #         elif 'upload' in request.data:
+    #             user.drafts.remove(post)
+    #             post.draft = False
+
+    #         # whether a post is SELLING, PENDING, or SOLD
+    #         post.status = request.data["status"]
+
+    #         post.save()
+
+    # def destroy(self, request, pk=None):
+    #     post = Post.objects.get(pk=pk)
+    #     post.delete()
+        
+class Profiles(viewsets.ModelViewSet):
+    """
+    View to list all of the profiles in the system
+    """
+
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+
+    # def list(self, request):
+    #     queryset = Profile.objects.all()
+    #     serializer = ProfileSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+    
+    # def retrieve(self, request, pk=None):
+    #     queryset = Profile.objects.all()
+    #     user = get_object_or_404(queryset, pk=pk)
+    #     serializer = ProfileSerializer(user)
+    #     return Response(serializer.data)
+    
+    # def update(self, request, pk=None):
+    #     queryset = Profile.objects.all()
+
+    #     #If the user is not logged in, redirect them to the home page (guests should not be able to edit profile)
+    #     try:
+    #         user = User.objects.get(username=request.user.get_username())
+    #     except:
+    #         return Response({'error': 'Must have an account to edit your profile'})
+        
+    #     try:
+    #         profile = Profile.objects.get(username=request.user.get_username())
+    #         hasProfile = True
+    #     except:
+    #         profile = Profile(username=request.user.get_username())
+    #         hasProfile = False
+
+    #     serializer = ProfileSerializer(queryset)
+
+    #     #If the user has submitted their edits for their profile
+    #     if serializer.is_valid():
+
+    #         #retrieve the profile from the database, make all changes to the post, then redirect user to the home screen
+    #         profile.profile_picture = form.cleaned_data['profile_picture']
+    #         profile.save()
+    #         # user.first_name = profile.first_name
+    #         # user.last_name = profile.last_name
+    #         # user.save()
+
+    #         return Response({'message': 'You have successfully edited your post'})
+
+
+# Taken from: https://www.django-rest-framework.org/api-guide/viewsets/
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    A simple ViewSet for listing or retrieving users.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+    
+
+class Rooms(viewsets.ModelViewSet):
+    """
+    View to list all of the profiles in the system
+    """
+
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+
+    # def list(self, request):
+    #     queryset = Room.objects.all()
+    #     serializer = RoomSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+    
+    # def retrieve(self, request, pk=None):
+    #     queryset = Room.objects.all()
+    #     user = get_object_or_404(queryset, pk=pk)
+    #     serializer = RoomSerializer(user)
+    #     return Response(serializer.data)
+    
+class Messages(viewsets.ModelViewSet):
+    """
+    View to list all of the profiles in the system
+    """
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+    # def list(self, request):
+    #     queryset = Message.objects.all()
+    #     serializer = MessageSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+    
+    # def retrieve(self, request, pk=None):
+    #     queryset = Message.objects.all()
+    #     user = get_object_or_404(queryset, pk=pk)
+    #     serializer = MessageSerializer(user)
+    #     return Response(serializer.data)
+    
+
+
+
+#----------------------------
+
 def home(request):
     """
     View representing the functionality of the home screen (home.html)
@@ -34,7 +211,7 @@ def home(request):
     posts = Post.objects.all()
     number_of_posts = len(posts)
 
-    return render(request, 'home.html', {'posts': posts, 'number_of_posts': number_of_posts})
+    return Response({'posts': posts, 'number_of_posts': number_of_posts})
 
 def search(request):
     """
@@ -46,7 +223,7 @@ def search(request):
         'posts': list(posts.values()),
         'number_of_posts': number_of_posts
     }
-    return JsonResponse(context)
+    return Response(context)
 
 def edit_button(request):
     username = request.POST['username']
@@ -265,83 +442,6 @@ def reset_password(request):
     #default, simply load the page
     return render(request, 'reset_password.html')
 
-
-class NewPostView(FormView):
-    """
-    View representing the functionality of the new_post screen (new_post.html)
-    Format used based on django documentation (version 4.2): 
-    https://docs.djangoproject.com/en/4.2/topics/http/file-uploads/#uploading-multiple-files
-    """
-    form_class = PostForm
-    template_name = "new_post.html"  # replace with your template.
-    success_url = '/returnHome'
-    
-    def post(self, request, *args, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-
-        if form.is_valid():
-            np = form.save(commit=False)
-            np.username = request.user.get_username()
-            np.save()
-
-            user = Profile.objects.get(username = request.user.get_username())
-            post = Post.objects.get(username = request.user.get_username(), product = np.product)
-
-            # making the post a draft if the user has choosen so
-            if 'save_as_draft' in request.POST:
-                user.drafts.add(post)
-                post.draft = True
-            elif 'upload' in request.POST:
-                post.draft = False
-
-            # setting the status of a post (default selling)
-            post.status = "SELLING"
-
-            post.save()
-            return self.form_valid(form, request)
- 
-        else:
-            
-            if request.user.get_username():
-                return self.form_invalid(form)
-            else:
-                messages.error(request, "Login or create an account to make a post")
-                return redirect('/')
-
-    def form_valid(self, form, request):
-        form.username = request.user.get_username()
-
-        # retrieving any additional images for a post, then adding them to a list
-        files = form.cleaned_data["additional_images"]
-        additional_images_list = []
-
-        for additions in files:
-            additional_images_list.append(additions)
-
-        # filling empty space, since an Image object must contain 4 images
-        length = len(additional_images_list)
-        while length < 4:
-            additional_images_list.append(None)
-            length += 1
-
-        post = Post.objects.get(
-            product=form.cleaned_data['product'], 
-            username = request.user.get_username()
-        )
-
-        img = Image(
-            post = post,
-            image1 = additional_images_list[0],
-            image2 = additional_images_list[1],
-            image3 = additional_images_list[2],
-            image4 = additional_images_list[3],
-        )
-
-        img.save()
-
-        messages.success(request, "Your post has been successfully uploaded!")
-        return super().form_valid(form)
 
 class EditPostView(FormView):
     """
