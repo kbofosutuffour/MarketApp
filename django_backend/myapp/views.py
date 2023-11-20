@@ -213,6 +213,7 @@ def home(request):
 
     return Response({'posts': posts, 'number_of_posts': number_of_posts})
 
+@api_view()
 def search(request):
     """
     View used for the functionality of the search bar of the home screen (home.html)

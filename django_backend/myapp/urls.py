@@ -4,6 +4,13 @@ from . import views
 from myapp.views import *
 from rest_framework.routers import DefaultRouter
 
+"""
+    This document contains all of the different webpages the app has.  
+    Django uses this information to know which view aligns with which html webpage, and how
+    different webpages interract with each other
+"""
+
+# routers are used to route Django ViewSets to an HTTP Request through the named URL
 
 router = DefaultRouter()
 router.register(r'posts', Posts, basename='post')
@@ -13,14 +20,9 @@ router.register(r'rooms', Rooms, basename='rooms')
 router.register(r'messages', Messages, basename='messages')
 urlpatterns = [
     path('', include(router.urls)),
+    path('search', views.search, name='search'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-
 ]
-"""
-    This document contains all of the different webpages the app has.  
-    Django uses this information to know which view aligns with which html webpage, and how
-    different webpages interract with each other
-"""
 
 # urlpatterns = [
 #     path('', views.loader, name='loader'),

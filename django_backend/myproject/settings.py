@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-2_xz#g00b6sj_($15e920er=)s$jn_-0j-%&row2*8&954urxr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp', # myapp application we've created,
     'rest_framework', # needed for use with react native
+    'corsheaders', # needed for cross-origin requests
 ]
 
 MIDDLEWARE = [
