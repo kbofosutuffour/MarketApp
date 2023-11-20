@@ -20,8 +20,9 @@ router.register(r'rooms', Rooms, basename='rooms')
 router.register(r'messages', Messages, basename='messages')
 urlpatterns = [
     path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('search', views.search, name='search'),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('profile/<str:user>', views.profile, name='profile'),
 ]
 
 # urlpatterns = [

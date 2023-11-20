@@ -656,35 +656,37 @@ def avatar(request):
     return render(request, 'avatar.html', {'form': form, 'user': user})
     
 
-def profile(request):
+@api_view()
+def profile(request, user):
     """
     View used for the funcitonality of the profile page (profile.html)
     """
-
-    posts = Post.objects.filter(username=request.user.get_username())
+    print(user)
+    posts = Post.objects.filter(username=user)
     try:
-        profile = Profile.objects.get(username=request.user.get_username())
-        saved_posts = profile.saved_posts.all()
-        drafts = profile.drafts.all()
+        profile = Profile.objects.get(username=user)
+        saved_posts = list(profile.saved_posts.all())
+        drafts = list(profile.drafts.all())
         hasProfile = True
         context = {
-            'profile': profile,
-            'posts': posts,
-            'saved_posts': saved_posts,
-            'drafts': drafts,
             'hasProfile': hasProfile,
-            'username': request.user.get_username()
+            'username': user,
+            'profile_picture': profile.profile_picture.url,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            # 'saved_posts': saved_posts,
+            # 'drafts': drafts,
         }
+        print(context)
 
     except: 
         hasProfile = False
         context = {
-            'posts': posts,
             'hasProfile': hasProfile,
-            'username': request.user.get_username()
+            'username': user
         }
 
-    return render(request, 'profile.html', context)
+    return Response(context)
 
 def other_profile(request):
     """

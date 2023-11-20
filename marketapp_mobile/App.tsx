@@ -30,6 +30,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import axios from 'axios';
+import ProductDescription from './ProductDescription';
 
 function Footer(): JSX.Element {
   return (
@@ -74,22 +75,31 @@ function Post(props: {
       | null
       | undefined;
   };
+  setDesc: any;
 }): JSX.Element {
   return (
-    <View style={styles.post}>
-      <View style={styles.postImageContainer}>
-        <Image
-          style={styles.postImage}
-          source={{uri: props.data.display_image}}
-        />
+    <TouchableWithoutFeedback
+      onPress={() => {
+        props.setDesc({
+          showDesc: true,
+          post: props.data,
+        });
+      }}>
+      <View style={styles.post}>
+        <View style={styles.postImageContainer}>
+          <Image
+            style={styles.postImage}
+            source={{uri: props.data.display_image}}
+          />
+        </View>
+        <View style={styles.postText}>
+          <Text>{props.data.product}</Text>
+          <Text>{props.data.username}</Text>
+          <Text>${props.data.price}</Text>
+        </View>
+        <View style={styles.editPost}></View>
       </View>
-      <View style={styles.postText}>
-        <Text>{props.data.product}</Text>
-        <Text>{props.data.username}</Text>
-        <Text>${props.data.price}</Text>
-      </View>
-      <View style={styles.editPost}></View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -148,6 +158,11 @@ function App(): JSX.Element {
     posts: [],
   });
 
+  const [prodDesc, setDesc] = useState({
+    showDesc: false,
+    post: {},
+  });
+
   useEffect(() => {
     axios
       .get('http://10.0.2.2:8000/posts')
@@ -173,7 +188,7 @@ function App(): JSX.Element {
       });
     var add_item = false;
     for (let i = 0; i < posts.posts.length; i++) {
-      console.log(posts.posts[i])
+      console.log(posts.posts[i]);
       var prod = posts.posts[i].product
         .toLowerCase()
         .split(' ')
@@ -216,54 +231,68 @@ function App(): JSX.Element {
     // return temp;
   };
 
+  const returnHome = () => {
+    setDesc({
+      showDesc: false,
+      post: {},
+    }),
+    setPosts({...posts, showPosts: true});
+  };
+
   return (
     <SafeAreaView style={backgroundStyle}>
-      <StatusBar backgroundColor={backgroundStyle.backgroundColor} />
-      <View style={styles.navigationBar}>
+      {!prodDesc.showDesc && (
         <View>
-          <Text style={styles.home}>Home</Text>
-        </View>
-        <View style={{width: 180}}>
-          {searchedPosts.showSearchBar && (
-            <TextInput
-              style={styles.input}
-              onSubmitEditing={text => searchPosts(text.nativeEvent.text)}
-            />
-          )}
-        </View>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setSearch({...searchedPosts, showSearchBar: true});
-            setPosts({...posts, showPosts: false});
-          }}>
-          <View style={styles.searchContainer}>
-            <Image source={require('./media/search.png')} />
+          <View style={styles.navigationBar}>
+            <View>
+              <Text style={styles.home}>Home</Text>
+            </View>
+            <View style={{width: 180}}>
+              {searchedPosts.showSearchBar && (
+                <TextInput
+                  style={styles.input}
+                  onSubmitEditing={text => searchPosts(text.nativeEvent.text)}
+                />
+              )}
+            </View>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setSearch({...searchedPosts, showSearchBar: true});
+                setPosts({...posts, showPosts: false});
+              }}>
+              <View style={styles.searchContainer}>
+                <Image source={require('./media/search.png')} />
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </TouchableWithoutFeedback>
-      </View>
-      <View style={styles.goldBar}></View>
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={styles.scrollView}>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          {posts.showPosts &&
-            posts.posts.map(post => {
-              return <Post data={post} />;
-            })}
-          {searchedPosts.showResults &&
-            searchedPosts.posts.length > 0 &&
-            searchedPosts.posts.map(post => {
-              return <Post data={post} />;
-            })}
-          {searchedPosts.showSearchBar && !searchedPosts.showResults && (
-            <Categories />
-          )}
+          <View style={styles.goldBar} />
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={styles.scrollView}>
+            <View
+              style={{
+                backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              }}>
+              {posts.showPosts &&
+                posts.posts.map(post => {
+                  return <Post data={post} setDesc={setDesc} />;
+                })}
+              {searchedPosts.showResults &&
+                searchedPosts.posts.length > 0 &&
+                searchedPosts.posts.map(post => {
+                  return <Post data={post} setDesc={setDesc} />;
+                })}
+              {searchedPosts.showSearchBar && !searchedPosts.showResults && (
+                <Categories />
+              )}
+            </View>
+          </ScrollView>
+          <Footer />
         </View>
-      </ScrollView>
-      <Footer />
+      )}
+      {prodDesc.showDesc && (
+        <ProductDescription post={prodDesc.post} returnHome={returnHome} />
+      )}
     </SafeAreaView>
   );
 }
@@ -316,7 +345,9 @@ const styles = StyleSheet.create({
   post: {
     display: 'flex',
     flexDirection: 'row',
-    paddingTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'grey',
   },
   postImageContainer: {
     width: 125,
@@ -329,6 +360,7 @@ const styles = StyleSheet.create({
     height: 100,
     display: 'flex',
     backgroundColor: 'black',
+    borderRadius: 10,
     overflow: 'hidden',
   },
   postText: {
