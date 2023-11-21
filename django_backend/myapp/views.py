@@ -12,8 +12,9 @@ from django.views.generic.edit import FormView
 from django.conf import settings
 from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
+
 from .serializers import *
 import random
 import datetime
@@ -44,11 +45,15 @@ class Posts(viewsets.ModelViewSet):
     #     serializer = PostSerializer(queryset, many=True)
     #     return Response(serializer.data)
 
-    # def retrieve(self, request, pk=None):
-    #     queryset = Post.objects.all()
-    #     user = get_object_or_404(queryset, pk=pk)
-    #     serializer = PostSerializer(user)
-    #     return Response(serializer.data)
+    @action(methods=['get'], detail=False, url_path=r'get_posts/(?P<username>\w+)')
+    def get_posts(self, request, username, *args, **kwargs):
+
+        posts = Post.objects.filter(username=username)
+        print(username, posts)
+        posts = self.filter_queryset(posts)
+        # page = self.paginate_queryset(posts)
+        serializer = self.get_serializer(posts, many=True)
+        return Response(serializer.data)
     
     # def create(self, request):
     #     serializer = PostSerializer(data=request.data)
@@ -100,7 +105,12 @@ class Posts(viewsets.ModelViewSet):
     # def destroy(self, request, pk=None):
     #     post = Post.objects.get(pk=pk)
     #     post.delete()
-        
+
+# @api_view()
+# def getPosts(request, username):
+#     posts = Post.objects.filter(username=username)
+#     return Response({'posts': list(posts)})
+
 class Profiles(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
@@ -165,21 +175,24 @@ class Rooms(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
     """
-
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
+    @action(methods=['get'], detail=False, url_path=r'get_rooms/(?P<username>\w+)')
+    def get_rooms(self, request, username, *args, **kwargs):
 
-    # def list(self, request):
-    #     queryset = Room.objects.all()
-    #     serializer = RoomSerializer(queryset, many=True)
-    #     return Response(serializer.data)
-    
-    # def retrieve(self, request, pk=None):
-    #     queryset = Room.objects.all()
-    #     user = get_object_or_404(queryset, pk=pk)
-    #     serializer = RoomSerializer(user)
-    #     return Response(serializer.data)
+        buyer_rooms = Room.objects.filter(buyer=username)
+        buyer_rooms = self.filter_queryset(buyer_rooms)
+        seller_rooms = Room.objects.filter(seller=username)
+        seller_rooms = self.filter_queryset(seller_rooms)
+
+        # page = self.paginate_queryset(posts)
+        buyer_serializer = self.get_serializer(buyer_rooms, many=True)
+        seller_serializer = self.get_serializer(seller_rooms, many=True)
+        return Response({
+            'buyers': buyer_serializer.data,
+            'sellers': seller_serializer.data
+        })
     
 class Messages(viewsets.ModelViewSet):
     """
@@ -188,18 +201,13 @@ class Messages(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
-    # def list(self, request):
-    #     queryset = Message.objects.all()
-    #     serializer = MessageSerializer(queryset, many=True)
-    #     return Response(serializer.data)
-    
-    # def retrieve(self, request, pk=None):
-    #     queryset = Message.objects.all()
-    #     user = get_object_or_404(queryset, pk=pk)
-    #     serializer = MessageSerializer(user)
-    #     return Response(serializer.data)
-    
+    @action(methods=['get'], detail=False, url_path=r'get_messages/(?P<room_id>\w+)')
+    def get_messages(self, request, room_id, *args, **kwargs):
 
+        messages = Message.objects.filter(room=room_id)
+        messages = self.filter_queryset(messages)
+        serializer = self.get_serializer(messages, many=True)
+        return Response(serializer.data)
 
 
 #----------------------------
@@ -677,7 +685,6 @@ def profile(request, user):
             # 'saved_posts': saved_posts,
             # 'drafts': drafts,
         }
-        print(context)
 
     except: 
         hasProfile = False

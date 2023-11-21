@@ -31,16 +31,54 @@ import {
 
 import axios from 'axios';
 import ProductDescription from './ProductDescription';
+import Profile from './Profile';
+import Chats from './Chats';
 
-function Footer(): JSX.Element {
+function Footer(props): JSX.Element {
   return (
     <View style={styles.footerContainer}>
       <View style={styles.footer}>
-        <Image source={require('./media/home-05.png')} />
-        <Image source={require('./media/message-chat-square.png')} />
-        <Image source={require('./media/user-01.png')} />
+        <TouchableWithoutFeedback onPress={props.returnHome}>
+          <Image source={require('./media/home-05.png')} />
+        </TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={props.viewChats}>
+          <Image source={require('./media/message-chat-square.png')} />
+        </TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={props.viewProfile}>
+          <Image source={require('./media/user-01.png')} />
+        </TouchableWithoutFeedback>
       </View>
     </View>
+  );
+}
+
+function NavBar(props): JSX.Element {
+  return (
+    <>
+      <View style={styles.navigationBar}>
+        <View>
+          <Text style={styles.home}>{props.type}</Text>
+        </View>
+        <View style={{width: 180}}>
+          {props.searchedPosts.showSearchBar && (
+            <TextInput
+              style={styles.input}
+              onSubmitEditing={text => props.searchPosts(text.nativeEvent.text)}
+            />
+          )}
+        </View>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            props.setSearch({...props.searchedPosts, showSearchBar: true});
+            props.setPosts({...props.posts, showPosts: false});
+          }}>
+          <View style={styles.searchContainer}>
+            <Image source={require('./media/search.png')} />
+          </View>
+        </TouchableWithoutFeedback>
+      </View>
+      <View style={styles.goldBar} />
+    </>
   );
 }
 
@@ -163,6 +201,13 @@ function App(): JSX.Element {
     post: {},
   });
 
+  const [profile, setProfile] = useState({
+    showProfile: false,
+    data: {},
+  });
+
+  const [showChats, setChats] = useState(false);
+
   useEffect(() => {
     axios
       .get('http://10.0.2.2:8000/posts')
@@ -171,7 +216,15 @@ function App(): JSX.Element {
           showPosts: true,
           posts: res.data,
         });
-        console.log(res.data);
+      })
+      .catch((err: any) => console.log(err));
+    axios
+      .get('http://10.0.2.2:8000/profile/admin')
+      .then(res => {
+        setProfile({
+          showProfile: false,
+          data: res.data,
+        });
       })
       .catch((err: any) => console.log(err));
   }, []);
@@ -188,7 +241,6 @@ function App(): JSX.Element {
       });
     var add_item = false;
     for (let i = 0; i < posts.posts.length; i++) {
-      console.log(posts.posts[i]);
       var prod = posts.posts[i].product
         .toLowerCase()
         .split(' ')
@@ -207,16 +259,14 @@ function App(): JSX.Element {
 
       input.forEach((element: any) => {
         if (prod.includes(element) || desc.includes(element)) {
-          console.log(prod, desc, element);
           add_item = true;
         }
       });
       if (add_item) {
         try {
-          console.log(i);
           results.push(posts.posts[i]);
         } catch {
-          console.log('');
+          console.log('error');
         }
       }
       add_item = false;
@@ -235,37 +285,44 @@ function App(): JSX.Element {
     setDesc({
       showDesc: false,
       post: {},
-    }),
+    });
     setPosts({...posts, showPosts: true});
+    setProfile({...profile, showProfile: false});
+    setChats(false);
+  };
+
+  const viewProfile = () => {
+    setDesc({
+      showDesc: false,
+      post: {},
+    });
+    setPosts({...posts, showPosts: false});
+    setProfile({...profile, showProfile: true});
+    setChats(false);
+  };
+
+  const viewChats = () => {
+    setDesc({
+      showDesc: false,
+      post: {},
+    });
+    setPosts({...posts, showPosts: false});
+    setProfile({...profile, showProfile: false});
+    setChats(true);
   };
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      {!prodDesc.showDesc && (
+      {!prodDesc.showDesc && !profile.showProfile && !showChats && (
         <View>
-          <View style={styles.navigationBar}>
-            <View>
-              <Text style={styles.home}>Home</Text>
-            </View>
-            <View style={{width: 180}}>
-              {searchedPosts.showSearchBar && (
-                <TextInput
-                  style={styles.input}
-                  onSubmitEditing={text => searchPosts(text.nativeEvent.text)}
-                />
-              )}
-            </View>
-            <TouchableWithoutFeedback
-              onPress={() => {
-                setSearch({...searchedPosts, showSearchBar: true});
-                setPosts({...posts, showPosts: false});
-              }}>
-              <View style={styles.searchContainer}>
-                <Image source={require('./media/search.png')} />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-          <View style={styles.goldBar} />
+          <NavBar
+            searchedPosts={searchedPosts}
+            posts={posts}
+            searchPosts={searchPosts}
+            setPosts={setPosts}
+            setSearch={setSearch}
+            type={'Home'}
+          />
           <ScrollView
             contentInsetAdjustmentBehavior="automatic"
             style={styles.scrollView}>
@@ -287,11 +344,62 @@ function App(): JSX.Element {
               )}
             </View>
           </ScrollView>
-          <Footer />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+          />
         </View>
       )}
-      {prodDesc.showDesc && (
-        <ProductDescription post={prodDesc.post} returnHome={returnHome} />
+      {prodDesc.showDesc && !profile.showProfile && (
+        <>
+          <ProductDescription post={prodDesc.post} returnHome={returnHome} />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+          />
+        </>
+      )}
+      {!prodDesc.showDesc && profile.showProfile && !showChats && (
+        <>
+          <NavBar
+            searchedPosts={searchedPosts}
+            posts={posts}
+            searchPosts={searchPosts}
+            setPosts={setPosts}
+            setSearch={setSearch}
+            type={'My Profile'}
+          />
+          <Profile
+            profile={profile.data}
+            returnHome={returnHome}
+            posts={posts.posts}
+          />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+          />
+        </>
+      )}
+      {!prodDesc.showDesc && !profile.showProfile && showChats && (
+        <>
+          <NavBar
+            searchedPosts={searchedPosts}
+            posts={posts}
+            searchPosts={searchPosts}
+            setPosts={setPosts}
+            setSearch={setSearch}
+            type={'My Chats'}
+          />
+          <Chats profile={profile.data} />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+          />
+        </>
       )}
     </SafeAreaView>
   );

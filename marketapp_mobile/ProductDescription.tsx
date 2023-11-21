@@ -62,7 +62,6 @@ function ProductDescription(props: {
       .get(request)
       .then(res => {
         setProfile(res.data);
-        console.log(res.data);
       })
       .catch((err: any) => console.log(err));
   }, []);
@@ -100,7 +99,7 @@ function ProductDescription(props: {
         <View style={styles.description}>
           <View style={styles.profile}>
             <Image
-              source={{uri: profile.profile_picture}}
+              source={{uri: 'http://10.0.2.2:8000' + profile.profile_picture}}
               style={styles.profilePicture}
             />
             <Text>{profile.username}</Text>
