@@ -150,7 +150,7 @@ function Chats(props): JSX.Element {
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
         backgroundColor: 'rgb(17, 87, 64)',
-        height: '82.5%',
+        height: '80%',
       }}>
       {rooms.showRoom &&
         rooms.rooms.buyers.map(value => {

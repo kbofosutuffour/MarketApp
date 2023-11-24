@@ -33,10 +33,12 @@ import axios from 'axios';
 import ProductDescription from './ProductDescription';
 import Profile from './Profile';
 import Chats from './Chats';
+import UserSettings from './UserSettings';
 
 function Footer(props): JSX.Element {
   return (
     <View style={styles.footerContainer}>
+      <View style={styles.goldBar} />
       <View style={styles.footer}>
         <TouchableWithoutFeedback onPress={props.returnHome}>
           <Image source={require('./media/home-05.png')} />
@@ -67,15 +69,30 @@ function NavBar(props): JSX.Element {
             />
           )}
         </View>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            props.setSearch({...props.searchedPosts, showSearchBar: true});
-            props.setPosts({...props.posts, showPosts: false});
-          }}>
-          <View style={styles.searchContainer}>
-            <Image source={require('./media/search.png')} />
-          </View>
-        </TouchableWithoutFeedback>
+        {props.type === 'Home' && (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              props.setSearch({...props.searchedPosts, showSearchBar: true});
+              props.setPosts({...props.posts, showPosts: false});
+            }}>
+            <View style={styles.searchContainer}>
+              <Image source={require('./media/search.png')} />
+            </View>
+          </TouchableWithoutFeedback>
+        )}
+        {props.type === 'Profile' && (
+          <TouchableWithoutFeedback
+            onPress={() => {
+              props.viewSettings();
+            }}>
+            <View style={styles.searchContainer}>
+              <Image
+                source={require('./media/settings.png')}
+                style={{width: 50, height: 50}}
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        )}
       </View>
       <View style={styles.goldBar} />
     </>
@@ -184,6 +201,7 @@ function App(): JSX.Element {
 
   const backgroundStyle = {
     backgroundColor: 'rgb(17, 87, 64)',
+    flex: 1,
   };
 
   const [posts, setPosts] = useState({
@@ -208,8 +226,14 @@ function App(): JSX.Element {
 
   const [showChats, setChats] = useState(false);
 
+  const [showSettings, setSettings] = useState(false);
+
   useEffect(() => {
-    axios
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    await axios
       .get('http://10.0.2.2:8000/posts')
       .then(res => {
         setPosts({
@@ -218,7 +242,7 @@ function App(): JSX.Element {
         });
       })
       .catch((err: any) => console.log(err));
-    axios
+    await axios
       .get('http://10.0.2.2:8000/profile/admin')
       .then(res => {
         setProfile({
@@ -227,7 +251,7 @@ function App(): JSX.Element {
         });
       })
       .catch((err: any) => console.log(err));
-  }, []);
+  };
 
   const searchPosts = (text: string) => {
     var results: any[] = [];
@@ -277,8 +301,6 @@ function App(): JSX.Element {
       showResults: true,
       posts: results,
     });
-
-    // return temp;
   };
 
   const returnHome = () => {
@@ -289,6 +311,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: true});
     setProfile({...profile, showProfile: false});
     setChats(false);
+    setSettings(false);
   };
 
   const viewProfile = () => {
@@ -299,6 +322,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: true});
     setChats(false);
+    setSettings(false);
   };
 
   const viewChats = () => {
@@ -309,116 +333,162 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: false});
     setChats(true);
+    setSettings(false);
   };
+
+  const viewSettings = () => {
+    setDesc({
+      showDesc: false,
+      post: {},
+    });
+    setPosts({...posts, showPosts: false});
+    setProfile({...profile, showProfile: false});
+    setChats(false);
+    setSettings(true);
+  };
+
+  const [settings, setSettingsTitle] = useState({
+    settings: false,
+    text: 'Settings',
+  });
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      {!prodDesc.showDesc && !profile.showProfile && !showChats && (
-        <View>
-          <NavBar
-            searchedPosts={searchedPosts}
-            posts={posts}
-            searchPosts={searchPosts}
-            setPosts={setPosts}
-            setSearch={setSearch}
-            type={'Home'}
-          />
-          <ScrollView
-            contentInsetAdjustmentBehavior="automatic"
-            style={styles.scrollView}>
-            <View
-              style={{
-                backgroundColor: isDarkMode ? Colors.black : Colors.white,
-              }}>
-              {posts.showPosts &&
-                posts.posts.map(post => {
-                  return <Post data={post} setDesc={setDesc} />;
-                })}
-              {searchedPosts.showResults &&
-                searchedPosts.posts.length > 0 &&
-                searchedPosts.posts.map(post => {
-                  return <Post data={post} setDesc={setDesc} />;
-                })}
-              {searchedPosts.showSearchBar && !searchedPosts.showResults && (
-                <Categories />
-              )}
-            </View>
-          </ScrollView>
-          <Footer
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-          />
-        </View>
-      )}
-      {prodDesc.showDesc && !profile.showProfile && (
-        <>
-          <ProductDescription post={prodDesc.post} returnHome={returnHome} />
-          <Footer
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-          />
-        </>
-      )}
-      {!prodDesc.showDesc && profile.showProfile && !showChats && (
-        <>
-          <NavBar
-            searchedPosts={searchedPosts}
-            posts={posts}
-            searchPosts={searchPosts}
-            setPosts={setPosts}
-            setSearch={setSearch}
-            type={'My Profile'}
-          />
-          <Profile
-            profile={profile.data}
-            returnHome={returnHome}
-            posts={posts.posts}
-          />
-          <Footer
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-          />
-        </>
-      )}
-      {!prodDesc.showDesc && !profile.showProfile && showChats && (
-        <>
-          <NavBar
-            searchedPosts={searchedPosts}
-            posts={posts}
-            searchPosts={searchPosts}
-            setPosts={setPosts}
-            setSearch={setSearch}
-            type={'My Chats'}
-          />
-          <Chats profile={profile.data} />
-          <Footer
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-          />
-        </>
-      )}
+      {!prodDesc.showDesc &&
+        !profile.showProfile &&
+        !showChats &&
+        !showSettings && (
+          <View>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'Home'}
+              viewSettings={viewSettings}
+            />
+            <ScrollView
+              contentInsetAdjustmentBehavior="automatic"
+              style={styles.scrollView}>
+              <View
+                style={{
+                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                }}>
+                {posts.showPosts &&
+                  posts.posts.map(post => {
+                    return <Post data={post} setDesc={setDesc} />;
+                  })}
+                {searchedPosts.showResults &&
+                  searchedPosts.posts.length > 0 &&
+                  searchedPosts.posts.map(post => {
+                    return <Post data={post} setDesc={setDesc} />;
+                  })}
+                {searchedPosts.showSearchBar && !searchedPosts.showResults && (
+                  <Categories />
+                )}
+              </View>
+            </ScrollView>
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </View>
+        )}
+      {prodDesc.showDesc &&
+        !profile.showProfile &&
+        !showChats &&
+        !showSettings && (
+          <>
+            <ProductDescription post={prodDesc.post} returnHome={returnHome} />
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </>
+        )}
+      {!prodDesc.showDesc &&
+        profile.showProfile &&
+        !showChats &&
+        !showSettings && (
+          <>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'Profile'}
+              viewSettings={viewSettings}
+            />
+            <Profile
+              profile={profile.data}
+              returnHome={returnHome}
+              posts={posts.posts}
+              viewSettings={viewSettings}
+            />
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </>
+        )}
+      {!prodDesc.showDesc &&
+        !profile.showProfile &&
+        showChats &&
+        !showSettings && (
+          <>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'My Chats'}
+              viewSettings={viewSettings}
+            />
+            <Chats profile={profile.data} />
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </>
+        )}
+      {!prodDesc.showDesc &&
+        !profile.showProfile &&
+        !showChats &&
+        showSettings && (
+          <>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'Settings'}
+              viewSettings={viewSettings}
+            />
+            <UserSettings
+              viewSettings={viewSettings}
+              settings={settings}
+              setSettingsTitle={setSettingsTitle}
+            />
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </>
+        )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  // sectionContainer: {
-  //   marginTop: 32,
-  //   paddingHorizontal: 24,
-  // },
-  // sectionTitle: {
-  //   fontSize: 24,
-  //   fontWeight: '600',
-  // },
-  // sectionDescription: {
-  //   marginTop: 8,
-  //   fontSize: 18,
-  //   fontWeight: '400',
-  // },
   navigationBar: {
     display: 'flex',
     flexDirection: 'row',

@@ -66,8 +66,56 @@ function Post(props: {
   );
 }
 
+function EditProfile(props): JSX.Element {
+  return (
+    <>
+      <Button
+        title="Return"
+        onPress={() =>
+          props.setView({
+            main: true,
+            editProfile: false,
+          })
+        }
+      />
+      <View style={styles.userSettings}>
+        <View style={styles.settingsOptionContainer}>
+          <Text style={styles.settingsOption}>My Information</Text>
+        </View>
+        <View style={styles.settingsOptionContainerOther}>
+          <View>
+            <Image
+              source={{
+                uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+              }}
+              style={styles.profilePictureBorder}
+            />
+          </View>
+          <View styles={styles.profileText}>
+            <Text>{props.profile.username}</Text>
+            <Text>useremail@email.com</Text>
+            <Text>Date Joined</Text>
+          </View>
+        </View>
+
+        <View style={styles.settingsOptionContainer}>
+          <Text style={styles.settingsOption}>Show Joined Date</Text>
+        </View>
+
+        <View style={styles.settingsOptionContainer}>
+          <Text style={styles.settingsOption}>Change Password</Text>
+        </View>
+      </View>
+    </>
+  );
+}
+
 function Profile(props): JSX.Element {
   const [posts, setPosts] = useState([]);
+  const [view, setView] = useState({
+    main: true,
+    editProfile: false,
+  });
 
   useEffect(() => {
     var request =
@@ -76,49 +124,65 @@ function Profile(props): JSX.Element {
     axios
       .get(request)
       .then(res => {
-        console.log(res.data)
+        console.log(res.data);
         setPosts(res.data);
       })
       .catch((err: any) => console.log(err));
   }, []);
 
   return (
-    <View style={styles.profilePage}>
-      {/* {console.log(props.profile)} */}
-      <View style={styles.profileView}>
-        <Image
-          style={styles.profilePicture}
-          source={{uri: 'http://10.0.2.2:8000' + props.profile.profile_picture}}
-        />
-        <View>
-          <Text>{props.profile.username}</Text>
-          {/* <Button>Edit Profile</Button> */}
+    <>
+      {view.main && (
+        <View style={styles.profilePage}>
+          <View style={styles.profileView}>
+            <Image
+              style={styles.profilePicture}
+              source={{
+                uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+              }}
+            />
+            <View>
+              <Text>{props.profile.username}</Text>
+              <Button
+                title="Edit Profile"
+                onPress={() => {
+                  setView({
+                    main: false,
+                    editProfile: true,
+                  });
+                }}
+              />
+            </View>
+          </View>
+          <View style={styles.typeView}>
+            <View style={styles.typeViewItem}>
+              <Text>Sell History</Text>
+            </View>
+            <View style={styles.typeViewItem}>
+              <Text>Buy History</Text>
+            </View>
+            <View style={styles.typeViewItem}>
+              <Text>Saved Posts</Text>
+            </View>
+          </View>
+          <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={styles.scrollView}>
+            <View
+              style={{
+                backgroundColor: Colors.white,
+              }}>
+              {posts.map(post => {
+                return <Post data={post} setDesc={props.setDesc} />;
+              })}
+            </View>
+          </ScrollView>
         </View>
-      </View>
-      <View style={styles.typeView}>
-        <View style={styles.typeViewItem}>
-          <Text>Sell History</Text>
-        </View>
-        <View style={styles.typeViewItem}>
-          <Text>Buy History</Text>
-        </View>
-        <View style={styles.typeViewItem}>
-          <Text>Saved Posts</Text>
-        </View>
-      </View>
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={styles.scrollView}>
-        <View
-          style={{
-            backgroundColor: Colors.white,
-          }}>
-          {posts.map(post => {
-            return <Post data={post} setDesc={props.setDesc} />;
-          })}
-        </View>
-      </ScrollView>
-    </View>
+      )}
+      {view.editProfile && (
+        <EditProfile profile={props.profile} setView={setView} />
+      )}
+    </>
   );
 }
 const styles = StyleSheet.create({
@@ -133,7 +197,14 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 25,
-    marginLeft: 50
+    marginLeft: 50,
+  },
+  profilePictureBorder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: Colors.black,
   },
   profileView: {
     display: 'flex',
@@ -195,6 +266,36 @@ const styles = StyleSheet.create({
   },
   editPost: {
     backgroundColor: 'white',
+  },
+  settingsOptionContainer: {
+    borderBottomWidth: 1,
+    borderColor: 'gray',
+    paddingTop: 20,
+    width: '85%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
+  settingsOptionContainerOther: {
+    borderBottomWidth: 1,
+    borderColor: 'gray',
+    paddingTop: 20,
+    paddingBottom: 20,
+    width: '85%',
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsOption: {
+    fontSize: 20,
+  },
+  userSettings: {
+    backgroundColor: Colors.white,
+    height: '82.5%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
 });
 export default Profile;

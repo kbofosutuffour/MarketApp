@@ -49,7 +49,6 @@ class Posts(viewsets.ModelViewSet):
     def get_posts(self, request, username, *args, **kwargs):
 
         posts = Post.objects.filter(username=username)
-        print(username, posts)
         posts = self.filter_queryset(posts)
         # page = self.paginate_queryset(posts)
         serializer = self.get_serializer(posts, many=True)
