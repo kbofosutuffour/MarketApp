@@ -34,6 +34,7 @@ import ProductDescription from './ProductDescription';
 import Profile from './Profile';
 import Chats from './Chats';
 import UserSettings from './UserSettings';
+import CreatePost from './Post';
 
 function Footer(props): JSX.Element {
   return (
@@ -227,6 +228,7 @@ function App(): JSX.Element {
   const [showChats, setChats] = useState(false);
 
   const [showSettings, setSettings] = useState(false);
+  const [showPost, setPost] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -312,6 +314,7 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(false);
     setSettings(false);
+    setPost(false);
   };
 
   const viewProfile = () => {
@@ -323,6 +326,7 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: true});
     setChats(false);
     setSettings(false);
+    setPost(false);
   };
 
   const viewChats = () => {
@@ -334,6 +338,7 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(true);
     setSettings(false);
+    setPost(false);
   };
 
   const viewSettings = () => {
@@ -345,6 +350,19 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(false);
     setSettings(true);
+    setPost(false);
+  };
+
+  const viewPost = () => {
+    setDesc({
+      showDesc: false,
+      post: {},
+    });
+    setPosts({...posts, showPosts: false});
+    setProfile({...profile, showProfile: false});
+    setChats(false);
+    setSettings(false);
+    setPost(true);
   };
 
   const [settings, setSettingsTitle] = useState({
@@ -357,7 +375,8 @@ function App(): JSX.Element {
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
-        !showSettings && (
+        !showSettings &&
+        !showPost && (
           <View>
             <NavBar
               searchedPosts={searchedPosts}
@@ -389,6 +408,14 @@ function App(): JSX.Element {
                 )}
               </View>
             </ScrollView>
+            <View>
+              <TouchableWithoutFeedback onPress={() => viewPost()}>
+                <Image
+                  source={require('./media/plus_sign.png')}
+                  style={styles.addPost}
+                />
+              </TouchableWithoutFeedback>
+            </View>
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
@@ -399,7 +426,8 @@ function App(): JSX.Element {
       {prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
-        !showSettings && (
+        !showSettings &&
+        !showPost && (
           <>
             <ProductDescription post={prodDesc.post} returnHome={returnHome} />
             <Footer
@@ -412,7 +440,8 @@ function App(): JSX.Element {
       {!prodDesc.showDesc &&
         profile.showProfile &&
         !showChats &&
-        !showSettings && (
+        !showSettings &&
+        !showPost && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -439,7 +468,8 @@ function App(): JSX.Element {
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         showChats &&
-        !showSettings && (
+        !showSettings &&
+        !showPost && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -461,7 +491,8 @@ function App(): JSX.Element {
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
-        showSettings && (
+        showSettings &&
+        !showPost && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -472,11 +503,35 @@ function App(): JSX.Element {
               type={'Settings'}
               viewSettings={viewSettings}
             />
+            {console.log('test')}
             <UserSettings
               viewSettings={viewSettings}
               settings={settings}
               setSettingsTitle={setSettingsTitle}
             />
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </>
+        )}
+      {!prodDesc.showDesc &&
+        !profile.showProfile &&
+        !showChats &&
+        !showSettings &&
+        showPost && (
+          <>
+            {/* <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'Settings'}
+              viewSettings={viewSettings}
+            /> */}
+            <CreatePost username={'admin'} returnHome={returnHome} />
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
@@ -596,6 +651,14 @@ const styles = StyleSheet.create({
     display: 'flex',
     overflow: 'hidden',
     backgroundColor: 'black',
+  },
+  addPost: {
+    width: 75,
+    height: 75,
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    borderRadius: 35,
   },
 });
 
