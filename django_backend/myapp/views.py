@@ -109,6 +109,48 @@ class Posts(viewsets.ModelViewSet):
 #     posts = Post.objects.filter(username=username)
 #     return Response({'posts': list(posts)})
 
+class EditProfileViewSet(viewsets.ViewSet):
+
+    def partial_update(self, request, pk=None):
+        profile = Profile.objects.get(pk=pk)
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            # profile.profile_picture = request.data.profile_picture
+            # profile.save()
+            # print(profile.profile_picture, 'profile.profile_picture')
+            # print(serializer.data.get('profile_picture'), 'serializer')
+            return Response({'message': 'You have successfully changed your profile picture'})
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors})
+        
+    def update(self, instance, validated_data):
+        instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
+        instance.save()
+        return instance
+    
+class EditPostViewSet(viewsets.ViewSet):
+    
+    def partial_update(self, request, pk=None):
+        post = Post.objects.get(pk=pk)
+        serializer = PostSerializer(post, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors})
+        
+    def update(self, instance, validated_data):
+        # instance.display_image = validated_data.get('display_image', instance.display_image)
+        instance.price = validated_data.get('price', instance.price)
+        instance.status = validated_data.get('status', instance.status)
+        instance.category = validated_data.get('category', instance.category)
+        instance.draft = validated_data.get('draft', instance.draft)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+        return instance
+    
 class Profiles(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
@@ -116,6 +158,30 @@ class Profiles(viewsets.ModelViewSet):
 
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    # def partial_update(self, request, pk=None):
+    #     serializer = ProfileSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response({'message': 'You have successfully changed your profile picture'})
+    #     else:
+    #         print(serializer.errors)
+    #         return Response({'error': serializer.errors})
+        
+    @action(methods=['get'], detail=False, url_path=r'get_id/(?P<username>\w+)')
+    def get_id(self, request, username, *args, **kwargs):
+
+        profile = Profile.objects.get(username=username)
+        return Response({'id': profile.id})
+    
+    # def partial_update(self, request, pk=None):
+    #     serializer = ProfileSerializer(data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #     else:
+    #         print(serializer.errors)
+    #         return Response({'error': serializer.errors})
+    
 
     # def list(self, request):
     #     queryset = Profile.objects.all()

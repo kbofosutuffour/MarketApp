@@ -50,7 +50,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Profile
-		fields = '__all__'
+		fields = ['id', 'username', 'profile_picture', 'first_name', 'last_name', 'saved_posts', 'drafts']
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

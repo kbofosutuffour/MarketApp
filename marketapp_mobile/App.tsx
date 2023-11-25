@@ -241,6 +241,7 @@ function App(): JSX.Element {
     await axios
       .get('http://10.0.2.2:8000/posts')
       .then(res => {
+        console.log(res.data)
         setPosts({
           showPosts: true,
           posts: res.data,
@@ -248,8 +249,9 @@ function App(): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get('http://10.0.2.2:8000/profile/admin')
+      .get('http://10.0.2.2:8000/profile/NarutoUzumaki')
       .then(res => {
+        console.log(res.data, res.data.id, 'id')
         setProfile({
           showProfile: false,
           data: res.data,
@@ -369,6 +371,7 @@ function App(): JSX.Element {
       showPost: true,
       id: id,
     });
+    console.log('test')
   };
 
   const [settings, setSettingsTitle] = useState({

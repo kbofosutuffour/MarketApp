@@ -25,6 +25,7 @@ function EditPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
 
   const [display, setDisplay] = useState('');
+  const [newData, setNewData] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -43,14 +44,20 @@ function EditPost(props): JSX.Element {
   const postData = async () => {
     let data = new FormData();
     for (const [key, value] of Object.entries(props.post)) {
-      data.append(key, value);
+      if (key === 'display_image') {
+        data.append('display_image', newData);
+      } else {
+        data.append(key, value);
+
+      }
     }
+    console.log(props.post.display_image, 'test');
     await axios
-      .patch('http://10.0.2.2:8000/posts/' + props.id + '/', data)
+      .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data)
       .then(response => {
         console.log(response);
       })
-      .catch((err: any) => console.log(err));
+      .catch((err: any) => console.log(err, data));
   };
 
   const chooseImage = async () => {
@@ -62,7 +69,16 @@ function EditPost(props): JSX.Element {
       type: res[0].type,
       name: 'image',
     };
-    props.setPost({...props.post, display_image: image});
+    props.setPost({
+      ...props.post,
+      display_image: {
+        uri: res[0].uri,
+        type: res[0].type,
+        name: 'image.png',
+      },
+    });
+    setNewData(image);
+    console.log(res[0].type)
     setDisplay(res[0].uri);
   };
 
