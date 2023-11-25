@@ -14,10 +14,12 @@ import {
   TouchableWithoutFeedback,
   View,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import * as ImagePicker from 'expo-image-picker';
 import DocumentPicker from 'react-native-document-picker';
+import {Picker} from '@react-native-picker/picker';
 
 // function EditPost(props): JSX.Element {
 //   const [post, setPost] = useState({});
@@ -48,13 +50,23 @@ import DocumentPicker from 'react-native-document-picker';
 function NewPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
 
+  const [display, setDisplay] = useState('');
+
   const postData = async () => {
+    let data = new FormData();
+    for (const [key, value] of Object.entries(props.post)) {
+      data.append(key, value);
+    }
+    // data.append('username', props.post.username);
+    // data.append('product', props.post.product);
+    // data.append('price', props.post.price);
     await axios
-      .post('http://10.0.2.2:8000/posts/', props.post)
+      .post('http://10.0.2.2:8000/posts/', data)
       .then(response => {
         console.log(response);
       })
       .catch((err: any) => console.log(err));
+    console.log(props.post);
   };
 
   const pickImage = async () => {
@@ -92,22 +104,26 @@ function NewPost(props): JSX.Element {
     const res = await DocumentPicker.pick({
       type: [DocumentPicker.types.allFiles],
     });
-    let temp = JSON.stringify(res);
-    let final = JSON.parse(temp);
-    // console.log('res : ', final[0].uri);
-    props.setPost({...props.post, display_image: final[0].uri});
+    let image = {
+      uri: res[0].uri,
+      type: res[0].type,
+      name: 'image.png',
+    };
+    props.setPost({...props.post, display_image: image});
+    setDisplay(res[0].uri);
   };
 
   return (
     <>
       <View style={styles.postItem}>
-        <Button title="Select your display image" onPress={chooseImage} />
-        {console.log(props.post)}
-        {props.post.display_image && (
-          <Image
-            source={{uri: props.post.display_image}}
-            style={{width: 200, height: 200}}
-          />
+        <Button
+          title="Select your display image"
+          onPress={chooseImage}
+          color={'rgb(17, 87, 64)'}
+        />
+        {console.log(display, props.post.display_image)}
+        {display && (
+          <Image source={{uri: display}} style={{width: 200, height: 200}} />
         )}
       </View>
       <View style={styles.postItem}>
@@ -117,9 +133,10 @@ function NewPost(props): JSX.Element {
           style={styles.input}
         />
       </View>
-      <View style={styles.postItem}>
+      <View style={styles.postItemPrice}>
+        <Text style={styles.dollarSign}>$</Text>
         <TextInput
-          placeholder="Price"
+          placeholder="Enter Price"
           onChangeText={value => {
             if (Number(value)) {
               props.setPost({...props.post, price: Number(value)});
@@ -128,22 +145,39 @@ function NewPost(props): JSX.Element {
           style={styles.input}
         />
       </View>
-      <View style={styles.postItem}>
-        <TextInput placeholder="Title" style={styles.input} />
+      <View style={styles.postItemCategory}>
+        <Text>Category: {props.post.category}</Text>
+        <Picker
+          selectedValue={props.post.category}
+          onValueChange={itemValue => {
+            if (props.categories.includes(itemValue)) {
+              props.setPost({...props.post, category: itemValue});
+            }
+          }}
+          style={styles.pickerItem}>
+          {props.categories.map((value: string) => {
+            return <Picker.Item label={value} value={value} />;
+          })}
+          <Picker.Item label={'test'} value={'test'} />
+        </Picker>
       </View>
-      <View style={styles.postItem}>
+      <View style={styles.postItemDraft}>
         <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
         <Switch
+          trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
+          value={props.post.draft}
           onValueChange={() =>
             props.setPost({...props.post, draft: !props.post.draft})
           }
         />
       </View>
-      <View style={styles.postItem}>
+      <View style={styles.postItemStatus}>
         <Button
           title="SELLING"
           color={
-            props.post.status === 'SELLING' ? 'rgb(185, 151, 91)' : Colors.blue
+            props.post.status === 'SELLING'
+              ? 'rgb(185, 151, 91)'
+              : 'rgb(17, 87, 64)'
           }
           onPress={() => {
             props.setPost({...props.post, status: 'SELLING'});
@@ -152,35 +186,38 @@ function NewPost(props): JSX.Element {
         <Button
           title="PENDING"
           color={
-            props.post.status === 'PENDING' ? 'rgb(185, 151, 91)' : Colors.blue
+            props.post.status === 'PENDING'
+              ? 'rgb(185, 151, 91)'
+              : 'rgb(17, 87, 64)'
           }
           onPress={() => {
             props.setPost({...props.post, status: 'PENDING'});
           }}
         />
-        <Button
-          title="SOLD"
-          color={
-            props.post.status === 'SOLD' ? 'rgb(185, 151, 91)' : Colors.blue
-          }
-          onPress={() => props.setPost({...props.post, status: 'SOLD'})}
-        />
       </View>
-      <View style={styles.postItem}>
+      <View style={styles.postItemDescription}>
         <TextInput
           placeholder="Write a description for your product here:"
+          multiline={true}
           numberOfLines={4}
-          style={styles.input}
+          style={styles.descriptionInput}
+          textAlignVertical={'top'}
+          onChangeText={value =>
+            props.setPost({...props.post, description: value})
+          }
         />
       </View>
 
-      <Button
-        title="SUBMIT"
+      <TouchableOpacity
         onPress={() => {
           postData();
           props.returnHome();
         }}
-      />
+        style={styles.submit}>
+        <View>
+          <Text style={{color: Colors.white, fontSize: 30}}>PUBLISH</Text>
+        </View>
+      </TouchableOpacity>
     </>
   );
 }
@@ -198,7 +235,7 @@ function CreatePost(props): JSX.Element {
     description: null,
     price: null,
     draft: false,
-    category: null,
+    category: 'MISC.',
     status: null,
   });
 
@@ -214,15 +251,26 @@ function CreatePost(props): JSX.Element {
     'FOOD',
     'ENTERTAINMENT',
     'BOOKS',
-    'MISC',
+    'MISC.',
   ];
 
   const status = ['SELLING', 'PENDING', 'SOLD'];
+  const [onCancel, setOnCancel] = useState(false);
 
   return (
     <>
+      <TouchableWithoutFeedback
+        onPress={props.returnHome}
+        onPressIn={() => setOnCancel(!onCancel)}
+        onPressOut={() => setOnCancel(!onCancel)}>
+        <View style={{backgroundColor: Colors.white, padding: 10}}>
+          <Text style={{fontSize: 15, color: onCancel ? 'red' : 'black'}}>
+            Cancel
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
       <View style={styles.postContainer}>
-        <Button title={'Cancel'} onPress={props.returnHome} />
+        {console.log(props.username)}
         {view.newPost && (
           <NewPost
             post={post}
@@ -230,6 +278,7 @@ function CreatePost(props): JSX.Element {
             status={status}
             categories={categories}
             returnHome={props.returnHome}
+            username={props.username}
           />
         )}
         {/* {view.editPost && <EditPost post={post} setPost={setPost} />} */}
@@ -243,9 +292,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     width: '100%',
+    height: '100%',
   },
   postItem: {
     display: 'flex',
@@ -256,10 +306,101 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 5,
   },
+  postItemCategory: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    columnGap: 10,
+    width: '100%',
+    padding: 5,
+  },
+  postItemPrice: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    width: '100%',
+    padding: 5,
+  },
+  postItemStatus: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    width: '100%',
+    padding: 10,
+  },
+  postItemDraft: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    width: '100%',
+    padding: 5,
+    columnGap: 10,
+  },
+  postItemDescription: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    width: '100%',
+    height: '20%',
+    padding: 5,
+  },
   input: {
     width: '70%',
+    fontSize: 17.5,
     // borderColor: 'gray',
     // borderWidth: 0.5,
+  },
+  dollarSign: {
+    fontSize: 17.5,
+  },
+  descriptionInput: {
+    width: '95%',
+    // borderColor: 'gray',
+    // borderWidth: 0.5,
+  },
+  submit: {
+    width: '95%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: 'rgb(17, 87, 64)',
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+  },
+  submitInner: {
+    width: '95%',
+    display: 'flex',
+    position: 'absolute',
+    bottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: Colors.blue,
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+  },
+  pickerItem: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    width: 50,
+    height: 50,
   },
 });
 

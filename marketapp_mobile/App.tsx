@@ -532,11 +532,11 @@ function App(): JSX.Element {
               viewSettings={viewSettings}
             /> */}
             <CreatePost username={'admin'} returnHome={returnHome} />
-            <Footer
+            {/* <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
-            />
+            /> */}
           </>
         )}
     </SafeAreaView>

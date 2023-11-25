@@ -54,27 +54,33 @@ class Posts(viewsets.ModelViewSet):
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
     
-    # def create(self, request):
-    #     serializer = PostSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         #create the post, then save it as a draft for the user
-    #         serializer.username = request.get_username()
-    #         serializer.save()
+    def create(self, request):
+        serializer = PostSerializer(data=request.data)
+        print(request.data, 'request')
+        if serializer.is_valid():
+            #create the post, then save it as a draft for the user
+            serializer.username = 'admin'
+            serializer.save()
+            temp_user = 'admin'
 
-    #         user = Profile.objects.get(username = request.user.get_username())
-    #         post = Post.objects.get(username = request.user.get_username(), product = np.product)
+            # user = Profile.objects.get(username = request.user.get_username())
+            # post = Post.objects.get(username = request.user.get_username(), product = np.product)
 
-    #         # making the post a draft if the user has choosen so
-    #         if 'save_as_draft' in request.data:
-    #             user.drafts.add(post)
-    #             post.draft = True
-    #         elif 'upload' in request.data:
-    #             post.draft = False
+            # # making the post a draft if the user has choosen so
+            # if 'save_as_draft' in request.data:
+            #     user.drafts.add(post)
+            #     post.draft = True
+            # elif 'upload' in request.data:
+            #     post.draft = False
 
-    #         # setting the status of a post (default selling)
-    #         post.status = "SELLING"
+            # # setting the status of a post (default selling)
+            # # post.status = "SELLING"
 
-    #         post.save()
+            # post.save()
+            return Response({'message': 'You have successfully edited your post'})
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors})
     
     # def update(self, request, pk=None):
     #     serializer = PostSerializer(data=request.data)
