@@ -82,34 +82,27 @@ class Posts(viewsets.ModelViewSet):
             print(serializer.errors)
             return Response({'error': serializer.errors})
     
-    # def update(self, request, pk=None):
-    #     serializer = PostSerializer(data=request.data)
-    #     if serializer.is_valid():
+    def partial_update(self, request, pk=None):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
 
-    #         #save the user info
-    #         post = Post.objects.get(username=request.user.get_username(), product = request.session['old_product'])
-    #         post.product = serializer.cleaned_data['product']
-    #         post.price = serializer.cleaned_data['price']
-    #         post.display_image = serializer.cleaned_data['display_image']
-    #         post.description = serializer.cleaned_data['description']
-
-    #         #save as draft or post
-    #         user = Profile.objects.get(username = request.user.get_username())
-    #         if 'save_as_draft' in request.data:
-    #             user.drafts.add(post)
-    #             post.draft = True
-    #         elif 'upload' in request.data:
-    #             user.drafts.remove(post)
-    #             post.draft = False
-
-    #         # whether a post is SELLING, PENDING, or SOLD
-    #         post.status = request.data["status"]
-
-    #         post.save()
-
-    # def destroy(self, request, pk=None):
-    #     post = Post.objects.get(pk=pk)
-    #     post.delete()
+            # post = Post.objects.get(product=serializer.data.get('product'))
+            # post.price = serializer.data.get('price')
+            # post.description = serializer.data.get('description')
+            # post.category = serializer.data.get('category')
+            # post.status = serializer.data.get('status')
+            # post.draft = serializer.data.get('draft')
+            return Response({'message': 'You have successfully edited your post'})
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors})
+    
+    def destroy(self, request, pk=None):
+        post = Post.objects.get(pk=pk)
+        print('test delete')
+        post.delete()
+        return Response({'message': 'You have successfully deleted your post'})
 
 # @api_view()
 # def getPosts(request, username):

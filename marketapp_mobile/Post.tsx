@@ -21,31 +21,161 @@ import * as ImagePicker from 'expo-image-picker';
 import DocumentPicker from 'react-native-document-picker';
 import {Picker} from '@react-native-picker/picker';
 
-// function EditPost(props): JSX.Element {
-//   const [post, setPost] = useState({});
+function EditPost(props): JSX.Element {
+  //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
 
-//   useEffect(() => {
-//     fetchData(props.id);
-//   }, []);
+  const [display, setDisplay] = useState('');
 
-//   const fetchData = async id => {
-//     await axios
-//       .get('http://10.0.2.2:8000/posts/' + id)
-//       .then(res => {
-//         props.setPost({
-//           product: res.data.product,
-//           username: res.data.username,
-//           display_image: res.data.display_image,
-//           description: res.data.description,
-//           price: res.data.price,
-//           draft: res.data.draft,
-//           category: res.data.category,
-//           status: res.data.status,
-//         });
-//       })
-//       .catch((err: any) => console.log(err));
-//   };
-// }
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    await axios
+      .get('http://10.0.2.2:8000/posts/' + props.id)
+      .then(response => {
+        props.setPost(response.data);
+        setDisplay(response.data.display_image);
+      })
+      .catch((err: any) => console.log(err));
+  };
+
+  const postData = async () => {
+    let data = new FormData();
+    for (const [key, value] of Object.entries(props.post)) {
+      data.append(key, value);
+    }
+    await axios
+      .patch('http://10.0.2.2:8000/posts/' + props.id + '/', data)
+      .then(response => {
+        console.log(response);
+      })
+      .catch((err: any) => console.log(err));
+  };
+
+  const chooseImage = async () => {
+    const res = await DocumentPicker.pick({
+      type: [DocumentPicker.types.images],
+    });
+    let image = {
+      uri: res[0].uri,
+      type: res[0].type,
+      name: 'image',
+    };
+    props.setPost({...props.post, display_image: image});
+    setDisplay(res[0].uri);
+  };
+
+  return (
+    <>
+      <View style={styles.postItem}>
+        <Button
+          title="Select your display image"
+          onPress={chooseImage}
+          color={'rgb(17, 87, 64)'}
+        />
+        {display && (
+          <Image source={{uri: display}} style={{width: 200, height: 200}} />
+        )}
+      </View>
+      <View style={styles.postItem}>
+        <TextInput
+          placeholder="Product"
+          onChangeText={value => props.setPost({...props.post, product: value})}
+          style={styles.input}
+          value={props.post.product}
+        />
+      </View>
+      <View style={styles.postItemPrice}>
+        <Text style={styles.dollarSign}>$</Text>
+        <TextInput
+          placeholder="Enter Price"
+          onChangeText={value => {
+            if (Number(value)) {
+              props.setPost({...props.post, price: Number(value)});
+            }
+          }}
+          style={styles.input}
+          value={props.post.price}
+        />
+      </View>
+      <View style={styles.postItemCategory}>
+        <Text>Category: {props.post.category}</Text>
+        <Picker
+          selectedValue={props.post.category}
+          onValueChange={itemValue => {
+            if (props.categories.includes(itemValue)) {
+              props.setPost({...props.post, category: itemValue});
+            }
+          }}
+          style={styles.pickerItem}>
+          {props.categories.map((value: string) => {
+            return <Picker.Item label={value} value={value} />;
+          })}
+          <Picker.Item label={'test'} value={'test'} />
+        </Picker>
+      </View>
+      <View style={styles.postItemDraft}>
+        <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
+        <Switch
+          trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
+          value={props.post.draft}
+          onValueChange={() =>
+            props.setPost({...props.post, draft: !props.post.draft})
+          }
+        />
+      </View>
+      <View style={styles.postItemStatus}>
+        <Button
+          title="SELLING"
+          color={
+            props.post.status === 'SELLING'
+              ? 'rgb(185, 151, 91)'
+              : 'rgb(17, 87, 64)'
+          }
+          onPress={() => {
+            props.setPost({...props.post, status: 'SELLING'});
+          }}
+        />
+        <Button
+          title="PENDING"
+          color={
+            props.post.status === 'PENDING'
+              ? 'rgb(185, 151, 91)'
+              : 'rgb(17, 87, 64)'
+          }
+          onPress={() => {
+            props.setPost({...props.post, status: 'PENDING'});
+          }}
+        />
+      </View>
+      <View style={styles.postItemDescription}>
+        <TextInput
+          placeholder="Write a description for your product here:"
+          multiline={true}
+          numberOfLines={4}
+          style={styles.descriptionInput}
+          textAlignVertical={'top'}
+          onChangeText={value =>
+            props.setPost({...props.post, description: value})
+          }
+          value={props.post.description}
+        />
+      </View>
+
+      <TouchableOpacity
+        onPress={() => {
+          postData();
+          props.returnHome();
+        }}
+        style={styles.submit}>
+        <View>
+          <Text style={{color: Colors.white, fontSize: 30}}>EDIT POST</Text>
+        </View>
+      </TouchableOpacity>
+    </>
+  );
+}
 
 function NewPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
@@ -66,38 +196,6 @@ function NewPost(props): JSX.Element {
         console.log(response);
       })
       .catch((err: any) => console.log(err));
-    console.log(props.post);
-  };
-
-  const pickImage = async () => {
-    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== 'granted') {
-      // If permission is denied, show an alert
-      Alert.alert(
-        'Permission Denied',
-        `Sorry, we need camera
-             roll permission to upload images.`,
-      );
-    } else {
-      // Launch the image library and get
-      // the selected image
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        // If an image is selected (not cancelled),
-        // update the file state variable
-        props.setPost({...props.post, display_image: result.assets[0].uri});
-
-        // Clear any previous errors
-        // setError(null);
-      }
-    }
   };
 
   const chooseImage = async () => {
@@ -121,7 +219,6 @@ function NewPost(props): JSX.Element {
           onPress={chooseImage}
           color={'rgb(17, 87, 64)'}
         />
-        {console.log(display, props.post.display_image)}
         {display && (
           <Image source={{uri: display}} style={{width: 200, height: 200}} />
         )}
@@ -224,8 +321,8 @@ function NewPost(props): JSX.Element {
 
 function CreatePost(props): JSX.Element {
   const [view, setView] = useState({
-    newPost: true,
-    editPost: false,
+    newPost: props.showPost.id == null,
+    editPost: props.showPost.id != null,
   });
 
   const [post, setPost] = useState({
@@ -270,7 +367,6 @@ function CreatePost(props): JSX.Element {
         </View>
       </TouchableWithoutFeedback>
       <View style={styles.postContainer}>
-        {console.log(props.username)}
         {view.newPost && (
           <NewPost
             post={post}
@@ -281,7 +377,17 @@ function CreatePost(props): JSX.Element {
             username={props.username}
           />
         )}
-        {/* {view.editPost && <EditPost post={post} setPost={setPost} />} */}
+        {view.editPost && (
+          <EditPost
+            post={post}
+            setPost={setPost}
+            status={status}
+            categories={categories}
+            returnHome={props.returnHome}
+            username={props.username}
+            id={props.showPost.id}
+          />
+        )}
       </View>
     </>
   );

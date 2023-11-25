@@ -45,23 +45,42 @@ function Post(props: {
   setDesc: any;
 }): JSX.Element {
   return (
-    <TouchableWithoutFeedback>
-      <View style={styles.post}>
-        <View style={styles.postImageContainer}>
-          <Image
-            style={styles.postImage}
-            source={{
-              uri: props.data.display_image,
-            }}
-          />
+    <TouchableWithoutFeedback
+      onPress={() => {
+        // props.viewPost(props.data.id);
+      }}>
+      <>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            props.setDelete(props.data.id);
+            props.setView({
+              main: false,
+              editProfile: false,
+              deletePost: true,
+            });
+            // props.deletePost(props.data.id);
+          }}>
+          <View>
+            <Text>DELETE</Text>
+          </View>
+        </TouchableWithoutFeedback>
+        <View style={styles.post}>
+          <View style={styles.postImageContainer}>
+            <Image
+              style={styles.postImage}
+              source={{
+                uri: props.data.display_image,
+              }}
+            />
+          </View>
+          <View style={styles.postText}>
+            <Text>{props.data.product}</Text>
+            <Text>{props.data.username}</Text>
+            <Text>${props.data.price}</Text>
+          </View>
+          <View style={styles.editPost}></View>
         </View>
-        <View style={styles.postText}>
-          <Text>{props.data.product}</Text>
-          <Text>{props.data.username}</Text>
-          <Text>${props.data.price}</Text>
-        </View>
-        <View style={styles.editPost}></View>
-      </View>
+      </>
     </TouchableWithoutFeedback>
   );
 }
@@ -115,7 +134,24 @@ function Profile(props): JSX.Element {
   const [view, setView] = useState({
     main: true,
     editProfile: false,
+    deletePost: false,
   });
+  const [deletePostID, setDelete] = useState(null);
+
+  const removePost = async id => {
+    await axios
+      .delete('http://10.0.2.2:8000/posts/' + id + '/')
+      .then(response => {
+        console.log(response);
+      })
+      .catch((err: any) => console.log(err));
+    setView({
+      main: true,
+      editProfile: false,
+      deletePost: false,
+    });
+    setDelete(null);
+  };
 
   useEffect(() => {
     var request =
@@ -149,6 +185,7 @@ function Profile(props): JSX.Element {
                   setView({
                     main: false,
                     editProfile: true,
+                    deletePost: false,
                   });
                 }}
               />
@@ -173,7 +210,15 @@ function Profile(props): JSX.Element {
                 backgroundColor: Colors.white,
               }}>
               {posts.map(post => {
-                return <Post data={post} setDesc={props.setDesc} />;
+                return (
+                  <Post
+                    data={post}
+                    setDesc={props.setDesc}
+                    viewPost={props.viewPost}
+                    setView={setView}
+                    setDelete={setDelete}
+                  />
+                );
               })}
             </View>
           </ScrollView>
@@ -181,6 +226,33 @@ function Profile(props): JSX.Element {
       )}
       {view.editProfile && (
         <EditProfile profile={props.profile} setView={setView} />
+      )}
+      {view.deletePost && (
+        <View
+          // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            backgroundColor: Colors.white,
+            width: '80%',
+            height: '40%',
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: 20,
+          }}>
+          <Text>Are you sure you want to delete this post?</Text>
+          <View>
+            <Button title="YES" onPress={() => removePost(deletePostID)} />
+            <Button
+              title="NO"
+              onPress={() =>
+                setView({
+                  main: true,
+                  editProfile: false,
+                  deletePost: false,
+                })
+              }
+            />
+          </View>
+        </View>
       )}
     </>
   );

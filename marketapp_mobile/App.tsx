@@ -228,7 +228,10 @@ function App(): JSX.Element {
   const [showChats, setChats] = useState(false);
 
   const [showSettings, setSettings] = useState(false);
-  const [showPost, setPost] = useState(false);
+  const [showPost, setPost] = useState({
+    showPost: false,
+    id: null,
+  });
 
   useEffect(() => {
     fetchData();
@@ -314,7 +317,7 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(false);
     setSettings(false);
-    setPost(false);
+    setPost({...showPost, showPost: false});
   };
 
   const viewProfile = () => {
@@ -326,7 +329,7 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: true});
     setChats(false);
     setSettings(false);
-    setPost(false);
+    setPost({...showPost, showPost: false});
   };
 
   const viewChats = () => {
@@ -338,7 +341,7 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(true);
     setSettings(false);
-    setPost(false);
+    setPost({...showPost, showPost: false});
   };
 
   const viewSettings = () => {
@@ -350,10 +353,10 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(false);
     setSettings(true);
-    setPost(false);
+    setPost({...showPost, showPost: false});
   };
 
-  const viewPost = () => {
+  const viewPost = (id = null) => {
     setDesc({
       showDesc: false,
       post: {},
@@ -362,7 +365,10 @@ function App(): JSX.Element {
     setProfile({...profile, showProfile: false});
     setChats(false);
     setSettings(false);
-    setPost(true);
+    setPost({
+      showPost: true,
+      id: id,
+    });
   };
 
   const [settings, setSettingsTitle] = useState({
@@ -376,7 +382,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
-        !showPost && (
+        !showPost.showPost && (
           <View>
             <NavBar
               searchedPosts={searchedPosts}
@@ -427,7 +433,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
-        !showPost && (
+        !showPost.showPost && (
           <>
             <ProductDescription post={prodDesc.post} returnHome={returnHome} />
             <Footer
@@ -441,7 +447,7 @@ function App(): JSX.Element {
         profile.showProfile &&
         !showChats &&
         !showSettings &&
-        !showPost && (
+        !showPost.showPost && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -457,6 +463,7 @@ function App(): JSX.Element {
               returnHome={returnHome}
               posts={posts.posts}
               viewSettings={viewSettings}
+              viewPost={viewPost}
             />
             <Footer
               returnHome={returnHome}
@@ -469,7 +476,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         showChats &&
         !showSettings &&
-        !showPost && (
+        !showPost.showPost && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -492,7 +499,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         showSettings &&
-        !showPost && (
+        !showPost.showPost && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -503,7 +510,6 @@ function App(): JSX.Element {
               type={'Settings'}
               viewSettings={viewSettings}
             />
-            {console.log('test')}
             <UserSettings
               viewSettings={viewSettings}
               settings={settings}
@@ -520,7 +526,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
-        showPost && (
+        showPost.showPost && (
           <>
             {/* <NavBar
               searchedPosts={searchedPosts}
@@ -531,7 +537,11 @@ function App(): JSX.Element {
               type={'Settings'}
               viewSettings={viewSettings}
             /> */}
-            <CreatePost username={'admin'} returnHome={returnHome} />
+            <CreatePost
+              username={'admin'}
+              returnHome={returnHome}
+              showPost={showPost}
+            />
             {/* <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
