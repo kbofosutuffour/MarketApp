@@ -6,14 +6,11 @@
  */
 
 import React, {useEffect, useState} from 'react';
-import type {PropsWithChildren} from 'react';
-// import uuid from 'react-native-uuid';
 
 import {
   Image,
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -22,12 +19,7 @@ import {
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  // DebugInstructions,
-  // LearnMoreLinks,
-  // ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import axios from 'axios';
 import ProductDescription from './ProductDescription';
@@ -37,6 +29,7 @@ import UserSettings from './UserSettings';
 import CreatePost from './Post';
 
 function Footer(props): JSX.Element {
+  //Footer component that is displayed on various screens
   return (
     <View style={styles.footerContainer}>
       <View style={styles.goldBar} />
@@ -56,6 +49,7 @@ function Footer(props): JSX.Element {
 }
 
 function NavBar(props): JSX.Element {
+  //Navigation Bar component that is displayed on top of various screens
   return (
     <>
       <View style={styles.navigationBar}>
@@ -70,6 +64,8 @@ function NavBar(props): JSX.Element {
             />
           )}
         </View>
+
+        {/* Show the search icon if the user is on the home screen */}
         {props.type === 'Home' && (
           <TouchableWithoutFeedback
             onPress={() => {
@@ -81,6 +77,8 @@ function NavBar(props): JSX.Element {
             </View>
           </TouchableWithoutFeedback>
         )}
+
+        {/* Show the settings icon if the user is on the home screen */}
         {props.type === 'Profile' && (
           <TouchableWithoutFeedback
             onPress={() => {
@@ -101,6 +99,7 @@ function NavBar(props): JSX.Element {
 }
 
 function Post(props: {
+  //Component that holds the information on the provided post in the props object
   data: {
     display_image: any;
     product:
@@ -134,7 +133,7 @@ function Post(props: {
   setDesc: any;
 }): JSX.Element {
   return (
-    <TouchableWithoutFeedback
+    <TouchableWithoutFeedback //Makes the post component react to a tap
       onPress={() => {
         props.setDesc({
           showDesc: true,
@@ -160,6 +159,9 @@ function Post(props: {
 }
 
 function Categories(): JSX.Element {
+  //Component that displays all of the possible categories for a post.
+  //Shown when the user is performing a search
+
   const categories = [
     'Furniture',
     'Clothing',
@@ -198,6 +200,8 @@ function Categories(): JSX.Element {
 }
 
 function App(): JSX.Element {
+  //The main component that is displayed on the screen.
+
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -205,10 +209,13 @@ function App(): JSX.Element {
     flex: 1,
   };
 
+  //These state variables dictate the what screen is currently being displayed
+  //Some state variables hold data that is used in that screen state
   const [posts, setPosts] = useState({
     showPosts: true,
     posts: [],
   });
+
   const [searchedPosts, setSearch] = useState({
     showSearchBar: false,
     showResults: false,
@@ -225,33 +232,49 @@ function App(): JSX.Element {
     data: {},
   });
 
-  const [showChats, setChats] = useState(false);
+  const [settings, setSettingsTitle] = useState({
+    settings: false,
+    text: 'Settings',
+  });
 
-  const [showSettings, setSettings] = useState(false);
   const [showPost, setPost] = useState({
     showPost: false,
     id: null,
   });
 
+  const [showChats, setChats] = useState(false);
+
+  const [showSettings, setSettings] = useState(false);
+
+  // When the defined components finish rendering, fetch
+  // The posts that are currently stored in the database
   useEffect(() => {
     fetchData();
   }, []);
 
+  // The axios is a JavaScript library that is used to perform
+  // various HTTP requests from existing API's.  Common HTTP requests
+  // include get, post, put, and delete
   const fetchData = async () => {
+    // asynchronous function that gets all existing posts
     await axios
       .get('http://10.0.2.2:8000/posts')
       .then(res => {
-        console.log(res.data)
+        console.log(res.data);
         setPosts({
           showPosts: true,
           posts: res.data,
         });
       })
       .catch((err: any) => console.log(err));
+
+    // asynchronous function that gets the profile information
+    // for the given username
+    // TODO: Create a state variable for the user that is logged in
     await axios
       .get('http://10.0.2.2:8000/profile/NarutoUzumaki')
       .then(res => {
-        console.log(res.data, res.data.id, 'id')
+        console.log(res.data, res.data.id, 'id');
         setProfile({
           showProfile: false,
           data: res.data,
@@ -260,6 +283,7 @@ function App(): JSX.Element {
       .catch((err: any) => console.log(err));
   };
 
+  // function used to show results of a user search
   const searchPosts = (text: string) => {
     var results: any[] = [];
 
@@ -310,6 +334,9 @@ function App(): JSX.Element {
     });
   };
 
+  // These functions are called by various buttons and
+  // touchables on the app to change the state variables,
+  // Which then changes what page is shown on the screen
   const returnHome = () => {
     setDesc({
       showDesc: false,
@@ -371,16 +398,19 @@ function App(): JSX.Element {
       showPost: true,
       id: id,
     });
-    console.log('test')
   };
-
-  const [settings, setSettingsTitle] = useState({
-    settings: false,
-    text: 'Settings',
-  });
 
   return (
     <SafeAreaView style={backgroundStyle}>
+      {/* SaveAreaView Components make it so that developers can safely view the styling layout on different device sizes */}
+
+      {/* Many of the created components/functions hold a props parameter.  Here is where we define what information is stored in
+      that props parameter, which can then be accessed inside of the component via props.{attribute} */}
+
+      {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
+          This produces the effect of changing what is seen on the screen */}
+
+      {/* Home Page */}
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
@@ -432,6 +462,9 @@ function App(): JSX.Element {
             />
           </View>
         )}
+
+      {/* Product Description Page */}
+
       {prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
@@ -446,6 +479,9 @@ function App(): JSX.Element {
             />
           </>
         )}
+
+      {/* Profile Page */}
+
       {!prodDesc.showDesc &&
         profile.showProfile &&
         !showChats &&
@@ -475,6 +511,9 @@ function App(): JSX.Element {
             />
           </>
         )}
+
+      {/* Chat Rooms */}
+
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         showChats &&
@@ -498,6 +537,9 @@ function App(): JSX.Element {
             />
           </>
         )}
+
+      {/* Settings Page */}
+
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
@@ -525,37 +567,30 @@ function App(): JSX.Element {
             />
           </>
         )}
+
+      {/* Create & Edit Post Page */}
+
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
         showPost.showPost && (
           <>
-            {/* <NavBar
-              searchedPosts={searchedPosts}
-              posts={posts}
-              searchPosts={searchPosts}
-              setPosts={setPosts}
-              setSearch={setSearch}
-              type={'Settings'}
-              viewSettings={viewSettings}
-            /> */}
             <CreatePost
               username={'admin'}
               returnHome={returnHome}
               showPost={showPost}
             />
-            {/* <Footer
-              returnHome={returnHome}
-              viewProfile={viewProfile}
-              viewChats={viewChats}
-            /> */}
           </>
         )}
     </SafeAreaView>
   );
 }
 
+// This syntax is how styling is done for React Native Components.
+// Notice its similarity to CSS stylesheets
+// One major difference here is that components can really only have
+// two display styles: flex and none.
 const styles = StyleSheet.create({
   navigationBar: {
     display: 'flex',
