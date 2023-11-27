@@ -19,6 +19,9 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
+/**
+ * @returns Screen that shows a description of a post passed through the props object
+ */
 function ProductDescription(props: {
   post: {
     image: ImageSourcePropType;
@@ -54,8 +57,12 @@ function ProductDescription(props: {
   };
   returnHome: any;
 }): JSX.Element {
+
   const [profile, setProfile] = useState({});
 
+  // After the page renders, retrieve information on the user
+  // who created the post from the database, stored in the preceeding
+  // state variable
   useEffect(() => {
     let request = 'http://10.0.2.2:8000/profile/' + props.post.username;
     axios
@@ -72,6 +79,8 @@ function ProductDescription(props: {
 
   return (
     <SafeAreaView style={backgroundStyle}>
+
+      {/* Button to return home */}
       <TouchableWithoutFeedback onPress={props.returnHome}>
         <View style={styles.returnHome}>
           <Image
@@ -90,12 +99,16 @@ function ProductDescription(props: {
       </TouchableWithoutFeedback>
 
       <View style={styles.pdContainer}>
+
+        {/* Product Image(s) */}
         <View style={styles.image}>
           <Image
             source={{uri: props.post.display_image}}
             style={styles.displayImage}
           />
         </View>
+
+        {/* Product Description */}
         <View style={styles.description}>
           <View style={styles.profile}>
             <Image

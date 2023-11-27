@@ -15,6 +15,11 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
+/**
+ * 
+ * @param props
+ * @returns button lead to DM's of two users stored in the props object
+ */
 function Room(props): JSX.Element {
   return (
     <TouchableWithoutFeedback
@@ -44,6 +49,9 @@ function Room(props): JSX.Element {
   );
 }
 
+/**
+ * @returns an individual message generated from data stored in the props object
+ */
 function Message(props): JSX.Element {
   if (props.seller) {
     return (
@@ -88,6 +96,9 @@ function Message(props): JSX.Element {
   }
 }
 
+/**
+ * @returns Chat room screen that holds all possible conversations that the user is involved in
+ */
 function Chats(props): JSX.Element {
   const [rooms, setRooms] = useState({
     showRoom: false,
@@ -107,6 +118,8 @@ function Chats(props): JSX.Element {
     },
   });
 
+  // After the page is rendered, retrieve all of the chatrooms the user is in
+  // from the database
   useEffect(() => {
     var room_request =
       'http://10.0.2.2:8000/rooms/get_rooms/' + props.profile.username;
@@ -121,6 +134,14 @@ function Chats(props): JSX.Element {
       .catch((err: any) => console.log(err));
   }, []);
 
+  /**
+   * 
+   * @param id the id of the room that stores the messages between the buyer and seller
+   * @param buyer the username of the buyer
+   * @param bpf the profile picture of the buyer
+   * @param seller the username of the seller
+   * @param spf the profile picture of the seller
+   */
   var getChats = (id, buyer, bpf, seller, spf) => {
     var chat_request = 'http://10.0.2.2:8000/messages/get_messages/' + id;
     axios

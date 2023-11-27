@@ -13,6 +13,10 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import DocumentPicker from 'react-native-document-picker';
 
+/**
+ * @param props
+ * @returns A post created by the user
+ */
 function Post(props: {
   data: {
     display_image: any;
@@ -47,19 +51,12 @@ function Post(props: {
   setDesc: any;
 }): JSX.Element {
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        // console.log(props, 'test')
-
-        props.viewPost(props.data.id);
-        // console.log(props)
-        console.log('test!');
-      }}>
+    <TouchableWithoutFeedback onPress={() => props.viewPost(props.data.id)}>
+      {/* Clicking on a post in the profile will lead user to the edit post screen */}
       <>
         <View style={styles.post}>
           <TouchableWithoutFeedback
             onPress={() => {
-              console.log('test!!!!');
               props.viewPost(props.data.id);
             }}>
             <View style={styles.postImageContainer}>
@@ -79,6 +76,8 @@ function Post(props: {
           </View>
           <View style={styles.editPost}></View>
         </View>
+
+        {/* Button to delete a post */}
         <TouchableWithoutFeedback
           onPress={() => {
             props.setDelete(props.data.id);
@@ -87,7 +86,6 @@ function Post(props: {
               editProfile: false,
               deletePost: true,
             });
-            // props.deletePost(props.data.id);
           }}>
           <View style={{display: 'flex', alignItems: 'center'}}>
             <Text>DELETE</Text>
@@ -98,6 +96,11 @@ function Post(props: {
   );
 }
 
+/**
+ * Component which allows users to edit their profile
+ * @param props
+ * @returns Edit Profile Screen
+ */
 function EditProfile(props): JSX.Element {
   return (
     <>
@@ -115,6 +118,7 @@ function EditProfile(props): JSX.Element {
           <Text style={styles.settingsOption}>My Information</Text>
         </View>
         <View style={styles.settingsOptionContainerOther}>
+          {/* Leads user to a screen to change their profile picture */}
           <TouchableOpacity
             onPress={() =>
               props.setView({
@@ -152,8 +156,16 @@ function EditProfile(props): JSX.Element {
   );
 }
 
+/**
+ * @param props 
+ * @returns The profile page
+ */
 function Profile(props): JSX.Element {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]); // Will hold all of the post created by the user
+
+  // State variables that allows the user to switch between
+  // The profile page, editing their profile, deleting a post,
+  // and changing their profile picture
   const [view, setView] = useState({
     main: true,
     editProfile: false,
@@ -163,6 +175,10 @@ function Profile(props): JSX.Element {
   const [deletePostID, setDelete] = useState(null);
   const [changedPic, setChangedPic] = useState(null);
 
+  /**
+   * Function to delete the post in the database
+   * @param id The id of the selected post
+   */
   const removePost = async id => {
     await axios
       .delete('http://10.0.2.2:8000/posts/' + id + '/')
@@ -179,6 +195,8 @@ function Profile(props): JSX.Element {
     setDelete(null);
   };
 
+  // Function that retrieves all of the post created
+  // by the user currently in the database after the page renders
   useEffect(() => {
     var request =
       // eslint-disable-next-line prettier/prettier
@@ -229,6 +247,8 @@ function Profile(props): JSX.Element {
               <Text>Saved Posts</Text>
             </View>
           </View>
+
+          {/* Where the user's posts are shown */}
           <ScrollView
             contentInsetAdjustmentBehavior="automatic"
             style={styles.scrollView}>
@@ -237,7 +257,6 @@ function Profile(props): JSX.Element {
                 backgroundColor: Colors.white,
               }}>
               {posts.map(post => {
-                console.log(post, props.viewPost);
                 return (
                   <Post
                     data={post}
@@ -308,6 +327,8 @@ function Profile(props): JSX.Element {
                 />
               </View>
             </TouchableWithoutFeedback>
+
+            {/* Saves the new profile picture in the database */}
             <TouchableWithoutFeedback
               onPress={async () => {
                 let data = new FormData();

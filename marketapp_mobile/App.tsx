@@ -158,6 +158,9 @@ function Post(props: {
   );
 }
 
+/**
+ * @returns All possible categories for a post
+ */
 function Categories(): JSX.Element {
   //Component that displays all of the possible categories for a post.
   //Shown when the user is performing a search
@@ -199,6 +202,9 @@ function Categories(): JSX.Element {
   );
 }
 
+/**
+ * @returns Application that is displayed on the screen
+ */
 function App(): JSX.Element {
   //The main component that is displayed on the screen.
 
@@ -284,6 +290,10 @@ function App(): JSX.Element {
   };
 
   // function used to show results of a user search
+  /**
+   * Function used to show results of a user's search
+   * @param text user's input on the search bar
+   */
   const searchPosts = (text: string) => {
     var results: any[] = [];
 
@@ -337,6 +347,10 @@ function App(): JSX.Element {
   // These functions are called by various buttons and
   // touchables on the app to change the state variables,
   // Which then changes what page is shown on the screen
+
+  /**
+   * Switches to home page
+   */
   const returnHome = () => {
     setDesc({
       showDesc: false,
@@ -349,6 +363,9 @@ function App(): JSX.Element {
     setPost({...showPost, showPost: false});
   };
 
+  /**
+   * Switches to profile page
+   */
   const viewProfile = () => {
     setDesc({
       showDesc: false,
@@ -361,6 +378,9 @@ function App(): JSX.Element {
     setPost({...showPost, showPost: false});
   };
 
+  /**
+   * Switches to chat rooms
+   */
   const viewChats = () => {
     setDesc({
       showDesc: false,
@@ -373,6 +393,9 @@ function App(): JSX.Element {
     setPost({...showPost, showPost: false});
   };
 
+  /**
+   * Switches to the settings page
+   */
   const viewSettings = () => {
     setDesc({
       showDesc: false,
@@ -385,6 +408,10 @@ function App(): JSX.Element {
     setPost({...showPost, showPost: false});
   };
 
+  /**
+   * Switches to the create/edit post screen
+   * @param id 
+   */
   const viewPost = (id = null) => {
     setDesc({
       showDesc: false,
