@@ -78,7 +78,7 @@ function EditPost(props): JSX.Element {
       },
     });
     setNewData(image);
-    console.log(res[0].type)
+    console.log(res[0].type);
     setDisplay(res[0].uri);
   };
 

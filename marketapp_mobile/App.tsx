@@ -27,6 +27,7 @@ import Profile from './Profile';
 import Chats from './Chats';
 import UserSettings from './UserSettings';
 import CreatePost from './Post';
+import Login from './Login';
 
 function Footer(props): JSX.Element {
   //Footer component that is displayed on various screens
@@ -217,6 +218,11 @@ function App(): JSX.Element {
 
   //These state variables dictate the what screen is currently being displayed
   //Some state variables hold data that is used in that screen state
+  const [user, setUser] = useState({
+    username: null,
+    showLogin: true,
+  });
+
   const [posts, setPosts] = useState({
     showPosts: true,
     posts: [],
@@ -349,9 +355,29 @@ function App(): JSX.Element {
   // Which then changes what page is shown on the screen
 
   /**
+   * Switches to login/register page
+   */
+  const login = () => {
+    setUser({
+      username: null,
+      showLogin: true,
+    });
+    setDesc({
+      showDesc: false,
+      post: {},
+    });
+    setPosts({...posts, showPosts: false});
+    setProfile({...profile, showProfile: false});
+    setChats(false);
+    setSettings(false);
+    setPost({...showPost, showPost: false});
+  };
+
+  /**
    * Switches to home page
    */
   const returnHome = () => {
+    setUser({...user, showLogin: false});
     setDesc({
       showDesc: false,
       post: {},
@@ -367,6 +393,7 @@ function App(): JSX.Element {
    * Switches to profile page
    */
   const viewProfile = () => {
+    setUser({...user, showLogin: false});
     setDesc({
       showDesc: false,
       post: {},
@@ -382,6 +409,7 @@ function App(): JSX.Element {
    * Switches to chat rooms
    */
   const viewChats = () => {
+    setUser({...user, showLogin: false});
     setDesc({
       showDesc: false,
       post: {},
@@ -397,6 +425,7 @@ function App(): JSX.Element {
    * Switches to the settings page
    */
   const viewSettings = () => {
+    setUser({...user, showLogin: false});
     setDesc({
       showDesc: false,
       post: {},
@@ -410,9 +439,10 @@ function App(): JSX.Element {
 
   /**
    * Switches to the create/edit post screen
-   * @param id 
+   * @param id
    */
   const viewPost = (id = null) => {
+    setUser({...user, showLogin: false});
     setDesc({
       showDesc: false,
       post: {},
@@ -437,12 +467,21 @@ function App(): JSX.Element {
       {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
           This produces the effect of changing what is seen on the screen */}
 
+      {/* Login/Register Page */}
+      {!prodDesc.showDesc &&
+        !profile.showProfile &&
+        !showChats &&
+        !showSettings &&
+        !showPost.showPost &&
+        user.showLogin && <Login returnHome={returnHome} />}
+
       {/* Home Page */}
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
-        !showPost.showPost && (
+        !showPost.showPost &&
+        !user.showLogin && (
           <View>
             <NavBar
               searchedPosts={searchedPosts}
@@ -496,7 +535,8 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
-        !showPost.showPost && (
+        !showPost.showPost &&
+        !user.showLogin && (
           <>
             <ProductDescription post={prodDesc.post} returnHome={returnHome} />
             <Footer
@@ -513,7 +553,8 @@ function App(): JSX.Element {
         profile.showProfile &&
         !showChats &&
         !showSettings &&
-        !showPost.showPost && (
+        !showPost.showPost &&
+        !user.showLogin && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -545,7 +586,8 @@ function App(): JSX.Element {
         !profile.showProfile &&
         showChats &&
         !showSettings &&
-        !showPost.showPost && (
+        !showPost.showPost && 
+        !user.showLogin && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -571,7 +613,8 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         showSettings &&
-        !showPost.showPost && (
+        !showPost.showPost && 
+        !user.showLogin && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -601,7 +644,8 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         !showSettings &&
-        showPost.showPost && (
+        showPost.showPost &&
+        !user.showLogin && (
           <>
             <CreatePost
               username={'admin'}

@@ -1,0 +1,699 @@
+import axios from 'axios';
+import React, {useEffect, useState} from 'react';
+import CheckBox from '@react-native-community/checkbox';
+import DocumentPicker from 'react-native-document-picker';
+
+import {
+  Button,
+  Image,
+  ImageSourcePropType,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+
+function ForgotPassword(props): JSX.Element {
+  const [passwordState, setPasswordState] = useState({
+    sendCode: true,
+    createPassword: false,
+  });
+
+  const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState({
+    password: '',
+    confirm: '',
+  });
+
+  const [codeSent, sendCode] = useState(false);
+
+  return (
+    <>
+      {passwordState.sendCode && (
+        <>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Image
+              style={styles.blackArrow}
+              source={require('./media/black_left_arrow.png')}
+            />
+          </TouchableWithoutFeedback>
+          <View style={styles.loginContainer}>
+            <Image
+              style={styles.wmLogo}
+              source={require('./media/wm_logo_green.png')}
+            />
+            <View style={styles.loginText}>
+              <Text style={styles.header}>Verify your W&M email account</Text>
+              <View style={styles.emailInput}>
+                <TextInput
+                  placeholder="Enter your school email"
+                  onChangeText={text => setEmail(text)}
+                  style={styles.inputSmall}
+                />
+                <TouchableWithoutFeedback
+                  onPress={() =>
+                    setPasswordState({
+                      sendCode: false,
+                      createPassword: true,
+                    })
+                  }>
+                  <Text
+                    // eslint-disable-next-line react-native/no-inline-styles
+                    style={{
+                      width: 90,
+                      height: 35,
+                      borderRadius: 15,
+                      backgroundColor: codeSent ? 'green' : 'rgb(176,211,229)',
+                      color: 'black',
+                      textAlign: 'center',
+                      lineHeight: 35,
+                    }}>
+                    {codeSent ? 'Code Sent' : 'Send Code'}
+                  </Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <View style={styles.emailInput}>
+                <TextInput
+                  placeholder="Enter your verification code"
+                  onChangeText={text => setEmail(text)}
+                  style={styles.inputSmall}
+                />
+                <TouchableWithoutFeedback>
+                  <Text
+                    // eslint-disable-next-line react-native/no-inline-styles
+                    style={{
+                      width: 90,
+                      height: 35,
+                      borderRadius: 15,
+                      backgroundColor: 'rgb(176,211,229)',
+                      color: 'black',
+                      textAlign: 'center',
+                      lineHeight: 35,
+                    }}>
+                    {'Verify Code'}
+                  </Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <TouchableWithoutFeedback>
+                <Text style={styles.forgotPassword}>Resend Code</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                // eslint-disable-next-line react-native/no-inline-styles
+                onPress={() =>
+                  setPasswordState({
+                    sendCode: false,
+                    createPassword: true,
+                  })
+                }>
+                <Text style={styles.loginButton}>Verify Code</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  props.setLoginState({
+                    login: false,
+                    register: false,
+                    forgotPassword: false,
+                    verifyEmail: true,
+                  })
+                }>
+                <Text>Don't have an account? Click here to Sign Up</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        </>
+      )}
+      {passwordState.createPassword && (
+        <>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Image
+              style={styles.blackArrow}
+              source={require('./media/black_left_arrow.png')}
+            />
+          </TouchableWithoutFeedback>
+          <View style={styles.loginContainer}>
+            <Image
+              style={styles.wmLogo}
+              source={require('./media/wm_logo_green.png')}
+            />
+            <View style={styles.loginText}>
+              <Text style={styles.header}>Create a new password</Text>
+              <View style={styles.emailInput}>
+                <TextInput
+                  placeholder="Enter your password"
+                  onChangeText={text =>
+                    setNewPassword({...newPassword, password: text})
+                  }
+                  style={styles.input}
+                  textContentType="password"
+                  secureTextEntry={true}
+                />
+              </View>
+              <View style={styles.emailInput}>
+                <TextInput
+                  placeholder="Confirm your password"
+                  onChangeText={text =>
+                    setNewPassword({...newPassword, confirm: text})
+                  }
+                  style={styles.input}
+                  textContentType="password"
+                  secureTextEntry={true}
+                />
+              </View>
+              <Text>Password must contain 8 characters</Text>
+              <TouchableWithoutFeedback
+                style={styles.loginButton}
+                onPress={() => {
+                  setPasswordState({
+                    sendCode: true,
+                    createPassword: false,
+                  });
+                  props.setLoginState({
+                    login: true,
+                    register: false,
+                    forgotPassword: false,
+                    verifyEmail: false,
+                  });
+                }}>
+                <Text style={styles.loginButton}>Create a new password</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        </>
+      )}
+    </>
+  );
+}
+
+function Register(props): JSX.Element {
+  const [hasRead, setRead] = useState(false);
+  const [info, setInfo] = useState({
+    first_name: '',
+    last_name: '',
+    username: '',
+    password: '',
+    confirm: '',
+    profile_picture: {},
+  });
+
+  const [userSelect, setUsername] = useState({
+    hasUser: false,
+    isTaken: false,
+  });
+
+  const [profilePicture, setProfilePicture] = useState('');
+
+  const chooseImage = async () => {
+    const res = await DocumentPicker.pick({
+      type: [DocumentPicker.types.images],
+    });
+    let image = {
+      uri: res[0].uri,
+      type: res[0].type,
+      name: 'image',
+    };
+    props.setPost({
+      ...props.post,
+      display_image: {
+        uri: res[0].uri,
+        type: res[0].type,
+        name: 'image.png',
+      },
+    });
+    setInfo({...info, profile_picture: image});
+    setProfilePicture(res[0].uri);
+  };
+
+  return (
+    <>
+      <TouchableWithoutFeedback
+        onPress={() =>
+          props.setLoginState({
+            login: false,
+            register: false,
+            forgotPassword: true,
+            verifyEmail: false,
+          })
+        }>
+        <Image
+          style={styles.blackArrow}
+          source={require('./media/black_left_arrow.png')}
+        />
+      </TouchableWithoutFeedback>
+      <View style={styles.loginContainer}>
+        <TouchableWithoutFeedback>
+          <Image
+            style={styles.profilePicture}
+            source={
+              profilePicture
+                ? {uri: profilePicture}
+                : require('./media/camera.png')
+            }
+          />
+        </TouchableWithoutFeedback>
+
+        <View style={styles.createAccountText}>
+          <TextInput
+            placeholder="Enter your first name"
+            onChangeText={text => setInfo({...info, first_name: text})}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Enter your last name"
+            onChangeText={text => setInfo({...info, last_name: text})}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Enter your username"
+            onChangeText={text => setInfo({...info, username: text})}
+            style={styles.input}
+          />
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setUsername({
+                hasUser: true,
+                isTaken: false,
+              });
+            }}>
+            <Text
+              // eslint-disable-next-line react-native/no-inline-styles
+              style={{
+                backgroundColor: !userSelect.hasUser
+                  ? 'rgb(176,211,229)'
+                  : userSelect.isTaken
+                  ? 'rgb(233,132,132)'
+                  : 'rgb(138,178,147)',
+                width: 150,
+                height: 30,
+                borderRadius: 10,
+                textAlign: 'center',
+                lineHeight: 30,
+              }}>
+              {!userSelect.hasUser
+                ? 'Check nickname'
+                : userSelect.isTaken
+                ? 'Nickname Taken'
+                : 'Great Nickname!'}
+            </Text>
+          </TouchableWithoutFeedback>
+
+          <TextInput
+            placeholder="Enter your password"
+            onChangeText={text => setInfo({...info, password: text})}
+            style={styles.input}
+            textContentType="password"
+            secureTextEntry={true}
+          />
+          <TextInput
+            placeholder="Confirm your password"
+            onChangeText={text => setInfo({...info, confirm: text})}
+            style={styles.input}
+            textContentType="password"
+            secureTextEntry={true}
+          />
+          <Text style={styles.usernameWarning}>
+            *Usernames are not changeable
+          </Text>
+
+          <View style={styles.termsAndConditionsContainer}>
+            <Text>I have read and agreed to the </Text>
+            <Text style={styles.termsAndConditionsBold}>
+              Terms and Conditions{' '}
+            </Text>
+          </View>
+          <View style={styles.termsAndConditionsContainer}>
+            <Text> and </Text>
+            <Text style={styles.termsAndConditionsBold}>Privacy Policy</Text>
+          </View>
+
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Text style={styles.createAccountButton}>Create Account</Text>
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Text>Already have an account? Click here</Text>
+          </TouchableWithoutFeedback>
+        </View>
+      </View>
+    </>
+  );
+}
+
+function Verify(props): JSX.Element {
+  const [code, setCodeSent] = useState({
+    code: '',
+    codeSent: false,
+  });
+
+  const verify = code => {
+    return;
+  };
+
+  return (
+    <>
+      <TouchableWithoutFeedback
+        onPress={() =>
+          props.setLoginState({
+            login: true,
+            register: false,
+            forgotPassword: false,
+            verifyEmail: false,
+          })
+        }>
+        <Image
+          style={styles.blackArrow}
+          source={require('./media/black_left_arrow.png')}
+        />
+      </TouchableWithoutFeedback>
+      <View style={styles.loginContainer}>
+        <Image
+          style={styles.wmLogo}
+          source={require('./media/wm_logo_green.png')}
+        />
+        <View style={styles.loginText}>
+          <Text style={styles.header}>Verify your W&M email account</Text>
+          <View style={styles.emailInput}>
+            <TextInput
+              style={styles.inputSmall}
+              placeholder="Enter your school email"
+              onChangeText={text =>
+                props.setInfo({...props.info, username: text})
+              }
+            />
+            <TouchableWithoutFeedback
+              style={{
+                backgroundColor: code.codeSent ? Colors.green : Colors.blue,
+              }}>
+              <Text
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  backgroundColor: code.codeSent
+                    ? 'rgb(138,178,147)'
+                    : 'rgb(176,211,229)',
+                  width: 100,
+                  height: 30,
+                  borderRadius: 10,
+                  textAlign: 'center',
+                  lineHeight: 30,
+                }}>
+                {code.codeSent ? 'Code Sent' : 'Send Code'}
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.emailInput}>
+            <TextInput
+              style={styles.inputSmall}
+              placeholder="Please enter your verification code here"
+              onChangeText={text =>
+                props.setInfo({...props.info, username: text})
+              }
+            />
+            <TouchableWithoutFeedback>
+              <Text
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  backgroundColor: 'rgb(176,211,229)',
+                  width: 100,
+                  height: 30,
+                  borderRadius: 10,
+                  textAlign: 'center',
+                  lineHeight: 30,
+                }}>
+                Verify
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: false,
+                register: true,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Text style={styles.loginButton}>Continue Sign Up</Text>
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Text style={styles.createAccount}>
+              Already have an account? Click here
+            </Text>
+          </TouchableWithoutFeedback>
+        </View>
+      </View>
+    </>
+  );
+}
+
+function Login(props): JSX.Element {
+  const [loginState, setLoginState] = useState({
+    login: true,
+    register: false,
+    forgotPassword: false,
+    verifyEmail: false,
+  });
+
+  const [info, setInfo] = useState({
+    username: '',
+    password: '',
+  });
+
+  const verifyUser = (username, password) => {
+    /* Django get request */
+    let request = true;
+    if (request) {
+      props.returnHome();
+    } else {
+      //raise error message
+    }
+  };
+
+  return (
+    <>
+      {loginState.login && (
+        <>
+          <View style={styles.loginContainer}>
+            <Image
+              style={styles.wmLogo}
+              source={require('./media/wm_logo_green.png')}
+            />
+            <View style={styles.loginText}>
+              <Text style={styles.header}>
+                Welcome to Market App at William and Mary
+              </Text>
+              <TextInput
+                placeholder="Enter username"
+                onChangeText={text => setInfo({...info, username: text})}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Enter Password"
+                onChangeText={text => setInfo({...info, password: text})}
+                style={styles.input}
+                textContentType="password"
+                secureTextEntry={true}
+              />
+              <TouchableWithoutFeedback
+                onPress={() => verifyUser(info.username, info.password)}>
+                <Text style={styles.loginButton}>Log In</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  setLoginState({
+                    login: false,
+                    register: false,
+                    forgotPassword: true,
+                    verifyEmail: false,
+                  })
+                }>
+                <Text style={styles.forgotPassword}>Forgot password?</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  setLoginState({
+                    login: false,
+                    register: false,
+                    forgotPassword: false,
+                    verifyEmail: true,
+                  })
+                }>
+                <Text style={styles.createAccount}>Create a new account</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        </>
+      )}
+      {loginState.register && (
+        <Register
+          setLoginState={setLoginState}
+          verifyUser={verifyUser}
+          setInfo={setInfo}
+          info={info}
+        />
+      )}
+      {loginState.forgotPassword && (
+        <ForgotPassword setLoginState={setLoginState} />
+      )}
+      {loginState.verifyEmail && <Verify setLoginState={setLoginState} />}
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  loginContainer: {
+    backgroundColor: Colors.white,
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: 20,
+  },
+  loginText: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: 10,
+  },
+  loginButton: {
+    width: 250,
+    height: 40,
+    borderRadius: 15,
+    backgroundColor: 'rgb(17, 87, 64)',
+    textAlign: 'center',
+    lineHeight: 40,
+    color: Colors.white,
+  },
+  createAccountButton: {
+    width: 250,
+    height: 40,
+    borderRadius: 15,
+    backgroundColor: 'rgb(17, 87, 64)',
+    textAlign: 'center',
+    lineHeight: 40,
+    color: Colors.white,
+    margin: 10,
+  },
+  header: {
+    fontSize: 20,
+    width: 250,
+    textAlign: 'center',
+  },
+  createAccount: {
+    textDecorationLine: 'underline',
+    color: 'gray',
+    margin: 10,
+  },
+  createAccountText: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  forgotPassword: {
+    color: 'rgb(17, 87, 64)',
+    textDecorationLine: 'underline',
+  },
+  wmLogo: {
+    width: 200,
+    height: 200,
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  profilePicture: {
+    width: 150,
+    height: 150,
+    padding: 20,
+    borderRadius: 75,
+    borderWidth: 2,
+    borderColor: Colors.black,
+    overflow: 'hidden',
+  },
+  emailInput: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  input: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray',
+    width: 300,
+    height: 50,
+    color: Colors.black,
+    paddingLeft: 10,
+    margin: 0,
+  },
+  inputSmall: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray',
+    width: 225,
+    height: 50,
+    color: Colors.black,
+    paddingLeft: 10,
+    margin: 0,
+  },
+  blackArrow: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    width: 20,
+    height: 20,
+  },
+  termsAndConditionsContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    rowGap: 0,
+  },
+  termsAndConditionsBold: {
+    fontWeight: 'bold',
+  },
+  usernameWarning: {
+    marginTop: 10,
+    marginBottom: 30,
+  },
+});
+
+export default Login;
