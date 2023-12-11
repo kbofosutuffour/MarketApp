@@ -509,6 +509,35 @@ function Login(props): JSX.Element {
     }
   };
 
+  const login = async () => {
+    const data = {
+      username: info.username,
+      password: info.password,
+    };
+    console.log(info.username, info.password)
+    await axios
+      .post('http://10.0.2.2:8000/users/login/', data)
+      .then(response => {
+        if (response.data.login) {
+          if (response.data.register) {
+            setLoginState({
+              login: false,
+              register: true,
+              forgotPassword: false,
+              verifyEmail: false,
+            });
+          } else {
+            props.returnHome(info.username);
+          }
+        }
+      })
+      .catch((err: any) => console.log(err));
+    setInfo({
+      username: '',
+      password: '',
+    });
+  };
+
   return (
     <>
       {loginState.login && (
@@ -534,8 +563,7 @@ function Login(props): JSX.Element {
                 textContentType="password"
                 secureTextEntry={true}
               />
-              <TouchableWithoutFeedback
-                onPress={() => verifyUser(info.username, info.password)}>
+              <TouchableWithoutFeedback onPress={() => login()}>
                 <Text style={styles.loginButton}>Log In</Text>
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback

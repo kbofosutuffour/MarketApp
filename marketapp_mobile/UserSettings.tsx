@@ -164,6 +164,9 @@ function UserSettings(props): JSX.Element {
                         settings: true,
                         text: value,
                       });
+                      if (value == 'Log Out') {
+                        props.login();
+                      }
                     }}>
                     <View style={styles.settingsOptionContainer}>
                       <Text style={styles.settingsOption}>{value}</Text>

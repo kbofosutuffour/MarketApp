@@ -262,7 +262,7 @@ function App(): JSX.Element {
   // The posts that are currently stored in the database
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user.username]);
 
   // The axios is a JavaScript library that is used to perform
   // various HTTP requests from existing API's.  Common HTTP requests
@@ -283,16 +283,19 @@ function App(): JSX.Element {
     // asynchronous function that gets the profile information
     // for the given username
     // TODO: Create a state variable for the user that is logged in
-    await axios
-      .get('http://10.0.2.2:8000/profile/NarutoUzumaki')
-      .then(res => {
-        console.log(res.data, res.data.id, 'id');
-        setProfile({
-          showProfile: false,
-          data: res.data,
-        });
-      })
-      .catch((err: any) => console.log(err));
+
+    if (user.username) {
+      await axios
+        .get('http://10.0.2.2:8000/profile/' + user.username)
+        .then(res => {
+          console.log(res.data, res.data.id, 'id');
+          setProfile({
+            showProfile: false,
+            data: res.data,
+          });
+        })
+        .catch((err: any) => console.log(err));
+    }
   };
 
   // function used to show results of a user search
@@ -375,9 +378,21 @@ function App(): JSX.Element {
 
   /**
    * Switches to home page
+   * @param username the username of the current user logged on
    */
-  const returnHome = () => {
-    setUser({...user, showLogin: false});
+  const returnHome = (username = null) => {
+    // needed for weird bug with calling a function through proos
+    username = typeof username === 'string' ? username : null;
+
+    // if a new user has logged on, change the state username
+    // otherwise (i.e changing from profile to homepage), use the same
+    // username
+    if (username) {
+      setUser({username: username, showLogin: false});
+    } else {
+      setUser({...user, showLogin: false});
+    }
+
     setDesc({
       showDesc: false,
       post: {},
@@ -393,7 +408,10 @@ function App(): JSX.Element {
    * Switches to profile page
    */
   const viewProfile = () => {
-    setUser({...user, showLogin: false});
+    setUser({
+      username: user.username,
+      showLogin: false,
+    });
     setDesc({
       showDesc: false,
       post: {},
@@ -586,7 +604,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         showChats &&
         !showSettings &&
-        !showPost.showPost && 
+        !showPost.showPost &&
         !user.showLogin && (
           <>
             <NavBar
@@ -613,7 +631,7 @@ function App(): JSX.Element {
         !profile.showProfile &&
         !showChats &&
         showSettings &&
-        !showPost.showPost && 
+        !showPost.showPost &&
         !user.showLogin && (
           <>
             <NavBar
@@ -629,6 +647,7 @@ function App(): JSX.Element {
               viewSettings={viewSettings}
               settings={settings}
               setSettingsTitle={setSettingsTitle}
+              login={login}
             />
             <Footer
               returnHome={returnHome}

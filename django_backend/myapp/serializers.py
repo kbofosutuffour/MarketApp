@@ -55,7 +55,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'is_staff']
+        fields = ['url', 'username', 'password', 'email', 'is_staff']
 
 class EditPostForm(serializers.ModelSerializer):
 

@@ -14,6 +14,8 @@ from rest_framework import viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .serializers import *
 import random
@@ -232,8 +234,35 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = [permissions.IsAuthenticated]
-    
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (AllowAny,)
+
+    @action(methods=['post'], detail=False)
+    def login(self, request, *args, **kwargs):
+        print('test')
+        content = {
+            'user': str(request.user),  # `django.contrib.auth.User` instance.
+            'auth': str(request.auth),  # None
+        }
+        print(request.data)
+
+        #authenticates the login information
+        user = auth.authenticate(username=request.data['username'], password=request.data['password']) 
+
+        #authenticates the user and checks if user has a profile
+        if user is not None:
+            #auth.login(request, user)
+            try:
+                Profile.objects.get(username=request.data['username'])
+            except:
+                return Response({'login': 1, 'register': 1, 'message': 'login successful'})
+            
+            return Response({'login': 1, 'register': 0, 'message': 'login successful, redirect to registration page'})
+        
+        #else, reload the login screen and display error message
+        else:
+            return Response({'login': 0, 'message': 'credentials invalid' })
+         
 
 class Rooms(viewsets.ModelViewSet):
     """

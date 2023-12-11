@@ -48,7 +48,6 @@ function EditPost(props): JSX.Element {
         data.append('display_image', newData);
       } else {
         data.append(key, value);
-
       }
     }
     console.log(props.post.display_image, 'test');
