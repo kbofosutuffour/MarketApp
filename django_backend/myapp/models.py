@@ -87,8 +87,8 @@ class Profile(models.Model):
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
-    saved_posts = models.ManyToManyField(Post)
-    drafts = models.ManyToManyField(Post, related_name="drafts")
+    saved_posts = models.ManyToManyField(Post, blank=True)
+    drafts = models.ManyToManyField(Post, blank=True, related_name="drafts")
 
     def __str__(self) -> str:
         return self.username

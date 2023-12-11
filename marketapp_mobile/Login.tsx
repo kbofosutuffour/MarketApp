@@ -205,14 +205,17 @@ function ForgotPassword(props): JSX.Element {
 
 function Register(props): JSX.Element {
   const [hasRead, setRead] = useState(false);
-  const [info, setInfo] = useState({
+  const [email, setEmail] = useState('');
+
+  const [profile, setProfile] = useState({
     first_name: '',
     last_name: '',
     username: '',
     password: '',
-    confirm: '',
     profile_picture: {},
   });
+
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [userSelect, setUsername] = useState({
     hasUser: false,
@@ -225,21 +228,58 @@ function Register(props): JSX.Element {
     const res = await DocumentPicker.pick({
       type: [DocumentPicker.types.images],
     });
-    let image = {
-      uri: res[0].uri,
-      type: res[0].type,
-      name: 'image',
-    };
-    props.setPost({
-      ...props.post,
-      display_image: {
+    setProfile({
+      ...profile,
+      profile_picture: {
         uri: res[0].uri,
         type: res[0].type,
         name: 'image.png',
       },
     });
-    setInfo({...info, profile_picture: image});
     setProfilePicture(res[0].uri);
+  };
+
+  const checkUsername = () => {
+    setUsername({
+      hasUser: false,
+      isTaken: false,
+    });
+  };
+
+  const createAccount = async () => {
+    let data = new FormData();
+    let finished =
+      profile.password === confirmPassword &&
+      profile.password.length >= 8 &&
+      profile.username.length > 0 &&
+      Object.keys(profile.profile_picture).length;
+
+    if (finished) {
+      for (const [key, value] of Object.entries(profile)) {
+        data.append(key, value);
+      }
+    }
+
+    await axios
+      .post('http://10.0.2.2:8000/users/', {
+        username: profile.username,
+        password: profile.password,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        email: email,
+      })
+      .then(response => {
+        console.log(response);
+      })
+      .catch((err: any) => console.log(err));
+
+    await axios
+      .post('http://10.0.2.2:8000/profiles/', data)
+      .then(response => {
+        console.log(response);
+        props.returnHome(profile.username);
+      })
+      .catch((err: any) => console.log(err));
   };
 
   return (
@@ -259,7 +299,7 @@ function Register(props): JSX.Element {
         />
       </TouchableWithoutFeedback>
       <View style={styles.loginContainer}>
-        <TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={() => chooseImage()}>
           <Image
             style={styles.profilePicture}
             source={
@@ -273,17 +313,22 @@ function Register(props): JSX.Element {
         <View style={styles.createAccountText}>
           <TextInput
             placeholder="Enter your first name"
-            onChangeText={text => setInfo({...info, first_name: text})}
+            onChangeText={text => setProfile({...profile, first_name: text})}
             style={styles.input}
           />
           <TextInput
             placeholder="Enter your last name"
-            onChangeText={text => setInfo({...info, last_name: text})}
+            onChangeText={text => setProfile({...profile, last_name: text})}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Re-enter your email address"
+            onChangeText={text => setEmail(text)}
             style={styles.input}
           />
           <TextInput
             placeholder="Enter your username"
-            onChangeText={text => setInfo({...info, username: text})}
+            onChangeText={text => setProfile({...profile, username: text})}
             style={styles.input}
           />
           <TouchableWithoutFeedback
@@ -317,14 +362,14 @@ function Register(props): JSX.Element {
 
           <TextInput
             placeholder="Enter your password"
-            onChangeText={text => setInfo({...info, password: text})}
+            onChangeText={text => setProfile({...profile, password: text})}
             style={styles.input}
             textContentType="password"
             secureTextEntry={true}
           />
           <TextInput
             placeholder="Confirm your password"
-            onChangeText={text => setInfo({...info, confirm: text})}
+            onChangeText={text => setConfirmPassword(text)}
             style={styles.input}
             textContentType="password"
             secureTextEntry={true}
@@ -344,15 +389,7 @@ function Register(props): JSX.Element {
             <Text style={styles.termsAndConditionsBold}>Privacy Policy</Text>
           </View>
 
-          <TouchableWithoutFeedback
-            onPress={() =>
-              props.setLoginState({
-                login: true,
-                register: false,
-                forgotPassword: false,
-                verifyEmail: false,
-              })
-            }>
+          <TouchableWithoutFeedback onPress={() => createAccount()}>
             <Text style={styles.createAccountButton}>Create Account</Text>
           </TouchableWithoutFeedback>
           <TouchableWithoutFeedback
@@ -524,7 +561,6 @@ function Login(props): JSX.Element {
       username: info.username,
       password: info.password,
     };
-    console.log(info.username, info.password);
     await axios
       .post('http://10.0.2.2:8000/users/login/', data)
       .then(response => {
@@ -608,6 +644,7 @@ function Login(props): JSX.Element {
           verifyUser={verifyUser}
           setInfo={setInfo}
           info={info}
+          returnHome={props.returnHome}
         />
       )}
       {loginState.forgotPassword && (

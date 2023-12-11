@@ -184,6 +184,23 @@ class UserViewSet(viewsets.ModelViewSet):
         code = str(code)
         send_code(request, code, request.data['email'])
         return Response({'code': code})
+    
+    def create(self, request):
+        serializer = UserSerializer(data=request.data)
+        print(request.data, 'request')
+        if serializer.is_valid():
+            user = User.objects.create()
+            user.username = request.data['username']
+            user.set_password(request.data['password'])
+            user.email = request.data['email']
+            user.first_name = request.data['first_name']
+            user.last_name = request.data['last_name']
+            user.save()
+            return Response({'message': 'You have successfully edited your post'})
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors})
+    
          
 
 class Rooms(viewsets.ModelViewSet):
@@ -355,12 +372,12 @@ def send_code(request, code, email):
 
     #send user an email
     print(code)
-    send_mail(
-            subject="H2H Account Verification Code",
-            message=message,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email]
-        )
+    # send_mail(
+    #         subject="H2H Account Verification Code",
+    #         message=message,
+    #         from_email=settings.EMAIL_HOST_USER,
+    #         recipient_list=[email]
+    #     )
 
 def register(request):
     """
