@@ -373,13 +373,33 @@ function Register(props): JSX.Element {
 }
 
 function Verify(props): JSX.Element {
-  const [code, setCodeSent] = useState({
+  const [code, setCode] = useState({
     code: '',
     codeSent: false,
   });
 
-  const verify = code => {
-    return;
+  const [email, setEmail] = useState('');
+  const [input, setInput] = useState('');
+
+  const verify = async (inputEmail = null, inputCode = null) => {
+    if (inputEmail) {
+      await axios
+        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .then(response => {
+          setCode({
+            code: response.data.code,
+            codeSent: true,
+          });
+        })
+        .catch((err: any) => console.log(err));
+    } else if (inputCode === code.code && code.code.length) {
+      props.setLoginState({
+        login: false,
+        register: true,
+        forgotPassword: false,
+        verifyEmail: false,
+      });
+    }
   };
 
   return (
@@ -409,14 +429,13 @@ function Verify(props): JSX.Element {
             <TextInput
               style={styles.inputSmall}
               placeholder="Enter your school email"
-              onChangeText={text =>
-                props.setInfo({...props.info, username: text})
-              }
+              onChangeText={text => setEmail(text)}
             />
             <TouchableWithoutFeedback
               style={{
                 backgroundColor: code.codeSent ? Colors.green : Colors.blue,
-              }}>
+              }}
+              onPressOut={() => verify(email)}>
               <Text
                 // eslint-disable-next-line react-native/no-inline-styles
                 style={{
@@ -437,9 +456,7 @@ function Verify(props): JSX.Element {
             <TextInput
               style={styles.inputSmall}
               placeholder="Please enter your verification code here"
-              onChangeText={text =>
-                props.setInfo({...props.info, username: text})
-              }
+              onChangeText={text => setInput(text)}
             />
             <TouchableWithoutFeedback>
               <Text
@@ -451,20 +468,13 @@ function Verify(props): JSX.Element {
                   borderRadius: 10,
                   textAlign: 'center',
                   lineHeight: 30,
-                }}>
+                }}
+                onPress={() => verify(null, input)}>
                 Verify
               </Text>
             </TouchableWithoutFeedback>
           </View>
-          <TouchableWithoutFeedback
-            onPress={() =>
-              props.setLoginState({
-                login: false,
-                register: true,
-                forgotPassword: false,
-                verifyEmail: false,
-              })
-            }>
+          <TouchableWithoutFeedback onPress={() => verify(null, input)}>
             <Text style={styles.loginButton}>Continue Sign Up</Text>
           </TouchableWithoutFeedback>
           <TouchableWithoutFeedback
@@ -514,7 +524,7 @@ function Login(props): JSX.Element {
       username: info.username,
       password: info.password,
     };
-    console.log(info.username, info.password)
+    console.log(info.username, info.password);
     await axios
       .post('http://10.0.2.2:8000/users/login/', data)
       .then(response => {

@@ -42,11 +42,6 @@ class Posts(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    # def list(self, request):
-    #     queryset = Post.objects.all()
-    #     serializer = PostSerializer(queryset, many=True)
-    #     return Response(serializer.data)
-
     @action(methods=['get'], detail=False, url_path=r'get_posts/(?P<username>\w+)')
     def get_posts(self, request, username, *args, **kwargs):
 
@@ -63,22 +58,6 @@ class Posts(viewsets.ModelViewSet):
             #create the post, then save it as a draft for the user
             serializer.username = 'admin'
             serializer.save()
-            temp_user = 'admin'
-
-            # user = Profile.objects.get(username = request.user.get_username())
-            # post = Post.objects.get(username = request.user.get_username(), product = np.product)
-
-            # # making the post a draft if the user has choosen so
-            # if 'save_as_draft' in request.data:
-            #     user.drafts.add(post)
-            #     post.draft = True
-            # elif 'upload' in request.data:
-            #     post.draft = False
-
-            # # setting the status of a post (default selling)
-            # # post.status = "SELLING"
-
-            # post.save()
             return Response({'message': 'You have successfully edited your post'})
         else:
             print(serializer.errors)
@@ -88,13 +67,6 @@ class Posts(viewsets.ModelViewSet):
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-
-            # post = Post.objects.get(product=serializer.data.get('product'))
-            # post.price = serializer.data.get('price')
-            # post.description = serializer.data.get('description')
-            # post.category = serializer.data.get('category')
-            # post.status = serializer.data.get('status')
-            # post.draft = serializer.data.get('draft')
             return Response({'message': 'You have successfully edited your post'})
         else:
             print(serializer.errors)
@@ -105,11 +77,6 @@ class Posts(viewsets.ModelViewSet):
         print('test delete')
         post.delete()
         return Response({'message': 'You have successfully deleted your post'})
-
-# @api_view()
-# def getPosts(request, username):
-#     posts = Post.objects.filter(username=username)
-#     return Response({'posts': list(posts)})
 
 class EditProfileViewSet(viewsets.ViewSet):
 
@@ -161,72 +128,23 @@ class Profiles(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
-    # def partial_update(self, request, pk=None):
-    #     serializer = ProfileSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response({'message': 'You have successfully changed your profile picture'})
-    #     else:
-    #         print(serializer.errors)
-    #         return Response({'error': serializer.errors})
-        
     @action(methods=['get'], detail=False, url_path=r'get_id/(?P<username>\w+)')
     def get_id(self, request, username, *args, **kwargs):
 
         profile = Profile.objects.get(username=username)
         return Response({'id': profile.id})
+
+    def create(self, request):
+        serializer = ProfileSerializer(data=request.data)
+        print(request.data, 'request')
+        if serializer.is_valid():
+            #create the profile
+            serializer.save()
+            return Response({'message': 'You have successfully edited your post'})
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors})
     
-    # def partial_update(self, request, pk=None):
-    #     serializer = ProfileSerializer(data=request.data, partial=True)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #     else:
-    #         print(serializer.errors)
-    #         return Response({'error': serializer.errors})
-    
-
-    # def list(self, request):
-    #     queryset = Profile.objects.all()
-    #     serializer = ProfileSerializer(queryset, many=True)
-    #     return Response(serializer.data)
-    
-    # def retrieve(self, request, pk=None):
-    #     queryset = Profile.objects.all()
-    #     user = get_object_or_404(queryset, pk=pk)
-    #     serializer = ProfileSerializer(user)
-    #     return Response(serializer.data)
-    
-    # def update(self, request, pk=None):
-    #     queryset = Profile.objects.all()
-
-    #     #If the user is not logged in, redirect them to the home page (guests should not be able to edit profile)
-    #     try:
-    #         user = User.objects.get(username=request.user.get_username())
-    #     except:
-    #         return Response({'error': 'Must have an account to edit your profile'})
-        
-    #     try:
-    #         profile = Profile.objects.get(username=request.user.get_username())
-    #         hasProfile = True
-    #     except:
-    #         profile = Profile(username=request.user.get_username())
-    #         hasProfile = False
-
-    #     serializer = ProfileSerializer(queryset)
-
-    #     #If the user has submitted their edits for their profile
-    #     if serializer.is_valid():
-
-    #         #retrieve the profile from the database, make all changes to the post, then redirect user to the home screen
-    #         profile.profile_picture = form.cleaned_data['profile_picture']
-    #         profile.save()
-    #         # user.first_name = profile.first_name
-    #         # user.last_name = profile.last_name
-    #         # user.save()
-
-    #         return Response({'message': 'You have successfully edited your post'})
-
-
 # Taken from: https://www.django-rest-framework.org/api-guide/viewsets/
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -239,11 +157,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False)
     def login(self, request, *args, **kwargs):
-        print('test')
-        content = {
-            'user': str(request.user),  # `django.contrib.auth.User` instance.
-            'auth': str(request.auth),  # None
-        }
         print(request.data)
 
         #authenticates the login information
@@ -262,6 +175,15 @@ class UserViewSet(viewsets.ModelViewSet):
         #else, reload the login screen and display error message
         else:
             return Response({'login': 0, 'message': 'credentials invalid' })
+        
+    @action(methods=['post'], detail=False)
+    def verify(self, request, *args, **kwargs):
+        print(request.data)
+
+        code = random.randint(0,99999)
+        code = str(code)
+        send_code(request, code, request.data['email'])
+        return Response({'code': code})
          
 
 class Rooms(viewsets.ModelViewSet):
