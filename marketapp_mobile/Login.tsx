@@ -37,7 +37,7 @@ function ForgotPassword(props): JSX.Element {
 
   const verify = async (inputEmail = null, inputCode = null) => {
     if (inputEmail) {
-      setNewPassword({...newPassword, email: inputEmail})
+      setNewPassword({...newPassword, email: inputEmail});
       await axios
         .post('http://10.0.2.2:8000/users/verify/', {email: email})
         .then(response => {
@@ -58,7 +58,8 @@ function ForgotPassword(props): JSX.Element {
   const changePassword = async () => {
     if (
       newPassword.password == newPassword.confirm &&
-      newPassword.password.length >= 8
+      newPassword.password.length >= 8 &&
+      newPassword.username.length
     ) {
       await axios
         .post('http://10.0.2.2:8000/users/change_password/', newPassword)
@@ -71,9 +72,17 @@ function ForgotPassword(props): JSX.Element {
           });
         })
         .catch((err: any) => console.log(err));
+    } else if (
+      newPassword.password !== newPassword.confirm &&
+      newPassword.password.length
+    ) {
+      props.setErrorMessage('Passwords do not match.  Please try again.');
+    } else if (newPassword.password.length < 8) {
+      props.setErrorMessage('Insufficient password length.  Please try again');
+    } else if (!newPassword.username.length) {
+      props.setErrorMessage('Please enter your username');
     } else {
-      console.log('Insufficient password');
-      console.log(newPassword.password, newPassword.confirm)
+      props.setErrorMessage('An unknown error has occurred');
     }
   };
 
@@ -117,7 +126,7 @@ function ForgotPassword(props): JSX.Element {
                       height: 35,
                       borderRadius: 15,
                       backgroundColor: code.codeSent
-                        ? 'green'
+                        ? 'rgb(138,178,147)'
                         : 'rgb(176,211,229)',
                       color: 'black',
                       textAlign: 'center',
@@ -137,24 +146,27 @@ function ForgotPassword(props): JSX.Element {
                   <Text
                     // eslint-disable-next-line react-native/no-inline-styles
                     style={{
+                      backgroundColor:
+                        inputCode == code.code && inputCode.length
+                          ? 'rgb(138,178,147)'
+                          : 'rgb(176,211,229)',
                       width: 90,
-                      height: 35,
-                      borderRadius: 15,
-                      backgroundColor: 'rgb(176,211,229)',
+                      height: 30,
+                      borderRadius: 10,
                       color: 'black',
                       textAlign: 'center',
-                      lineHeight: 35,
+                      lineHeight: 30,
                     }}>
-                    {'Verify Code'}
+                    {inputCode == code.code && inputCode.length
+                      ? 'Verified'
+                      : 'Pending'}
                   </Text>
                 </TouchableWithoutFeedback>
               </View>
               <TouchableWithoutFeedback>
                 <Text style={styles.forgotPassword}>Resend Code</Text>
               </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback
-                // eslint-disable-next-line react-native/no-inline-styles
-                onPress={() => verify(null, inputCode)}>
+              <TouchableWithoutFeedback onPress={() => verify(null, inputCode)}>
                 <Text style={styles.loginButton}>Verify Code</Text>
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
@@ -285,38 +297,59 @@ function Register(props): JSX.Element {
 
   const createAccount = async () => {
     let data = new FormData();
-    let finished =
+    let validInformation =
       profile.password === confirmPassword &&
       profile.password.length >= 8 &&
       profile.username.length > 0 &&
       Object.keys(profile.profile_picture).length;
 
-    if (finished) {
+    if (validInformation) {
       for (const [key, value] of Object.entries(profile)) {
         data.append(key, value);
       }
+      await axios
+        .post('http://10.0.2.2:8000/users/', {
+          username: profile.username,
+          password: profile.password,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: email,
+        })
+        .then(response => {
+          console.log(response);
+        })
+        .catch((err: any) => {
+          console.log(err);
+          props.setErrorMessage(
+            'An error has occured within our server.  Please try again later',
+          );
+        });
+
+      await axios
+        .post('http://10.0.2.2:8000/profiles/', data)
+        .then(response => {
+          console.log(response);
+          props.returnHome(profile.username);
+        })
+        .catch((err: any) => {
+          console.log(err);
+          props.setErrorMessage(
+            'An error has occured within our server.  Please try again later',
+          );
+        });
+    } else if (profile.password !== confirmPassword) {
+      props.setErrorMessage('Passwords do not match.  Please try again.');
+    } else if (profile.password.length < 8) {
+      props.setErrorMessage('Insufficient password length.  Please try again.');
+    } else if (profile.username.length == 0) {
+      props.setErrorMessage('Please enter a username.');
+    } else if (!Object.keys(profile.profile_picture).length) {
+      props.setErrorMessage('Please select a profile picture');
+    } else {
+      props.setErrorMessage(
+        'An unknown error has occured.  Please try again later',
+      );
     }
-
-    await axios
-      .post('http://10.0.2.2:8000/users/', {
-        username: profile.username,
-        password: profile.password,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        email: email,
-      })
-      .then(response => {
-        console.log(response);
-      })
-      .catch((err: any) => console.log(err));
-
-    await axios
-      .post('http://10.0.2.2:8000/profiles/', data)
-      .then(response => {
-        console.log(response);
-        props.returnHome(profile.username);
-      })
-      .catch((err: any) => console.log(err));
   };
 
   return (
@@ -453,7 +486,7 @@ function Verify(props): JSX.Element {
   });
 
   const [email, setEmail] = useState('');
-  const [input, setInput] = useState('');
+  const [inputCode, setInputCode] = useState('');
 
   const verify = async (inputEmail = null, inputCode = null) => {
     if (inputEmail) {
@@ -465,7 +498,12 @@ function Verify(props): JSX.Element {
             codeSent: true,
           });
         })
-        .catch((err: any) => console.log(err));
+        .catch((err: any) => {
+          console.log(err);
+          props.setErrorMessage(
+            'Error with validation process. Please try again.',
+          );
+        });
     } else if (inputCode === code.code && code.code.length) {
       props.setLoginState({
         login: false,
@@ -530,25 +568,30 @@ function Verify(props): JSX.Element {
             <TextInput
               style={styles.inputSmall}
               placeholder="Please enter your verification code here"
-              onChangeText={text => setInput(text)}
+              onChangeText={text => setInputCode(text)}
             />
             <TouchableWithoutFeedback>
               <Text
                 // eslint-disable-next-line react-native/no-inline-styles
                 style={{
-                  backgroundColor: 'rgb(176,211,229)',
+                  backgroundColor:
+                    inputCode == code.code && inputCode.length
+                      ? 'rgb(138,178,147)'
+                      : 'rgb(176,211,229)',
                   width: 100,
                   height: 30,
                   borderRadius: 10,
                   textAlign: 'center',
                   lineHeight: 30,
                 }}
-                onPress={() => verify(null, input)}>
-                Verify
+                onPress={() => verify(null, inputCode)}>
+                {inputCode == code.code && inputCode.length
+                  ? 'Verified'
+                  : 'Pending'}
               </Text>
             </TouchableWithoutFeedback>
           </View>
-          <TouchableWithoutFeedback onPress={() => verify(null, input)}>
+          <TouchableWithoutFeedback onPress={() => verify(null, inputCode)}>
             <Text style={styles.loginButton}>Continue Sign Up</Text>
           </TouchableWithoutFeedback>
           <TouchableWithoutFeedback
@@ -583,6 +626,8 @@ function Login(props): JSX.Element {
     password: '',
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const verifyUser = (username, password) => {
     /* Django get request */
     let request = true;
@@ -598,27 +643,33 @@ function Login(props): JSX.Element {
       username: info.username,
       password: info.password,
     };
-    await axios
-      .post('http://10.0.2.2:8000/users/login/', data)
-      .then(response => {
-        if (response.data.login) {
-          if (response.data.register) {
-            setLoginState({
-              login: false,
-              register: true,
-              forgotPassword: false,
-              verifyEmail: false,
-            });
+    if (data.username && data.password) {
+      await axios
+        .post('http://10.0.2.2:8000/users/login/', data)
+        .then(response => {
+          if (response.data.login) {
+            if (response.data.register) {
+              setLoginState({
+                login: false,
+                register: true,
+                forgotPassword: false,
+                verifyEmail: false,
+              });
+            } else {
+              props.returnHome(info.username);
+            }
           } else {
-            props.returnHome(info.username);
+            setErrorMessage('Invalid Login Credentials.  Please try again.');
           }
-        }
-      })
-      .catch((err: any) => console.log(err));
-    setInfo({
-      username: '',
-      password: '',
-    });
+        })
+        .catch((err: any) => console.log(err));
+      setInfo({
+        username: '',
+        password: '',
+      });
+    } else {
+      setErrorMessage('Please enter login information.')
+    }
   };
 
   return (
@@ -682,12 +733,33 @@ function Login(props): JSX.Element {
           setInfo={setInfo}
           info={info}
           returnHome={props.returnHome}
+          setErrorMessage={setErrorMessage}
         />
       )}
       {loginState.forgotPassword && (
-        <ForgotPassword setLoginState={setLoginState} />
+        <ForgotPassword
+          setLoginState={setLoginState}
+          setErrorMessage={setErrorMessage}
+        />
       )}
-      {loginState.verifyEmail && <Verify setLoginState={setLoginState} />}
+      {loginState.verifyEmail && (
+        <Verify
+          setLoginState={setLoginState}
+          setErrorMessage={setErrorMessage}
+        />
+      )}
+      {errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }
@@ -805,6 +877,45 @@ const styles = StyleSheet.create({
   usernameWarning: {
     marginTop: 10,
     marginBottom: 30,
+  },
+  errorMessageContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '32.5%',
+    transform: [{translateX: -50}],
+    width: 250,
+    height: 150,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#D7D7D7',
+    borderRadius: 10,
+    padding: 15,
+  },
+  errorMessageBanner: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  exitErrorMessage: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: Colors.white,
+    height: 20,
+    width: 50,
+    textAlign: 'center',
+    lineHeight: 20,
+    borderRadius: 5,
+  },
+  errorMessageTextContainer: {
+    display: 'flex',
+    height: 70,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorMessage: {
+    color: 'black',
+    textAlign: 'center',
   },
 });
 
