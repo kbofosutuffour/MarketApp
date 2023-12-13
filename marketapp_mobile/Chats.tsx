@@ -178,7 +178,7 @@ function Chats(props): JSX.Element {
           return (
             <Room
               other_user={value.seller}
-              rooms={rooms}
+              rooms={value}
               chats={chats}
               setRooms={setRooms}
               getChats={getChats}
@@ -272,6 +272,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    backgroundColor: Colors.black,
   },
   messagePicture: {
     width: 50,

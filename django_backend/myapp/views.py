@@ -185,6 +185,23 @@ class UserViewSet(viewsets.ModelViewSet):
         send_code(request, code, request.data['email'])
         return Response({'code': code})
     
+    @action(methods=['post'], detail=False)
+    def change_password(self, request, *args, **kwargs):
+        print(request.data)
+        if (request.data['username'] and request.data['password']):
+            try:
+                user = User.objects.get(username=request.data['username'], email=request.data['email'])
+                print('success')
+                user.set_password(request.data['password'])
+                user.save()
+                return Response({'success': 1})
+            except:
+                print('failed')
+                return Response({'success': 0})
+        else:
+            print('failed')
+            return Response({'success': 0})
+    
     def create(self, request):
         serializer = UserSerializer(data=request.data)
         print(request.data, 'request')

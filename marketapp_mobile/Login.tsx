@@ -24,11 +24,58 @@ function ForgotPassword(props): JSX.Element {
 
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState({
+    username: '',
     password: '',
     confirm: '',
+    email: email,
   });
+  const [code, setCode] = useState({
+    code: '',
+    codeSent: false,
+  });
+  const [inputCode, setInputCode] = useState('');
 
-  const [codeSent, sendCode] = useState(false);
+  const verify = async (inputEmail = null, inputCode = null) => {
+    if (inputEmail) {
+      setNewPassword({...newPassword, email: inputEmail})
+      await axios
+        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .then(response => {
+          setCode({
+            code: response.data.code,
+            codeSent: true,
+          });
+        })
+        .catch((err: any) => console.log(err));
+    } else if (inputCode === code.code && code.code.length) {
+      setPasswordState({
+        sendCode: false,
+        createPassword: true,
+      });
+    }
+  };
+
+  const changePassword = async () => {
+    if (
+      newPassword.password == newPassword.confirm &&
+      newPassword.password.length >= 8
+    ) {
+      await axios
+        .post('http://10.0.2.2:8000/users/change_password/', newPassword)
+        .then(response => {
+          props.setLoginState({
+            login: true,
+            register: false,
+            forgotPassword: false,
+            verifyEmail: false,
+          });
+        })
+        .catch((err: any) => console.log(err));
+    } else {
+      console.log('Insufficient password');
+      console.log(newPassword.password, newPassword.confirm)
+    }
+  };
 
   return (
     <>
@@ -62,31 +109,28 @@ function ForgotPassword(props): JSX.Element {
                   style={styles.inputSmall}
                 />
                 <TouchableWithoutFeedback
-                  onPress={() =>
-                    setPasswordState({
-                      sendCode: false,
-                      createPassword: true,
-                    })
-                  }>
+                  onPress={() => verify((inputEmail = email))}>
                   <Text
                     // eslint-disable-next-line react-native/no-inline-styles
                     style={{
                       width: 90,
                       height: 35,
                       borderRadius: 15,
-                      backgroundColor: codeSent ? 'green' : 'rgb(176,211,229)',
+                      backgroundColor: code.codeSent
+                        ? 'green'
+                        : 'rgb(176,211,229)',
                       color: 'black',
                       textAlign: 'center',
                       lineHeight: 35,
                     }}>
-                    {codeSent ? 'Code Sent' : 'Send Code'}
+                    {code.codeSent ? 'Code Sent' : 'Send Code'}
                   </Text>
                 </TouchableWithoutFeedback>
               </View>
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your verification code"
-                  onChangeText={text => setEmail(text)}
+                  onChangeText={text => setInputCode(text)}
                   style={styles.inputSmall}
                 />
                 <TouchableWithoutFeedback>
@@ -110,12 +154,7 @@ function ForgotPassword(props): JSX.Element {
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
                 // eslint-disable-next-line react-native/no-inline-styles
-                onPress={() =>
-                  setPasswordState({
-                    sendCode: false,
-                    createPassword: true,
-                  })
-                }>
+                onPress={() => verify(null, inputCode)}>
                 <Text style={styles.loginButton}>Verify Code</Text>
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
@@ -158,44 +197,42 @@ function ForgotPassword(props): JSX.Element {
               <Text style={styles.header}>Create a new password</Text>
               <View style={styles.emailInput}>
                 <TextInput
-                  placeholder="Enter your password"
+                  placeholder="Enter your username"
                   onChangeText={text =>
-                    setNewPassword({...newPassword, password: text})
+                    setNewPassword({...newPassword, username: text})
                   }
                   style={styles.input}
-                  textContentType="password"
-                  secureTextEntry={true}
                 />
               </View>
-              <View style={styles.emailInput}>
-                <TextInput
-                  placeholder="Confirm your password"
-                  onChangeText={text =>
-                    setNewPassword({...newPassword, confirm: text})
-                  }
-                  style={styles.input}
-                  textContentType="password"
-                  secureTextEntry={true}
-                />
-              </View>
-              <Text>Password must contain 8 characters</Text>
-              <TouchableWithoutFeedback
-                style={styles.loginButton}
-                onPress={() => {
-                  setPasswordState({
-                    sendCode: true,
-                    createPassword: false,
-                  });
-                  props.setLoginState({
-                    login: true,
-                    register: false,
-                    forgotPassword: false,
-                    verifyEmail: false,
-                  });
-                }}>
-                <Text style={styles.loginButton}>Create a new password</Text>
-              </TouchableWithoutFeedback>
+              <TextInput
+                placeholder="Enter your password"
+                onChangeText={text =>
+                  setNewPassword({...newPassword, password: text})
+                }
+                style={styles.input}
+                textContentType="password"
+                secureTextEntry={true}
+              />
             </View>
+            <View style={styles.emailInput}>
+              <TextInput
+                placeholder="Confirm your password"
+                onChangeText={text =>
+                  setNewPassword({...newPassword, confirm: text})
+                }
+                style={styles.input}
+                textContentType="password"
+                secureTextEntry={true}
+              />
+            </View>
+            <Text>Password must contain 8 characters</Text>
+            <TouchableWithoutFeedback
+              style={styles.loginButton}
+              onPress={() => {
+                changePassword();
+              }}>
+              <Text style={styles.loginButton}>Create a new password</Text>
+            </TouchableWithoutFeedback>
           </View>
         </>
       )}
