@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {
   Button,
@@ -14,9 +14,10 @@ import {
   View,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {JsxElement} from 'typescript';
 
 /**
- * 
+ *
  * @param props
  * @returns button lead to DM's of two users stored in the props object
  */
@@ -31,6 +32,8 @@ function Room(props): JSX.Element {
           props.rooms.buyer_profile_picture,
           props.seller,
           props.rooms.seller_profile_picture,
+          props.display_image,
+          props.product,
         );
       }}>
       <View style={styles.room}>
@@ -43,7 +46,7 @@ function Room(props): JSX.Element {
         <View>
           <Text>{props.other_user}</Text>
         </View>
-        <Image style={styles.roomImage} source={{uri: props.product}} />
+        <Image style={styles.roomImage} source={{uri: props.display_image}} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -53,9 +56,9 @@ function Room(props): JSX.Element {
  * @returns an individual message generated from data stored in the props object
  */
 function Message(props): JSX.Element {
-  if (props.seller) {
+  if (props.data.username !== props.current_user) {
     return (
-      <View style={styles.sellerMessage}>
+      <View style={styles.leftMessage}>
         <Image
           style={styles.profilePicture}
           source={{uri: props.profile_picture}}
@@ -72,10 +75,10 @@ function Message(props): JSX.Element {
         </View>
       </View>
     );
-  } else if (props.buyer) {
+  } else if (props.data.username === props.current_user) {
     return (
-      <View style={styles.buyerMessage}>
-        <View style={styles.message}>
+      <View style={styles.rightMessage}>
+        <View style={styles.userMessage}>
           <Text>{props.data.value}</Text>
           {props.data.image && (
             <Image
@@ -91,8 +94,6 @@ function Message(props): JSX.Element {
         />
       </View>
     );
-  } else {
-    return <></>;
   }
 }
 
@@ -116,7 +117,12 @@ function Chats(props): JSX.Element {
       username: null,
       profile_picture: null,
     },
+    image: '',
+    product: '',
   });
+
+  const [text, setText] = useState('');
+  const scrollViewRef = useRef(); //used for scrolling
 
   // After the page is rendered, retrieve all of the chatrooms the user is in
   // from the database
@@ -135,42 +141,72 @@ function Chats(props): JSX.Element {
   }, []);
 
   /**
-   * 
    * @param id the id of the room that stores the messages between the buyer and seller
    * @param buyer the username of the buyer
    * @param bpf the profile picture of the buyer
    * @param seller the username of the seller
    * @param spf the profile picture of the seller
+   * @param image the display image of a product
+   * @param product the name of the product being discussed
    */
-  var getChats = (id, buyer, bpf, seller, spf) => {
+  var getChats = (
+    id,
+    buyer = null,
+    bpf = null,
+    seller = null,
+    spf = null,
+    image = null,
+    product = null,
+  ) => {
     var chat_request = 'http://10.0.2.2:8000/messages/get_messages/' + id;
     axios
       .get(chat_request)
       .then(res => {
-        setChats({
-          ...chats,
-          id: id,
-          showChats: true,
-          chats: res.data,
-          buyer: {
-            username: buyer,
-            profile_picture: bpf,
-          },
-          seller: {
-            username: seller,
-            profile_picture: spf,
-          },
-        });
+        if (buyer || seller) {
+          setChats({
+            ...chats,
+            id: id,
+            showChats: true,
+            chats: res.data,
+            buyer: {
+              username: buyer,
+              profile_picture: bpf,
+            },
+            seller: {
+              username: seller,
+              profile_picture: spf,
+            },
+            image: image,
+            product: product,
+          });
+        } else {
+          setChats({...chats, chats: res.data});
+        }
         setRooms({...rooms, showRoom: false});
       })
       .catch((err: any) => console.log(err));
   };
 
+  const sendMessage = async (value, room_id) => {
+    let data = {
+      value: value,
+      username: props.profile.username,
+      room: room_id,
+      image: null,
+    };
+    console.log(value);
+    await axios
+      .post('http://10.0.2.2:8000/messages/', data)
+      .then(res => {
+        getChats(room_id);
+      })
+      .catch((err: any) => console.log(err));
+  };
   return (
     <View
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
-        backgroundColor: 'rgb(17, 87, 64)',
+        backgroundColor: Colors.white,
         height: '80%',
       }}>
       {rooms.showRoom &&
@@ -183,7 +219,8 @@ function Chats(props): JSX.Element {
               setRooms={setRooms}
               getChats={getChats}
               profile_picture={value.seller_profile_picture}
-              product={value.image}
+              display_image={value.image}
+              product={value.product}
               id={value.id}
               seller={false}
               buyer={true}
@@ -201,7 +238,8 @@ function Chats(props): JSX.Element {
               setRooms={setRooms}
               getChats={getChats}
               profile_picture={value.buyer_profile_picture}
-              product={value.image}
+              display_image={value.image}
+              product={value.product}
               id={value.id}
               seller={value.seller}
               buyer={value.buyer}
@@ -210,10 +248,39 @@ function Chats(props): JSX.Element {
         })}
       {!rooms.showRoom && chats.showChats && (
         <>
-          <ScrollView>
+          <View style={styles.post}>
+            <View style={styles.postImageContainer}>
+              <Image
+                style={styles.postImage}
+                source={{
+                  uri: chats.image,
+                }}
+              />
+            </View>
+
+            <View style={styles.postText}>
+              <Text>{chats.product}</Text>
+              {/* <Text>{props.data.username}</Text>
+          <Text>${props.data.price}</Text> */}
+            </View>
+            <View style={styles.editPost}>
+              <Image
+                style={styles.editButtons}
+                source={require('./media/edit_post.png')}
+              />
+            </View>
+          </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            ref={scrollViewRef}
+            onContentSizeChange={async () =>
+              await scrollViewRef.current.scrollToEnd({animated: false})
+            }>
             {chats.chats.map(value => {
               var img =
-                value.username == chats.buyer.username
+                value.username == props.profile.username
+                  ? 'http://10.0.2.2:8000' + props.profile.profile_picture
+                  : value.username == chats.buyer.username
                   ? chats.buyer.profile_picture
                   : chats.seller.profile_picture;
               var buyer = value.username == chats.buyer.username;
@@ -223,13 +290,25 @@ function Chats(props): JSX.Element {
                   profile_picture={img}
                   buyer={buyer}
                   seller={!buyer}
+                  current_user={props.profile.username}
                 />
               );
             })}
           </ScrollView>
           <View style={styles.inputContainer}>
-            <TextInput style={styles.input} />
-            <Button title={'send'} color={'rgb(185, 151, 91)'}/>
+            <TextInput
+              style={styles.input}
+              onChangeText={value => setText(value)}
+              value={text}
+            />
+            <Button
+              title={'send'}
+              color={'rgb(185, 151, 91)'}
+              onPress={async () => {
+                await sendMessage(text, chats.id);
+                setText('');
+              }}
+            />
           </View>
         </>
       )}
@@ -240,11 +319,17 @@ function Chats(props): JSX.Element {
 const styles = StyleSheet.create({
   message: {
     padding: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: '#f6f7f5',
     borderRadius: 20,
     width: 200,
   },
-  sellerMessage: {
+  userMessage: {
+    padding: 20,
+    backgroundColor: 'rgb(185, 151, 91)',
+    borderRadius: 20,
+    width: 200,
+  },
+  leftMessage: {
     display: 'flex',
     width: '100%',
     flexDirection: 'row',
@@ -253,7 +338,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  buyerMessage: {
+  rightMessage: {
     display: 'flex',
     width: '100%',
     flexDirection: 'row',
@@ -295,7 +380,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   inputContainer: {
-    backgroundColor: 'rgb(17, 87, 64)',
+    // backgroundColor: 'rgb(17, 87, 64)',
     display: 'flex',
     flexDirection: 'row',
     columnGap: 10,
@@ -303,8 +388,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   input: {
-    backgroundColor: Colors.white,
-    height: 30,
+    backgroundColor: '#f6f7f5',
+    height: '70%',
     width: '65%',
     borderRadius: 10,
     borderWidth: 1,
@@ -314,6 +399,46 @@ const styles = StyleSheet.create({
   send: {
     backgroundColor: 'rgb(185, 151, 91)',
     borderRadius: 10,
+  },
+  post: {
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    borderWidth: 0.8,
+    borderColor: 'grey',
+  },
+  postImageContainer: {
+    width: 75,
+    height: 75,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postImage: {
+    width: 75,
+    height: 75,
+    display: 'flex',
+    backgroundColor: 'black',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  postText: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '70%',
+  },
+  editPost: {
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
+  editButtons: {
+    width: 10,
+    height: 30,
   },
 });
 

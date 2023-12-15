@@ -660,6 +660,7 @@ function Login(props): JSX.Element {
     } else {
       setErrorMessage('Please enter login information.');
     }
+    setInfo({...info, password: ''});
   };
 
   return (
@@ -686,6 +687,7 @@ function Login(props): JSX.Element {
                 style={styles.input}
                 textContentType="password"
                 secureTextEntry={true}
+                value={info.password}
               />
               <TouchableWithoutFeedback onPress={() => login()}>
                 <Text style={styles.loginButton}>Log In</Text>
