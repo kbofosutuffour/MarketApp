@@ -157,7 +157,7 @@ function EditProfile(props): JSX.Element {
 }
 
 /**
- * @param props 
+ * @param props
  * @returns The profile page
  */
 function Profile(props): JSX.Element {
@@ -174,6 +174,12 @@ function Profile(props): JSX.Element {
   });
   const [deletePostID, setDelete] = useState(null);
   const [changedPic, setChangedPic] = useState(null);
+
+  const [type, setType] = useState({
+    sell_history: true,
+    buy_history: false,
+    saved_posts: false,
+  });
 
   /**
    * Function to delete the post in the database
@@ -237,15 +243,75 @@ function Profile(props): JSX.Element {
             </View>
           </View>
           <View style={styles.typeView}>
-            <View style={styles.typeViewItem}>
-              <Text>Sell History</Text>
-            </View>
-            <View style={styles.typeViewItem}>
-              <Text>Buy History</Text>
-            </View>
-            <View style={styles.typeViewItem}>
-              <Text>Saved Posts</Text>
-            </View>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                setType({
+                  sell_history: true,
+                  buy_history: false,
+                  saved_posts: false,
+                })
+              }>
+              <View
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: 'gray',
+                  borderWidth: 0.5,
+                  padding: 20,
+                  width: '33.33%',
+                  backgroundColor: type.sell_history ? Colors.white : '#D7D7D7',
+                }}>
+                <Text>Sell History</Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                setType({
+                  sell_history: false,
+                  buy_history: true,
+                  saved_posts: false,
+                })
+              }>
+              <View
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: 'gray',
+                  borderWidth: 0.5,
+                  padding: 20,
+                  width: '33.33%',
+                  backgroundColor: type.buy_history ? Colors.white : '#D7D7D7',
+                }}>
+                <Text>Buy History</Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                setType({
+                  sell_history: false,
+                  buy_history: false,
+                  saved_posts: true,
+                })
+              }>
+              <View
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: 'gray',
+                  borderWidth: 0.5,
+                  padding: 20,
+                  width: '33.33%',
+                  backgroundColor: type.saved_posts ? Colors.white : '#D7D7D7',
+                }}>
+                <Text>Saved Posts</Text>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
 
           {/* Where the user's posts are shown */}
@@ -257,15 +323,35 @@ function Profile(props): JSX.Element {
                 backgroundColor: Colors.white,
               }}>
               {posts.map(post => {
-                return (
-                  <Post
-                    data={post}
-                    setDesc={props.setDesc}
-                    viewPost={props.viewPost}
-                    setView={setView}
-                    setDelete={setDelete}
-                  />
-                );
+                if (type.saved_posts) {
+                  if (
+                    props.profile.saved_posts &&
+                    props.profile.saved_posts.includes(post.id)
+                  ) {
+                    return (
+                      <Post
+                        data={post}
+                        setDesc={props.setDesc}
+                        viewPost={props.viewPost}
+                        setView={setView}
+                        setDelete={setDelete}
+                      />
+                    );
+                  }
+                } else if (type.buy_history) {
+                  //TODO: Add buy history to post model
+                  return;
+                } else if (type.sell_history) {
+                  return (
+                    <Post
+                      data={post}
+                      setDesc={props.setDesc}
+                      viewPost={props.viewPost}
+                      setView={setView}
+                      setDelete={setDelete}
+                    />
+                  );
+                }
               })}
             </View>
           </ScrollView>
@@ -379,7 +465,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '80%',
+    height: 600,
   },
   profilePicture: {
     width: 100,
@@ -431,7 +517,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     padding: 10,
-    borderWidth: 1,
+    borderWidth: 0.8,
     borderColor: 'grey',
   },
   postImageContainer: {
@@ -488,6 +574,7 @@ const styles = StyleSheet.create({
   changeProfileContainer: {
     backgroundColor: Colors.white,
     display: 'flex',
+    height: 600,
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
@@ -495,7 +582,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   change: {
-    width: 100,
+    width: 200,
     borderRadius: 20,
     padding: 10,
     backgroundColor: 'rgb(17, 87, 64)',

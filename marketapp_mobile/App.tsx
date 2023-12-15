@@ -320,7 +320,7 @@ function App(): JSX.Element {
         .split(' ')
         .filter((value: string) => {
           // eslint-disable-next-line prettier/prettier
-              return ((value != 'and') && (value != 'the'))
+              return ((value !== 'and') && (value !== 'the'))
         });
 
       var desc = posts.posts[i].description
@@ -328,7 +328,7 @@ function App(): JSX.Element {
         .split(' ')
         .filter((value: string) => {
           // eslint-disable-next-line prettier/prettier
-              return ((value != 'and') && (value != 'the'));
+              return ((value !== 'and') && (value !== 'the'));
         });
 
       input.forEach((element: any) => {
@@ -354,7 +354,7 @@ function App(): JSX.Element {
   };
 
   // These functions are called by various buttons and
-  // touchables on the app to change the state variables,
+  // button on the app to change the state variables,
   // Which then changes what page is shown on the screen
 
   /**
@@ -381,7 +381,7 @@ function App(): JSX.Element {
    * @param username the username of the current user logged on
    */
   const returnHome = (username = null) => {
-    // needed for weird bug with calling a function through proos
+    // needed for weird bug with calling a function through props
     username = typeof username === 'string' ? username : null;
 
     // if a new user has logged on, change the state username
@@ -648,6 +648,7 @@ function App(): JSX.Element {
               settings={settings}
               setSettingsTitle={setSettingsTitle}
               login={login}
+              profile={profile.data}
             />
             <Footer
               returnHome={returnHome}

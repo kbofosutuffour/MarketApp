@@ -57,7 +57,7 @@ function ForgotPassword(props): JSX.Element {
 
   const changePassword = async () => {
     if (
-      newPassword.password == newPassword.confirm &&
+      newPassword.password === newPassword.confirm &&
       newPassword.password.length >= 8 &&
       newPassword.username.length
     ) {
@@ -147,7 +147,7 @@ function ForgotPassword(props): JSX.Element {
                     // eslint-disable-next-line react-native/no-inline-styles
                     style={{
                       backgroundColor:
-                        inputCode == code.code && inputCode.length
+                        inputCode === code.code && inputCode.length
                           ? 'rgb(138,178,147)'
                           : 'rgb(176,211,229)',
                       width: 90,
@@ -157,7 +157,7 @@ function ForgotPassword(props): JSX.Element {
                       textAlign: 'center',
                       lineHeight: 30,
                     }}>
-                    {inputCode == code.code && inputCode.length
+                    {inputCode === code.code && inputCode.length
                       ? 'Verified'
                       : 'Pending'}
                   </Text>
@@ -321,7 +321,7 @@ function Register(props): JSX.Element {
         .catch((err: any) => {
           console.log(err);
           props.setErrorMessage(
-            'An error has occured within our server.  Please try again later',
+            'An error has occurred within our server.  Please try again later',
           );
         });
 
@@ -334,20 +334,20 @@ function Register(props): JSX.Element {
         .catch((err: any) => {
           console.log(err);
           props.setErrorMessage(
-            'An error has occured within our server.  Please try again later',
+            'An error has occurred within our server.  Please try again later',
           );
         });
     } else if (profile.password !== confirmPassword) {
       props.setErrorMessage('Passwords do not match.  Please try again.');
     } else if (profile.password.length < 8) {
       props.setErrorMessage('Insufficient password length.  Please try again.');
-    } else if (profile.username.length == 0) {
+    } else if (profile.username.length === 0) {
       props.setErrorMessage('Please enter a username.');
     } else if (!Object.keys(profile.profile_picture).length) {
       props.setErrorMessage('Please select a profile picture');
     } else {
       props.setErrorMessage(
-        'An unknown error has occured.  Please try again later',
+        'An unknown error has occurred.  Please try again later',
       );
     }
   };
@@ -575,7 +575,7 @@ function Verify(props): JSX.Element {
                 // eslint-disable-next-line react-native/no-inline-styles
                 style={{
                   backgroundColor:
-                    inputCode == code.code && inputCode.length
+                    inputCode === code.code && inputCode.length
                       ? 'rgb(138,178,147)'
                       : 'rgb(176,211,229)',
                   width: 100,
@@ -585,7 +585,7 @@ function Verify(props): JSX.Element {
                   lineHeight: 30,
                 }}
                 onPress={() => verify(null, inputCode)}>
-                {inputCode == code.code && inputCode.length
+                {inputCode === code.code && inputCode.length
                   ? 'Verified'
                   : 'Pending'}
               </Text>
@@ -628,16 +628,6 @@ function Login(props): JSX.Element {
 
   const [errorMessage, setErrorMessage] = useState('');
 
-  const verifyUser = (username, password) => {
-    /* Django get request */
-    let request = true;
-    if (request) {
-      props.returnHome();
-    } else {
-      //raise error message
-    }
-  };
-
   const login = async () => {
     const data = {
       username: info.username,
@@ -668,7 +658,7 @@ function Login(props): JSX.Element {
         password: '',
       });
     } else {
-      setErrorMessage('Please enter login information.')
+      setErrorMessage('Please enter login information.');
     }
   };
 
@@ -729,7 +719,6 @@ function Login(props): JSX.Element {
       {loginState.register && (
         <Register
           setLoginState={setLoginState}
-          verifyUser={verifyUser}
           setInfo={setInfo}
           info={info}
           returnHome={props.returnHome}
