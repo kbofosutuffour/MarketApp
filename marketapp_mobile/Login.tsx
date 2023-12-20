@@ -35,8 +35,12 @@ function ForgotPassword(props): JSX.Element {
   });
   const [inputCode, setInputCode] = useState('');
 
-  const verify = async (inputEmail = null, inputCode = null) => {
-    if (inputEmail) {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const verify = async (inputEmail: string = '', inputCode: string = '') => {
+    // Making sure the inputEmail is from a W&M email domain
+    let domain = inputEmail ? inputEmail.split('@')[1] : '';
+
+    if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
         .post('http://10.0.2.2:8000/users/verify/', {email: email})
@@ -46,12 +50,19 @@ function ForgotPassword(props): JSX.Element {
             codeSent: true,
           });
         })
-        .catch((err: any) => console.log(err));
+        .catch((err: any) => {
+          console.log(err);
+          props.setErrorMessage(
+            'Error with the validation process.  Please try again.',
+          );
+        });
     } else if (inputCode === code.code && code.code.length) {
       setPasswordState({
         sendCode: false,
         createPassword: true,
       });
+    } else if (!inputEmail || domain !== 'wm.edu') {
+      props.setErrorMessage('Please enter a valid W&M address');
     }
   };
 
@@ -115,6 +126,7 @@ function ForgotPassword(props): JSX.Element {
                 <TextInput
                   placeholder="Enter your school email"
                   onChangeText={text => setEmail(text)}
+                  value={email}
                   style={styles.inputSmall}
                 />
                 <TouchableWithoutFeedback
@@ -140,6 +152,7 @@ function ForgotPassword(props): JSX.Element {
                 <TextInput
                   placeholder="Enter your verification code"
                   onChangeText={text => setInputCode(text)}
+                  value={inputCode}
                   style={styles.inputSmall}
                 />
                 <TouchableWithoutFeedback>
@@ -384,21 +397,25 @@ function Register(props): JSX.Element {
           <TextInput
             placeholder="Enter your first name"
             onChangeText={text => setProfile({...profile, first_name: text})}
+            value={profile.first_name}
             style={styles.input}
           />
           <TextInput
             placeholder="Enter your last name"
             onChangeText={text => setProfile({...profile, last_name: text})}
+            value={profile.last_name}
             style={styles.input}
           />
           <TextInput
             placeholder="Re-enter your email address"
             onChangeText={text => setEmail(text)}
+            value={email}
             style={styles.input}
           />
           <TextInput
             placeholder="Enter your username"
             onChangeText={text => setProfile({...profile, username: text})}
+            value={profile.username}
             style={styles.input}
           />
           <TouchableWithoutFeedback
@@ -434,12 +451,14 @@ function Register(props): JSX.Element {
             placeholder="Enter your password"
             onChangeText={text => setProfile({...profile, password: text})}
             style={styles.input}
+            value={profile.password}
             textContentType="password"
             secureTextEntry={true}
           />
           <TextInput
             placeholder="Confirm your password"
             onChangeText={text => setConfirmPassword(text)}
+            value={confirmPassword}
             style={styles.input}
             textContentType="password"
             secureTextEntry={true}
@@ -488,8 +507,12 @@ function Verify(props): JSX.Element {
   const [email, setEmail] = useState('');
   const [inputCode, setInputCode] = useState('');
 
-  const verify = async (inputEmail = null, inputCode = null) => {
-    if (inputEmail) {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const verify = async (inputEmail: string = '', inputCode: string = '') => {
+    // Making sure the inputEmail is from a W&M email domain
+    let domain = inputEmail ? inputEmail.split('@')[1] : '';
+
+    if (inputEmail && domain === 'wm.edu') {
       await axios
         .post('http://10.0.2.2:8000/users/verify/', {email: email})
         .then(response => {
@@ -511,6 +534,8 @@ function Verify(props): JSX.Element {
         forgotPassword: false,
         verifyEmail: false,
       });
+    } else if (!inputEmail || domain !== 'wm.edu') {
+      props.setErrorMessage('Please enter a valid W&M address');
     }
   };
 
@@ -650,6 +675,7 @@ function Login(props): JSX.Element {
             }
           } else {
             setErrorMessage('Invalid Login Credentials.  Please try again.');
+            setInfo({...info, password: ''});
           }
         })
         .catch((err: any) => console.log(err));
@@ -659,8 +685,8 @@ function Login(props): JSX.Element {
       });
     } else {
       setErrorMessage('Please enter login information.');
+      setInfo({...info, password: ''});
     }
-    setInfo({...info, password: ''});
   };
 
   return (
@@ -679,15 +705,16 @@ function Login(props): JSX.Element {
               <TextInput
                 placeholder="Enter username"
                 onChangeText={text => setInfo({...info, username: text})}
+                value={info.username}
                 style={styles.input}
               />
               <TextInput
                 placeholder="Enter Password"
                 onChangeText={text => setInfo({...info, password: text})}
+                value={info.password}
                 style={styles.input}
                 textContentType="password"
                 secureTextEntry={true}
-                value={info.password}
               />
               <TouchableWithoutFeedback onPress={() => login()}>
                 <Text style={styles.loginButton}>Log In</Text>

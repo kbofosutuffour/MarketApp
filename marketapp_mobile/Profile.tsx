@@ -74,7 +74,12 @@ function Post(props: {
             <Text>{props.data.username}</Text>
             <Text>${props.data.price}</Text>
           </View>
-          <View style={styles.editPost}></View>
+          <View style={styles.editPost}>
+            <Image
+              style={styles.editButtons}
+              source={require('./media/edit_post.png')}
+            />
+          </View>
         </View>
 
         {/* Button to delete a post */}
@@ -537,9 +542,7 @@ const styles = StyleSheet.create({
   postText: {
     display: 'flex',
     flexDirection: 'column',
-  },
-  editPost: {
-    backgroundColor: 'white',
+    width: '60%',
   },
   settingsOptionContainer: {
     borderBottomWidth: 1,
@@ -606,6 +609,16 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  editPost: {
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
+  editButtons: {
+    width: 10,
+    height: 30,
   },
 });
 export default Profile;

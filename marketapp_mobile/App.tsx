@@ -51,32 +51,112 @@ function Footer(props): JSX.Element {
 
 function NavBar(props): JSX.Element {
   //Navigation Bar component that is displayed on top of various screens
+
+  const [input, setInput] = useState('');
+
   return (
     <>
       <View style={styles.navigationBar}>
-        <View>
-          <Text style={styles.home}>{props.type}</Text>
-        </View>
-        <View style={{width: 180}}>
-          {props.searchedPosts.showSearchBar && (
-            <TextInput
-              style={styles.input}
-              onSubmitEditing={text => props.searchPosts(text.nativeEvent.text)}
-            />
-          )}
+        {/* Only show the type of nav bar if the search bar is not being used */}
+        <View
+          style={
+            !props.searchedPosts.showSearchBar ? styles.navigationBarType : {}
+          }>
+          <Text style={styles.home}>
+            {!props.searchedPosts.showSearchBar ? props.type : ''}
+          </Text>
         </View>
 
         {/* Show the search icon if the user is on the home screen */}
         {props.type === 'Home' && (
-          <TouchableWithoutFeedback
-            onPress={() => {
-              props.setSearch({...props.searchedPosts, showSearchBar: true});
-              props.setPosts({...props.posts, showPosts: false});
-            }}>
-            <View style={styles.searchContainer}>
-              <Image source={require('./media/search.png')} />
-            </View>
-          </TouchableWithoutFeedback>
+          <>
+            {props.searchedPosts.showSearchBar && (
+              <View style={styles.searchContainer}>
+                <View style={styles.searchBar}>
+                  <TouchableWithoutFeedback>
+                    <View
+                      style={styles.searchButton}
+                      // source={require('./media/user-01.png')}
+                    />
+                  </TouchableWithoutFeedback>
+                  <TextInput
+                    style={styles.input}
+                    onSubmitEditing={text =>
+                      props.searchPosts(text.nativeEvent.text, props.category)
+                    }
+                    onChangeText={text => setInput(text)}
+                    value={input}
+                    placeholder={
+                      props.searchedPosts.showSearchBar && props.category
+                        ? 'Search in ' + props.category + ':'
+                        : ''
+                    }
+                  />
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      props.setCategory('');
+                      props.setSearch({
+                        showSearchBar: true,
+                        showResults: false,
+                        posts: [],
+                      });
+                      setInput('');
+                    }}>
+                    <View
+                      style={styles.searchButton}
+                      // source={require('./media/user-01.png')}
+                    />
+                  </TouchableWithoutFeedback>
+                </View>
+                <View>
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      props.setPosts({
+                        ...props.posts,
+                        showPosts: true,
+                        showResults: false,
+                      });
+                      props.setCategory('');
+                      props.setSearch({
+                        showSearchBar: false,
+                        showResults: false,
+                        posts: [],
+                      });
+                    }}>
+                    <View style={styles.cancelButton}>
+                      <Text
+                        // eslint-disable-next-line react-native/no-inline-styles
+                        style={{
+                          color: Colors.white,
+                          textAlign: 'center',
+                          height: 20,
+                          lineHeight: 20,
+                          fontSize: 17.5,
+                        }}>
+                        cancel
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </View>
+            )}
+            {!props.searchedPosts.showSearchBar && (
+              <View>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    props.setSearch({
+                      ...props.searchedPosts,
+                      showSearchBar: true,
+                    });
+                    props.setPosts({...props.posts, showPosts: false});
+                  }}>
+                  <View style={styles.searchButtonContainer}>
+                    <Image source={require('./media/search.png')} />
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            )}
+          </>
         )}
 
         {/* Show the settings icon if the user is on the home screen */}
@@ -85,7 +165,7 @@ function NavBar(props): JSX.Element {
             onPress={() => {
               props.viewSettings();
             }}>
-            <View style={styles.searchContainer}>
+            <View style={styles.searchButtonContainer}>
               <Image
                 source={require('./media/settings.png')}
                 style={{width: 50, height: 50}}
@@ -162,7 +242,7 @@ function Post(props: {
 /**
  * @returns All possible categories for a post
  */
-function Categories(): JSX.Element {
+function Categories(props): JSX.Element {
   //Component that displays all of the possible categories for a post.
   //Shown when the user is performing a search
 
@@ -185,18 +265,27 @@ function Categories(): JSX.Element {
     <View style={styles.category}>
       {categories.map(value => {
         return (
-          <View style={styles.categoryItem}>
-            <View
-              // eslint-disable-next-line react-native/no-inline-styles
-              style={{
-                backgroundColor: 'gray',
-                borderRadius: 10,
-                width: 80,
-                height: 80,
-              }}
-            />
-            <Text>{value}</Text>
-          </View>
+          <>
+            <TouchableWithoutFeedback onPress={() => props.setCategory(value)}>
+              <View
+                style={
+                  props.category === value
+                    ? styles.categoryItemSelected
+                    : styles.categoryItem
+                }>
+                <View
+                  // eslint-disable-next-line react-native/no-inline-styles
+                  style={{
+                    backgroundColor: 'gray',
+                    borderRadius: 10,
+                    width: 80,
+                    height: 80,
+                  }}
+                />
+                <Text>{value}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </>
         );
       })}
     </View>
@@ -258,6 +347,8 @@ function App(): JSX.Element {
 
   const [showSettings, setSettings] = useState(false);
 
+  const [category, setCategory] = useState('');
+
   // When the defined components finish rendering, fetch
   // The posts that are currently stored in the database
   useEffect(() => {
@@ -303,7 +394,7 @@ function App(): JSX.Element {
    * Function used to show results of a user's search
    * @param text user's input on the search bar
    */
-  const searchPosts = (text: string) => {
+  const searchPosts = (text: string, category: string) => {
     var results: any[] = [];
 
     var prepositions = ['the', 'and', 'or', 'at', 'in', 'of'];
@@ -331,19 +422,31 @@ function App(): JSX.Element {
               return ((value !== 'and') && (value !== 'the'));
         });
 
+      var post_category = posts.posts[i].category;
+
       input.forEach((element: any) => {
-        if (prod.includes(element) || desc.includes(element)) {
-          add_item = true;
+        if (category.length) {
+          if (
+            category === post_category &&
+            (prod.includes(element) || desc.includes(element))
+          ) {
+            try {
+              console.log(category, post_category, 'test');
+              results.push(posts.posts[i]);
+            } catch {
+              console.log('error');
+            }
+          }
+        } else {
+          if (prod.includes(element) || desc.includes(element)) {
+            try {
+              results.push(posts.posts[i]);
+            } catch {
+              console.log('error');
+            }
+          }
         }
       });
-      if (add_item) {
-        try {
-          results.push(posts.posts[i]);
-        } catch {
-          console.log('error');
-        }
-      }
-      add_item = false;
     }
 
     setSearch({
@@ -374,6 +477,7 @@ function App(): JSX.Element {
     setChats(false);
     setSettings(false);
     setPost({...showPost, showPost: false});
+    setSearch({...searchedPosts, showSearchBar: false});
   };
 
   /**
@@ -402,6 +506,8 @@ function App(): JSX.Element {
     setChats(false);
     setSettings(false);
     setPost({...showPost, showPost: false});
+    setCategory('');
+    setSearch({...searchedPosts, showSearchBar: false});
   };
 
   /**
@@ -421,6 +527,7 @@ function App(): JSX.Element {
     setChats(false);
     setSettings(false);
     setPost({...showPost, showPost: false});
+    setSearch({...searchedPosts, showSearchBar: false});
   };
 
   /**
@@ -437,6 +544,7 @@ function App(): JSX.Element {
     setChats(true);
     setSettings(false);
     setPost({...showPost, showPost: false});
+    setSearch({...searchedPosts, showSearchBar: false});
   };
 
   /**
@@ -453,6 +561,7 @@ function App(): JSX.Element {
     setChats(false);
     setSettings(true);
     setPost({...showPost, showPost: false});
+    setSearch({...searchedPosts, showSearchBar: false});
   };
 
   /**
@@ -473,6 +582,7 @@ function App(): JSX.Element {
       showPost: true,
       id: id,
     });
+    setSearch({...searchedPosts, showSearchBar: false});
   };
 
   return (
@@ -509,6 +619,8 @@ function App(): JSX.Element {
               setSearch={setSearch}
               type={'Home'}
               viewSettings={viewSettings}
+              category={category}
+              setCategory={setCategory}
             />
             <ScrollView
               contentInsetAdjustmentBehavior="automatic"
@@ -527,18 +639,20 @@ function App(): JSX.Element {
                     return <Post data={post} setDesc={setDesc} />;
                   })}
                 {searchedPosts.showSearchBar && !searchedPosts.showResults && (
-                  <Categories />
+                  <Categories category={category} setCategory={setCategory} />
                 )}
               </View>
             </ScrollView>
-            <View>
-              <TouchableWithoutFeedback onPress={() => viewPost()}>
-                <Image
-                  source={require('./media/plus_sign.png')}
-                  style={styles.addPost}
-                />
-              </TouchableWithoutFeedback>
-            </View>
+            {!searchedPosts.showSearchBar && (
+              <View>
+                <TouchableWithoutFeedback onPress={() => viewPost()}>
+                  <Image
+                    source={require('./media/plus_sign.png')}
+                    style={styles.addPost}
+                  />
+                </TouchableWithoutFeedback>
+              </View>
+            )}
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
@@ -686,8 +800,15 @@ const styles = StyleSheet.create({
   navigationBar: {
     display: 'flex',
     flexDirection: 'row',
-    columnGap: 20,
     padding: 20,
+    width: '100%',
+  },
+  navigationBarType: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: '85%',
   },
   home: {
     textAlign: 'center',
@@ -704,15 +825,16 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
-  searchContainer: {
+  searchButtonContainer: {
     // flex: 1,
     display: 'flex',
     flexDirection: 'row',
+    width: '10%',
   },
   input: {
     backgroundColor: Colors.white,
     borderRadius: 20,
-    width: 180,
+    width: '70%',
   },
   post: {
     display: 'flex',
@@ -770,6 +892,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
+  categoryItemSelected: {
+    backgroundColor: Colors.white,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 5,
+    borderColor: 'rgb(185, 151, 91)',
+  },
   footerContainer: {
     flex: 1,
     backgroundColor: 'rgb(17, 87, 64)',
@@ -798,6 +930,35 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
     borderRadius: 35,
+  },
+  searchContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchBar: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    width: '80%',
+    columnGap: 10,
+  },
+  searchButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 20,
+    backgroundColor: Colors.black,
+  },
+  cancelButton: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

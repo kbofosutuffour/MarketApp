@@ -56,7 +56,7 @@ class Posts(viewsets.ModelViewSet):
         print(request.data, 'request')
         if serializer.is_valid():
             #create the post, then save it as a draft for the user
-            serializer.username = 'admin'
+            # serializer.username = 'admin'
             serializer.save()
             return Response({'message': 'You have successfully edited your post'})
         else:
@@ -136,13 +136,18 @@ class Profiles(viewsets.ModelViewSet):
 
     def create(self, request):
         serializer = ProfileSerializer(data=request.data)
-        print(request.data, 'request')
-        if serializer.is_valid():
+        try:
+            exists = Profile.objects.get(username=request.data['username'])
+        except:
+            exists = False
+        if serializer.is_valid() and not exists:
             #create the profile
             serializer.save()
-            return Response({'message': 'You have successfully edited your post'})
+            return Response({'message': 'You have successfully created a profile'})
+        elif exists:
+            return Response({'error': 'Profile for this username already exists'})
         else:
-            print(serializer.errors)
+            print(serializer.errors, test)
             return Response({'error': serializer.errors})
     
 # Taken from: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -204,8 +209,11 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def create(self, request):
         serializer = UserSerializer(data=request.data)
-        print(request.data, 'request')
-        if serializer.is_valid():
+        try:
+            exists = User.objects.get(username=request.data['username'])
+        except:
+            exists = False
+        if serializer.is_valid() and not exists:
             user = User.objects.create()
             user.username = request.data['username']
             user.set_password(request.data['password'])
@@ -213,7 +221,9 @@ class UserViewSet(viewsets.ModelViewSet):
             user.first_name = request.data['first_name']
             user.last_name = request.data['last_name']
             user.save()
-            return Response({'message': 'You have successfully edited your post'})
+            return Response({'message': 'You have successfully registered for H2H'})
+        elif exists:
+            return Response({'message': 'User already registered.  Be sure to create a profile.'})
         else:
             print(serializer.errors)
             return Response({'error': serializer.errors})
