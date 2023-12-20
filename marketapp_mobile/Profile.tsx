@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
 import React, {useEffect, useState} from 'react';
 import {
@@ -50,6 +51,8 @@ function Post(props: {
   };
   setDesc: any;
 }): JSX.Element {
+  const [options, showOptions] = useState(false);
+
   return (
     <TouchableWithoutFeedback onPress={() => props.viewPost(props.data.id)}>
       {/* Clicking on a post in the profile will lead user to the edit post screen */}
@@ -70,32 +73,65 @@ function Post(props: {
           </TouchableWithoutFeedback>
 
           <View style={styles.postText}>
-            <Text>{props.data.product}</Text>
-            <Text>{props.data.username}</Text>
+            <Text style={{color: 'black', fontSize: 17.5}}>
+              {props.data.product}
+            </Text>
             <Text>${props.data.price}</Text>
+            <Text
+              // eslint-disable-next-line react-native/no-inline-styles
+              style={{
+                color:
+                  props.data.status === 'SELLING'
+                    ? 'blue'
+                    : props.data.status === 'PENDING'
+                    ? 'rgb(185, 151, 91)'
+                    : 'rgb(17, 87, 64)',
+                fontWeight: 'bold',
+              }}>
+              {props.data.status}
+            </Text>
           </View>
-          <View style={styles.editPost}>
-            <Image
-              style={styles.editButtons}
-              source={require('./media/edit_post.png')}
-            />
-          </View>
-        </View>
+          <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+            <View style={styles.editPost}>
+              <Image
+                style={styles.editButtons}
+                source={require('./media/edit_post.png')}
+              />
+            </View>
+          </TouchableWithoutFeedback>
 
-        {/* Button to delete a post */}
-        <TouchableWithoutFeedback
-          onPress={() => {
-            props.setDelete(props.data.id);
-            props.setView({
-              main: false,
-              editProfile: false,
-              deletePost: true,
-            });
-          }}>
-          <View style={{display: 'flex', alignItems: 'center'}}>
-            <Text>DELETE</Text>
-          </View>
-        </TouchableWithoutFeedback>
+          {/* Editing options for current user profile page */}
+          {props.data.username === props.current_user && options && (
+            <View style={styles.postOptions}>
+              <TouchableWithoutFeedback
+                onPress={() => props.viewPost(props.data.id)}>
+                <Text>Edit Post</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  props.setDelete(props.data.id);
+                  props.setView({
+                    main: false,
+                    editProfile: false,
+                    deletePost: true,
+                  });
+                }}>
+                <Text>Delete Post</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          )}
+
+          {/* Editing options for viewing other profile page */}
+          {props.data.username !== props.current_user && options && (
+            <View style={styles.postOptions}>
+              {console.log(props.current_user)}
+
+              {/* <TouchableWithoutFeedback></TouchableWithoutFeedback>
+            <TouchableWithoutFeedback></TouchableWithoutFeedback>
+            <TouchableWithoutFeedback></TouchableWithoutFeedback> */}
+            </View>
+          )}
+        </View>
       </>
     </TouchableWithoutFeedback>
   );
@@ -107,8 +143,10 @@ function Post(props: {
  * @returns Edit Profile Screen
  */
 function EditProfile(props): JSX.Element {
+  const [showDate, changeDateSettings] = useState(false);
+
   return (
-    <>
+    <View style={{height: '80%'}}>
       <Button
         title="Return"
         onPress={() =>
@@ -122,7 +160,7 @@ function EditProfile(props): JSX.Element {
         <View style={styles.settingsOptionContainer}>
           <Text style={styles.settingsOption}>My Information</Text>
         </View>
-        <View style={styles.settingsOptionContainerOther}>
+        <View style={styles.settingsOptionContainerOtherMain}>
           {/* Leads user to a screen to change their profile picture */}
           <TouchableOpacity
             onPress={() =>
@@ -142,22 +180,43 @@ function EditProfile(props): JSX.Element {
               />
             </View>
           </TouchableOpacity>
-          <View styles={styles.profileText}>
-            <Text>{props.profile.username}</Text>
-            <Text>useremail@email.com</Text>
+          <View>
+            <Text style={{color: 'black', fontSize: 22.5}}>
+              {props.profile.username}
+            </Text>
+            <Text style={{textDecorationLine: 'underline'}}>
+              {props.profile.email
+                ? props.profile.email
+                : 'useremail@email.com'}
+            </Text>
             <Text>Date Joined</Text>
           </View>
         </View>
 
-        <View style={styles.settingsOptionContainer}>
-          <Text style={styles.settingsOption}>Show Joined Date</Text>
-        </View>
-
-        <View style={styles.settingsOptionContainer}>
-          <Text style={styles.settingsOption}>Change Password</Text>
+        <View style={styles.settingsOptionContainerNoBorder}>
+          <View style={styles.toggle}>
+            <View>
+              <Text style={{color: 'black', fontSize: 17.5, width: 200}}>
+                Show Joined Date
+              </Text>
+            </View>
+            <TouchableWithoutFeedback onPress={() => changeDateSettings(!showDate)}>
+              <View style={styles.outerCircle}>
+                <View
+                  // eslint-disable-next-line react-native/no-inline-styles
+                  style={{
+                    backgroundColor: showDate ? Colors.black : Colors.white,
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
         </View>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -232,10 +291,9 @@ function Profile(props): JSX.Element {
                 uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
               }}
             />
-            <View>
-              <Text>{props.profile.username}</Text>
-              <Button
-                title="Edit Profile"
+            <View style={styles.profileDescription}>
+              <Text style={{fontSize: 25}}>{props.profile.username}</Text>
+              <TouchableWithoutFeedback
                 onPress={() => {
                   setView({
                     main: false,
@@ -243,8 +301,9 @@ function Profile(props): JSX.Element {
                     deletePost: false,
                     changeProfilePicture: false,
                   });
-                }}
-              />
+                }}>
+                <Text style={styles.editProfileButton}>Edit Profile</Text>
+              </TouchableWithoutFeedback>
             </View>
           </View>
           <View style={styles.typeView}>
@@ -257,18 +316,25 @@ function Profile(props): JSX.Element {
                 })
               }>
               <View
-                // eslint-disable-next-line react-native/no-inline-styles
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderColor: 'gray',
-                  borderWidth: 0.5,
+                  borderTopWidth: 0.5,
                   padding: 20,
                   width: '33.33%',
                   backgroundColor: type.sell_history ? Colors.white : '#D7D7D7',
                 }}>
-                <Text>Sell History</Text>
+                <Text
+                  style={{
+                    color: type.sell_history ? 'black' : 'gray',
+                    width: 50,
+                    textAlign: 'center',
+                    fontSize: 15,
+                  }}>
+                  Sell History
+                </Text>
               </View>
             </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
@@ -280,18 +346,25 @@ function Profile(props): JSX.Element {
                 })
               }>
               <View
-                // eslint-disable-next-line react-native/no-inline-styles
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderColor: 'gray',
-                  borderWidth: 0.5,
+                  borderTopWidth: 0.5,
                   padding: 20,
                   width: '33.33%',
                   backgroundColor: type.buy_history ? Colors.white : '#D7D7D7',
                 }}>
-                <Text>Buy History</Text>
+                <Text
+                  style={{
+                    color: type.buy_history ? 'black' : 'gray',
+                    width: 50,
+                    textAlign: 'center',
+                    fontSize: 15,
+                  }}>
+                  Buy History
+                </Text>
               </View>
             </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
@@ -303,18 +376,25 @@ function Profile(props): JSX.Element {
                 })
               }>
               <View
-                // eslint-disable-next-line react-native/no-inline-styles
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderColor: 'gray',
-                  borderWidth: 0.5,
+                  borderTopWidth: 0.5,
                   padding: 20,
                   width: '33.33%',
                   backgroundColor: type.saved_posts ? Colors.white : '#D7D7D7',
                 }}>
-                <Text>Saved Posts</Text>
+                <Text
+                  style={{
+                    color: type.saved_posts ? 'black' : 'gray',
+                    width: 50,
+                    textAlign: 'center',
+                    fontSize: 15,
+                  }}>
+                  Saved Posts
+                </Text>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -325,7 +405,10 @@ function Profile(props): JSX.Element {
             style={styles.scrollView}>
             <View
               style={{
-                backgroundColor: Colors.white,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                padding: 0,
               }}>
               {posts.map(post => {
                 if (type.saved_posts) {
@@ -340,6 +423,7 @@ function Profile(props): JSX.Element {
                         viewPost={props.viewPost}
                         setView={setView}
                         setDelete={setDelete}
+                        current_user={props.current_user}
                       />
                     );
                   }
@@ -354,6 +438,7 @@ function Profile(props): JSX.Element {
                       viewPost={props.viewPost}
                       setView={setView}
                       setDelete={setDelete}
+                      current_user={props.current_user}
                     />
                   );
                 }
@@ -367,7 +452,6 @@ function Profile(props): JSX.Element {
       )}
       {view.deletePost && (
         <View
-          // eslint-disable-next-line react-native/no-inline-styles
           style={{
             backgroundColor: Colors.white,
             width: '80%',
@@ -470,13 +554,15 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 600,
+    height: '79%',
   },
   profilePicture: {
     width: 100,
     height: 100,
-    borderRadius: 25,
-    marginLeft: 50,
+    borderRadius: 50,
+    marginLeft: 25,
+    borderWidth: 1,
+    borderColor: Colors.black,
   },
   profilePictureBorder: {
     width: 100,
@@ -491,9 +577,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 15,
+    paddingBottom: 15,
+    columnGap: 15,
     backgroundColor: Colors.white,
+  },
+  profileDescription: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: 5,
   },
   typeView: {
     display: 'flex',
@@ -519,9 +611,10 @@ const styles = StyleSheet.create({
   },
   post: {
     backgroundColor: 'white',
+    width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    padding: 10,
+    padding: 15,
     borderWidth: 0.8,
     borderColor: 'grey',
   },
@@ -536,17 +629,38 @@ const styles = StyleSheet.create({
     height: 100,
     display: 'flex',
     backgroundColor: 'black',
-    borderRadius: 10,
+    borderRadius: 25,
     overflow: 'hidden',
   },
   postText: {
     display: 'flex',
     flexDirection: 'column',
-    width: '60%',
+    width: '55%',
+    marginLeft: 20,
+  },
+  postOptions: {
+    width: '40%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.black,
+    backgroundColor: Colors.white,
+    rowGap: 5,
+    position: 'relative',
+    right: 170,
   },
   settingsOptionContainer: {
     borderBottomWidth: 1,
     borderColor: 'gray',
+    paddingTop: 20,
+    width: '85%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
+  settingsOptionContainerNoBorder: {
     paddingTop: 20,
     width: '85%',
     display: 'flex',
@@ -564,12 +678,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  settingsOptionContainerOtherMain: {
+    borderColor: 'gray',
+    paddingTop: 20,
+    paddingBottom: 0,
+    width: '85%',
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   settingsOption: {
     fontSize: 20,
   },
   userSettings: {
     backgroundColor: Colors.white,
-    height: '82.5%',
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -619,6 +744,40 @@ const styles = StyleSheet.create({
   editButtons: {
     width: 10,
     height: 30,
+  },
+  editProfileButton: {
+    backgroundColor: '#D7D7D7',
+    padding: 5,
+    borderRadius: 10,
+    textAlign: 'center',
+    height: 25,
+    lineHeight: 17.5,
+  },
+  outerCircle: {
+    position: 'absolute',
+    right: 5,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderColor: Colors.black,
+    borderWidth: 1,
+  },
+  toggleContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: 10,
+    rowGap: 10,
+  },
+  toggle: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    columnGap: 300,
+    width: '100%',
   },
 });
 export default Profile;

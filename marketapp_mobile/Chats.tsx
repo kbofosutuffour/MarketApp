@@ -207,7 +207,7 @@ function Chats(props): JSX.Element {
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
         backgroundColor: Colors.white,
-        height: '80%',
+        height: '79%',
       }}>
       {rooms.showRoom &&
         rooms.rooms.buyers.map(value => {
@@ -259,9 +259,7 @@ function Chats(props): JSX.Element {
             </View>
 
             <View style={styles.postText}>
-              <Text>{chats.product}</Text>
-              {/* <Text>{props.data.username}</Text>
-          <Text>${props.data.price}</Text> */}
+              <Text style={{color: 'black', fontSize: 17.5}}>{chats.product}</Text>
             </View>
             <View style={styles.editPost}>
               <Image

@@ -35,15 +35,59 @@ function Footer(props): JSX.Element {
     <View style={styles.footerContainer}>
       <View style={styles.goldBar} />
       <View style={styles.footer}>
-        <TouchableWithoutFeedback onPress={props.returnHome}>
-          <Image source={require('./media/home-05.png')} />
-        </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={props.viewChats}>
-          <Image source={require('./media/message-chat-square.png')} />
-        </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={props.viewProfile}>
-          <Image source={require('./media/user-01.png')} />
-        </TouchableWithoutFeedback>
+        <View // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            width: 60,
+            height: 60,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            backgroundColor:
+              props.type === 'Home' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
+            borderRadius: 30,
+          }}>
+          <TouchableWithoutFeedback onPress={props.returnHome}>
+            <Image source={require('./media/home-05.png')} />
+          </TouchableWithoutFeedback>
+        </View>
+        <View // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            width: 60,
+            height: 60,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            backgroundColor:
+              props.type === 'Chats' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
+            borderRadius: 30,
+          }}>
+          <TouchableWithoutFeedback onPress={props.viewChats}>
+            <Image source={require('./media/message-chat-square.png')} />
+          </TouchableWithoutFeedback>
+        </View>
+        <View // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            width: 60,
+            height: 60,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            backgroundColor:
+              props.type === 'Profile'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)',
+            borderRadius: 30,
+          }}>
+          <TouchableWithoutFeedback onPress={props.viewProfile}>
+            <Image source={require('./media/user-01.png')} />
+          </TouchableWithoutFeedback>
+        </View>
       </View>
     </View>
   );
@@ -141,20 +185,18 @@ function NavBar(props): JSX.Element {
               </View>
             )}
             {!props.searchedPosts.showSearchBar && (
-              <View>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    props.setSearch({
-                      ...props.searchedPosts,
-                      showSearchBar: true,
-                    });
-                    props.setPosts({...props.posts, showPosts: false});
-                  }}>
-                  <View style={styles.searchButtonContainer}>
-                    <Image source={require('./media/search.png')} />
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  props.setSearch({
+                    ...props.searchedPosts,
+                    showSearchBar: true,
+                  });
+                  props.setPosts({...props.posts, showPosts: false});
+                }}>
+                <View style={styles.searchButtonContainer}>
+                  <Image source={require('./media/search.png')} />
+                </View>
+              </TouchableWithoutFeedback>
             )}
           </>
         )}
@@ -233,7 +275,7 @@ function Post(props: {
           <Text>{props.data.username}</Text>
           <Text>${props.data.price}</Text>
         </View>
-        <View style={styles.editPost}></View>
+        <View style={styles.editPost} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -363,7 +405,7 @@ function App(): JSX.Element {
     await axios
       .get('http://10.0.2.2:8000/posts')
       .then(res => {
-        console.log(res.data);
+        // console.log(res.data);
         setPosts({
           showPosts: true,
           posts: res.data,
@@ -379,7 +421,6 @@ function App(): JSX.Element {
       await axios
         .get('http://10.0.2.2:8000/profile/' + user.username)
         .then(res => {
-          console.log(res.data, res.data.id, 'id');
           setProfile({
             showProfile: false,
             data: res.data,
@@ -431,7 +472,6 @@ function App(): JSX.Element {
             (prod.includes(element) || desc.includes(element))
           ) {
             try {
-              console.log(category, post_category, 'test');
               results.push(posts.posts[i]);
             } catch {
               console.log('error');
@@ -657,6 +697,7 @@ function App(): JSX.Element {
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
+              type={'Home'}
             />
           </View>
         )}
@@ -675,6 +716,7 @@ function App(): JSX.Element {
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
+              type={'Home'}
             />
           </>
         )}
@@ -703,11 +745,13 @@ function App(): JSX.Element {
               posts={posts.posts}
               viewSettings={viewSettings}
               viewPost={viewPost}
+              current_user={user.username}
             />
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
+              type={'Profile'}
             />
           </>
         )}
@@ -735,6 +779,7 @@ function App(): JSX.Element {
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
+              type={'Chats'}
             />
           </>
         )}
@@ -768,6 +813,7 @@ function App(): JSX.Element {
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
+              type={'Profile'}
             />
           </>
         )}
@@ -802,6 +848,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 20,
     width: '100%',
+    height: '10%',
   },
   navigationBarType: {
     display: 'flex',
@@ -817,10 +864,10 @@ const styles = StyleSheet.create({
   },
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
-    height: 7.5,
+    height: '1%',
   },
   scrollView: {
-    height: '82.5%',
+    height: '82%',
   },
   highlight: {
     fontWeight: '700',
@@ -829,7 +876,6 @@ const styles = StyleSheet.create({
     // flex: 1,
     display: 'flex',
     flexDirection: 'row',
-    width: '10%',
   },
   input: {
     backgroundColor: Colors.white,
@@ -905,7 +951,7 @@ const styles = StyleSheet.create({
   footerContainer: {
     flex: 1,
     backgroundColor: 'rgb(17, 87, 64)',
-    height: 85,
+    height: '10%',
   },
   footer: {
     display: 'flex',
@@ -914,14 +960,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     columnGap: 40,
-    paddingTop: 20,
-  },
-  footerImage: {
-    width: 100,
-    height: 100,
-    display: 'flex',
-    overflow: 'hidden',
-    backgroundColor: 'black',
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   addPost: {
     width: 75,
