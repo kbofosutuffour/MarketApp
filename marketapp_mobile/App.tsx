@@ -445,7 +445,6 @@ function App(): JSX.Element {
       .filter(value => {
         return !prepositions.includes(value);
       });
-    var add_item = false;
     for (let i = 0; i < posts.posts.length; i++) {
       var prod = posts.posts[i].product
         .toLowerCase()
@@ -468,7 +467,7 @@ function App(): JSX.Element {
       input.forEach((element: any) => {
         if (category.length) {
           if (
-            category === post_category &&
+            category.toUpperCase() === post_category &&
             (prod.includes(element) || desc.includes(element))
           ) {
             try {
@@ -671,7 +670,13 @@ function App(): JSX.Element {
                 }}>
                 {posts.showPosts &&
                   posts.posts.map(post => {
-                    return <Post data={post} setDesc={setDesc} />;
+                    /* Only show posts not created by the user on the home page */
+                    if (
+                      post.username !== user.username &&
+                      post.status !== 'SOLD'
+                    ) {
+                      return <Post data={post} setDesc={setDesc} />;
+                    }
                   })}
                 {searchedPosts.showResults &&
                   searchedPosts.posts.length > 0 &&
@@ -711,12 +716,12 @@ function App(): JSX.Element {
         !showPost.showPost &&
         !user.showLogin && (
           <>
-            <ProductDescription post={prodDesc.post} returnHome={returnHome} />
-            <Footer
+            <ProductDescription
+              post={prodDesc.post}
               returnHome={returnHome}
-              viewProfile={viewProfile}
               viewChats={viewChats}
-              type={'Home'}
+              current_user={profile.data.username}
+              current_user_pfp={profile.data.profile_picture}
             />
           </>
         )}
@@ -774,7 +779,11 @@ function App(): JSX.Element {
               type={'My Chats'}
               viewSettings={viewSettings}
             />
-            <Chats profile={profile.data} />
+            <Chats
+              profile={profile.data}
+              viewChats={viewChats}
+              current_user={user.username}
+            />
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
@@ -881,6 +890,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: 20,
     width: '70%',
+    height: '80%',
   },
   post: {
     display: 'flex',

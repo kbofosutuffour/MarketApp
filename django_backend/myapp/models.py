@@ -65,6 +65,7 @@ class Post(models.Model):
         default = Status.SELLING,
         max_length=8,
     )
+    purchased_by = models.CharField(max_length=500, blank=True, null=True, default=None)
 
     def __str__(self) -> str:
         return self.product
@@ -87,7 +88,9 @@ class Profile(models.Model):
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
-    saved_posts = models.ManyToManyField(Post, blank=True)
+    saved_posts = models.ManyToManyField(Post, blank=True, related_name="saved_posts")
+    liked_posts = models.ManyToManyField(Post, blank=True, related_name="liked_posts")
+    buy_history = models.ManyToManyField(Post, blank=True, related_name="buy_history")
     drafts = models.ManyToManyField(Post, blank=True, related_name="drafts")
 
     def __str__(self) -> str:
@@ -99,9 +102,9 @@ class Room(models.Model):
     Room table is used to hold data on a conversation between two users
     """
     seller = models.CharField(max_length=500, default=None)
-    seller_profile_picture = models.ImageField(verbose_name="seller_picture",upload_to="images/", default=None)
+    seller_profile_picture = models.ImageField(verbose_name="seller_picture",upload_to="images/", blank=False)
     buyer = models.CharField(max_length=500, default=None)
-    buyer_profile_picture = models.ImageField(verbose_name="buyer_picture",upload_to="images/", default=None)
+    buyer_profile_picture = models.ImageField(verbose_name="buyer_picture",upload_to="images/", blank=False)
     product = models.CharField(max_length=100)
     image = models.ImageField("images/", default=None)
 

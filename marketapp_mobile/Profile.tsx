@@ -21,37 +21,33 @@ import DocumentPicker from 'react-native-document-picker';
 function Post(props: {
   data: {
     display_image: any;
-    product:
-      | string
-      | number
-      | boolean
-      | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-      | Iterable<React.ReactNode>
-      | React.ReactPortal
-      | null
-      | undefined;
-    username:
-      | string
-      | number
-      | boolean
-      | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-      | Iterable<React.ReactNode>
-      | React.ReactPortal
-      | null
-      | undefined;
-    price:
-      | string
-      | number
-      | boolean
-      | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-      | Iterable<React.ReactNode>
-      | React.ReactPortal
-      | null
-      | undefined;
+    product: string;
+    username: string;
+    price: string;
   };
   setDesc: any;
 }): JSX.Element {
   const [options, showOptions] = useState(false);
+  const [status, setStatus] = useState('');
+  const [statusOptions, showStatusOptions] = useState(false);
+
+  useEffect(() => {
+    setStatus(props.data.status);
+  }, []);
+
+  const changeStatus = async (id: string, username: string, status: string) => {
+    let data = {
+      username: username,
+      post: id,
+      status: status.toUpperCase(),
+    };
+    axios
+      .patch('http://10.0.2.2:8000/edit_post/status/' + username + '/', data)
+      .then(res => {
+        setStatus(status.toUpperCase());
+      })
+      .catch((err: any) => console.log(err));
+  };
 
   return (
     <TouchableWithoutFeedback onPress={() => props.viewPost(props.data.id)}>
@@ -77,19 +73,22 @@ function Post(props: {
               {props.data.product}
             </Text>
             <Text>${props.data.price}</Text>
-            <Text
-              // eslint-disable-next-line react-native/no-inline-styles
-              style={{
-                color:
-                  props.data.status === 'SELLING'
-                    ? 'blue'
-                    : props.data.status === 'PENDING'
-                    ? 'rgb(185, 151, 91)'
-                    : 'rgb(17, 87, 64)',
-                fontWeight: 'bold',
-              }}>
-              {props.data.status}
-            </Text>
+            <TouchableWithoutFeedback
+              onPress={() => showStatusOptions(!statusOptions)}>
+              <Text
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  color:
+                    status === 'SELLING'
+                      ? 'blue'
+                      : status === 'PENDING'
+                      ? 'rgb(185, 151, 91)'
+                      : 'rgb(17, 87, 64)',
+                  fontWeight: 'bold',
+                }}>
+                {status}
+              </Text>
+            </TouchableWithoutFeedback>
           </View>
           <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
             <View style={styles.editPost}>
@@ -117,6 +116,31 @@ function Post(props: {
                   });
                 }}>
                 <Text>Delete Post</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          )}
+          {props.data.username === props.current_user && statusOptions && (
+            <View style={styles.statusOptions}>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  changeStatus(props.data.id, props.data.username, 'SELLING');
+                  showStatusOptions(!statusOptions);
+                }}>
+                <Text>SELLING</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  changeStatus(props.data.id, props.data.username, 'PENDING');
+                  showStatusOptions(!statusOptions);
+                }}>
+                <Text>PENDING</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  changeStatus(props.data.id, props.data.username, 'SOLD');
+                  showStatusOptions(!statusOptions);
+                }}>
+                <Text>SOLD</Text>
               </TouchableWithoutFeedback>
             </View>
           )}
@@ -200,7 +224,8 @@ function EditProfile(props): JSX.Element {
                 Show Joined Date
               </Text>
             </View>
-            <TouchableWithoutFeedback onPress={() => changeDateSettings(!showDate)}>
+            <TouchableWithoutFeedback
+              onPress={() => changeDateSettings(!showDate)}>
               <View style={styles.outerCircle}>
                 <View
                   // eslint-disable-next-line react-native/no-inline-styles
@@ -651,6 +676,20 @@ const styles = StyleSheet.create({
     rowGap: 5,
     position: 'relative',
     right: 170,
+  },
+  statusOptions: {
+    width: '30%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.black,
+    backgroundColor: Colors.white,
+    rowGap: 5,
+    position: 'relative',
+    right: 150,
   },
   settingsOptionContainer: {
     borderBottomWidth: 1,

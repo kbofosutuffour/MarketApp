@@ -18,7 +18,7 @@ router.register(r'profiles', Profiles, basename='profile')
 router.register(r'users', UserViewSet)
 router.register(r'rooms', Rooms, basename='rooms')
 router.register(r'messages', Messages, basename='messages')
-router.register(r'edit_profile', EditProfileViewSet, basename='edit-profile')
+router.register(r'edit_profile', EditProfileViewSet, basename='edit_profile')
 router.register(r'edit_post', EditPostViewSet, basename='edit-post')
 urlpatterns = [
     path('', include(router.urls)),
