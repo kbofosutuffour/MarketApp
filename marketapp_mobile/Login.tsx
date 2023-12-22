@@ -653,6 +653,18 @@ function Login(props): JSX.Element {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Redirect to Forgot Password screen immediately if desired from app
+  useState(() => {
+    if (props.redirect === 'Forgot Password') {
+      setLoginState({
+        login: false,
+        register: false,
+        forgotPassword: true,
+        verifyEmail: false,
+      });
+    }
+  })
+
   const login = async () => {
     const data = {
       username: info.username,

@@ -148,8 +148,6 @@ function Post(props: {
           {/* Editing options for viewing other profile page */}
           {props.data.username !== props.current_user && options && (
             <View style={styles.postOptions}>
-              {console.log(props.current_user)}
-
               {/* <TouchableWithoutFeedback></TouchableWithoutFeedback>
             <TouchableWithoutFeedback></TouchableWithoutFeedback>
             <TouchableWithoutFeedback></TouchableWithoutFeedback> */}
@@ -299,7 +297,6 @@ function Profile(props): JSX.Element {
     axios
       .get(request)
       .then(res => {
-        console.log(res.data);
         setPosts(res.data);
       })
       .catch((err: any) => console.log(err));
@@ -317,7 +314,7 @@ function Profile(props): JSX.Element {
               }}
             />
             <View style={styles.profileDescription}>
-              <Text style={{fontSize: 25}}>{props.profile.username}</Text>
+              <Text style={{fontSize: 25, color: Colors.black}}>{props.profile.username}</Text>
               <TouchableWithoutFeedback
                 onPress={() => {
                   setView({
@@ -543,7 +540,6 @@ function Profile(props): JSX.Element {
                       '/',
                   )
                   .then(response => {
-                    console.log(response);
                     profile_id = response.data.id;
                   })
                   .catch((err: any) => console.log(err));
@@ -553,7 +549,7 @@ function Profile(props): JSX.Element {
                     data,
                   )
                   .then(response => {
-                    console.log(response);
+                    console.log('');
                   })
                   .catch((err: any) => console.log(err));
                 setView({

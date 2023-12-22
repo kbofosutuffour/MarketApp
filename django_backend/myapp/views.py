@@ -326,6 +326,39 @@ class Messages(viewsets.ModelViewSet):
         serializer = self.get_serializer(messages, many=True)
         return Response(serializer.data)
 
+class UserSettingsViewSet(viewsets.ModelViewSet):
+
+    queryset = UserSettings.objects.all()
+    serializer_class = UserSettingsSerializer
+
+    @action(methods=['patch'], detail=False, url_path=r'new_messages/(?P<username>\w+)')
+    def new_messages(self, request, username=None):
+        """
+        Changing the liked post settings of a post
+        """
+        try:
+            settings = UserSettings.objects.get(pk=username)
+            settings.new_messages = request.data['new_messages']
+            settings.save()
+            return Response({'message': 'You have successfully edited your profile settings'})
+        except:
+            print('error')
+            return Response({'error': 'There was an error editing your profile settings.  Please try again.'})
+
+    @action(methods=['patch'], detail=False, url_path=r'liked_posts/(?P<username>\w+)')
+    def liked_posts(self, request, username=None):
+        """
+        Changing the liked post settings of a post
+        """
+        try:
+            settings = UserSettings.objects.get(pk=username)
+            settings.liked_posts_updates = request.data['liked_post_updates']
+            settings.save()
+            return Response({'message': 'You have successfully edited your profile settings'})
+        except:
+            print('error')
+            return Response({'error': 'There was an error editing your profile settings.  Please try again.'})
+        
 #----------------------------
 
 def home(request):

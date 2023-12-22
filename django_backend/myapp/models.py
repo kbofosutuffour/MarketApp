@@ -86,6 +86,7 @@ class Profile(models.Model):
     """
     username = models.CharField(max_length=500, default=None, unique=True)
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
+    date = models.DateField(default=datetime.date.today)
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     saved_posts = models.ManyToManyField(Post, blank=True, related_name="saved_posts")
@@ -141,8 +142,23 @@ class Image(models.Model):
     image4 = models.ImageField("images/", upload_to="posts", default=None)
 
 
+class UserSettings(models.Model):
+    """
+    Table to store a users settings and notifications
+    """
+    username = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        primary_key=True
+    )
+    new_messages = models.BooleanField(blank=True, default=False)
+    liked_posts_updates = models.BooleanField(blank=True, default=False)
+    blocked_users = models.ManyToManyField(Profile, blank=True, related_name="blocked_users")
+
+    # Violations
+    scamming = models.BooleanField(blank=True, default=False)
+    harassment = models.BooleanField(blank=True, default=False),
+    illegal_goods = models.BooleanField(blank=True, default=False)
+
 
     
-
-
-

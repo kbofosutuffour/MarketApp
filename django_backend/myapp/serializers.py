@@ -81,4 +81,8 @@ class MessageSerializer(serializers.ModelSerializer):
 		model = Message
 		fields = '__all__'
 
+class UserSettingsSerializer(serializers.ModelSerializer):
 
+	class Meta:
+		model = UserSettings
+		fields = ['username', 'new_messages', 'liked_posts_updates', 'blocked_users']

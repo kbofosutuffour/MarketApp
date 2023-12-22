@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -41,7 +42,21 @@ function Profile(props): JSX.Element {
       </View>
       {options.map(value => {
         return (
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              if (value === 'Change Password') {
+                props.setView({
+                  settings: false,
+                  profile: false,
+                  notifications: false,
+                  privacy: false,
+                  support: false,
+                  logout: false,
+                  violations: false,
+                  changePassword: true,
+                });
+              }
+            }}>
             <View
               style={
                 value === 'Change Password'
@@ -59,10 +74,345 @@ function Profile(props): JSX.Element {
   );
 }
 
-function Notifications(): JSX.Element {
-  const options = ['New Messages', 'Liked Post Updates'];
+function ChangePassword(props): JSX.Element {
+  const [passwordState, setPasswordState] = useState({
+    sendCode: false,
+    createPassword: false,
+  });
+
+  const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState({
+    username: '',
+    password: '',
+    confirm: '',
+    email: email,
+  });
+
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [code, setCode] = useState({
+    code: '',
+    codeSent: false,
+  });
+  const [inputCode, setInputCode] = useState('');
+  // Add username as soon as the component renders
+  useEffect(() => {
+    setNewPassword({...newPassword, username: props.profile.username});
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const verify = async (inputEmail: string = '', inputCode: string = '') => {
+    // Making sure the inputEmail is from a W&M email domain
+    let domain = inputEmail ? inputEmail.split('@')[1] : '';
+
+    if (inputEmail && domain === 'wm.edu') {
+      setNewPassword({...newPassword, email: inputEmail});
+      await axios
+        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .then(response => {
+          setCode({
+            code: response.data.code,
+            codeSent: true,
+          });
+        })
+        .catch((err: any) => {
+          console.log(err);
+          setErrorMessage(
+            'Error with the validation process.  Please try again.',
+          );
+        });
+    } else if (inputCode === code.code && code.code.length) {
+      setPasswordState({
+        sendCode: false,
+        createPassword: true,
+      });
+    } else if (!inputEmail || domain !== 'wm.edu') {
+      setErrorMessage('Please enter a valid W&M address');
+    }
+  };
+
+  const changePassword = async () => {
+    if (
+      newPassword.password === newPassword.confirm &&
+      newPassword.password.length >= 8 &&
+      newPassword.username.length
+    ) {
+      await axios
+        .post('http://10.0.2.2:8000/users/change_password/', newPassword)
+        .then(response => {
+          setPasswordState({
+            sendCode: false,
+            createPassword: true,
+          });
+        })
+        .catch((err: any) => console.log(err));
+    } else if (
+      newPassword.password !== newPassword.confirm &&
+      newPassword.password.length
+    ) {
+      setErrorMessage('Passwords do not match.  Please try again.');
+    } else if (newPassword.password.length < 8) {
+      setErrorMessage('Insufficient password length.  Please try again');
+    } else if (!newPassword.username.length) {
+      setErrorMessage('Please enter your username');
+    } else {
+      setErrorMessage('An unknown error has occurred');
+    }
+  };
+
+  return (
+    <>
+      {!passwordState.createPassword && !passwordState.sendCode && (
+        <>
+          <View style={styles.userSettings}>
+            <TouchableWithoutFeedback
+              onPress={() =>
+                setPasswordState({
+                  sendCode: true,
+                  createPassword: false,
+                })
+              }>
+              <View style={styles.supportOptionContainerTop}>
+                <Text style={styles.settingsOption}>
+                  Change from existing password
+                </Text>
+              </View>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() => props.login('Forgot Password')}>
+              <View style={styles.settingsOptionContainerBottom}>
+                <Text style={styles.settingsOption}>Forgot Password</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </>
+      )}
+      {passwordState.sendCode && (
+        <>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Image
+              style={styles.blackArrow}
+              source={require('./media/black_left_arrow.png')}
+            />
+          </TouchableWithoutFeedback>
+          <View style={styles.loginContainer}>
+            <Image
+              style={styles.wmLogo}
+              source={require('./media/wm_logo_green.png')}
+            />
+            <View style={styles.loginText}>
+              <Text style={styles.header}>Verify your W&M email account</Text>
+              <View style={styles.emailInput}>
+                <TextInput
+                  placeholder="Enter your school email"
+                  onChangeText={text => setEmail(text)}
+                  value={email}
+                  style={styles.inputSmall}
+                />
+                <TouchableWithoutFeedback
+                  onPress={() => verify((inputEmail = email))}>
+                  <Text
+                    // eslint-disable-next-line react-native/no-inline-styles
+                    style={{
+                      width: 90,
+                      height: 35,
+                      borderRadius: 15,
+                      backgroundColor: code.codeSent
+                        ? 'rgb(138,178,147)'
+                        : 'rgb(176,211,229)',
+                      color: 'black',
+                      textAlign: 'center',
+                      lineHeight: 35,
+                    }}>
+                    {code.codeSent ? 'Code Sent' : 'Send Code'}
+                  </Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <View style={styles.emailInput}>
+                <TextInput
+                  placeholder="Enter your verification code"
+                  onChangeText={text => setInputCode(text)}
+                  value={inputCode}
+                  style={styles.inputSmall}
+                />
+                <TouchableWithoutFeedback>
+                  <Text
+                    // eslint-disable-next-line react-native/no-inline-styles
+                    style={{
+                      backgroundColor:
+                        inputCode === code.code && inputCode.length
+                          ? 'rgb(138,178,147)'
+                          : 'rgb(176,211,229)',
+                      width: 90,
+                      height: 30,
+                      borderRadius: 10,
+                      color: 'black',
+                      textAlign: 'center',
+                      lineHeight: 30,
+                    }}>
+                    {inputCode === code.code && inputCode.length
+                      ? 'Verified'
+                      : 'Pending'}
+                  </Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <TouchableWithoutFeedback>
+                <Text style={styles.forgotPassword}>Resend Code</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback onPress={() => verify(null, inputCode)}>
+                <Text style={styles.loginButton}>Verify Code</Text>
+              </TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  props.setLoginState({
+                    login: false,
+                    register: false,
+                    forgotPassword: false,
+                    verifyEmail: true,
+                  })
+                }>
+                <Text>Don't have an account? Click here to Sign Up</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        </>
+      )}
+      {passwordState.createPassword && (
+        <>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.setLoginState({
+                login: true,
+                register: false,
+                forgotPassword: false,
+                verifyEmail: false,
+              })
+            }>
+            <Image
+              style={styles.blackArrow}
+              source={require('./media/black_left_arrow.png')}
+            />
+          </TouchableWithoutFeedback>
+          <View style={styles.loginContainer}>
+            <Image
+              style={styles.wmLogo}
+              source={{
+                uri: 'http://10.0.2.2:8000/' + props.profile.profile_picture,
+              }}
+            />
+            <View style={styles.loginText}>
+              <Text style={styles.header}>Create a new password</Text>
+              <TextInput
+                placeholder="Enter your password"
+                onChangeText={text =>
+                  setNewPassword({...newPassword, password: text})
+                }
+                style={styles.input}
+                textContentType="password"
+                secureTextEntry={true}
+              />
+              <TextInput
+                placeholder="Confirm your password"
+                onChangeText={text =>
+                  setNewPassword({...newPassword, confirm: text})
+                }
+                style={styles.input}
+                textContentType="password"
+                secureTextEntry={true}
+              />
+            </View>
+
+            <Text>Password must contain 8 characters</Text>
+            <TouchableWithoutFeedback
+              style={styles.loginButton}
+              onPress={() => {
+                changePassword();
+              }}>
+              <Text style={styles.loginButton}>Create a new password</Text>
+            </TouchableWithoutFeedback>
+          </View>
+        </>
+      )}
+      {errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+        </View>
+      )}
+    </>
+  );
+}
+
+function Notifications(props): JSX.Element {
   const [newMessages, setNewMessages] = useState(true);
   const [likedPostUpdates, setLikedPostUpdates] = useState(true);
+  const [userSettings, setUserSettings] = useState({});
+  const [profileID, setProfileID] = useState('');
+
+  useEffect(() => {
+    showNotifications();
+  }, []);
+
+  const showNotifications = async () => {
+    let profile_id;
+    await axios
+      .get('http://10.0.2.2:8000/profiles/get_id/' + props.profile + '/')
+      .then(response => {
+        setProfileID(response.data.id);
+        profile_id = response.data.id;
+      })
+      .catch((err: any) => console.log(err));
+    await axios
+      .get('http://10.0.2.2:8000/user_settings/' + profile_id)
+      .then(response => {
+        setNewMessages(response.data.new_messages);
+        setLikedPostUpdates(response.data.liked_posts_updates);
+        setUserSettings(response.data);
+      })
+      .catch(error => console.log(error));
+  };
+
+  const changedNewMessages = async choice => {
+    let data = userSettings;
+    data.new_messages = choice;
+    await axios
+      .patch(
+        'http://10.0.2.2:8000/user_settings/new_messages/' + profileID + '/',
+        data,
+      )
+      .then(response => {
+        setNewMessages(choice);
+      })
+      .catch(error => console.log(error));
+  };
+
+  const changedLikedPosts = async choice => {
+    let data = userSettings;
+    data.liked_post_updates = choice;
+    await axios
+      .patch(
+        'http://10.0.2.2:8000/user_settings/liked_posts/' + profileID + '/',
+        data,
+      )
+      .then(response => {
+        setLikedPostUpdates(choice);
+      })
+      .catch(error => console.log(error));
+  };
 
   return (
     <View style={styles.userSettings}>
@@ -78,7 +428,7 @@ function Notifications(): JSX.Element {
             <View style={{width: 20}}>
               <Text>On</Text>
             </View>
-            <TouchableWithoutFeedback onPress={() => setNewMessages(true)}>
+            <TouchableWithoutFeedback onPress={() => changedNewMessages(true)}>
               <View style={styles.outerCircle}>
                 <View
                   // eslint-disable-next-line react-native/no-inline-styles
@@ -96,7 +446,7 @@ function Notifications(): JSX.Element {
             <View style={{width: 20}}>
               <Text>Off</Text>
             </View>
-            <TouchableWithoutFeedback onPress={() => setNewMessages(false)}>
+            <TouchableWithoutFeedback onPress={() => changedNewMessages(false)}>
               <View style={styles.outerCircle}>
                 <View
                   // eslint-disable-next-line react-native/no-inline-styles
@@ -126,7 +476,7 @@ function Notifications(): JSX.Element {
             <View style={{width: 20}}>
               <Text>On</Text>
             </View>
-            <TouchableWithoutFeedback onPress={() => setLikedPostUpdates(true)}>
+            <TouchableWithoutFeedback onPress={() => changedLikedPosts(true)}>
               <View style={styles.outerCircle}>
                 <View
                   // eslint-disable-next-line react-native/no-inline-styles
@@ -146,8 +496,7 @@ function Notifications(): JSX.Element {
             <View style={{width: 20}}>
               <Text>Off</Text>
             </View>
-            <TouchableWithoutFeedback
-              onPress={() => setLikedPostUpdates(false)}>
+            <TouchableWithoutFeedback onPress={() => changedLikedPosts(false)}>
               <View style={styles.outerCircle}>
                 <View
                   // eslint-disable-next-line react-native/no-inline-styles
@@ -212,6 +561,76 @@ function Privacy(): JSX.Element {
   );
 }
 
+function HelpOrFeedback(props): JSX.Element {
+  const [view, setView] = useState({
+    help: true,
+    feedback: false,
+  });
+
+  return (
+    <>
+      {view.help && (
+        <View style={styles.userSettings}>
+          <View style={styles.helpHeader}>
+            <Text style={styles.settingsOption}>Contact Us</Text>
+          </View>
+          <View style={styles.notificationSettingsContainer}>
+            <View style={styles.helpContainer}>
+              <Text
+                style={{
+                  color: Colors.black,
+                  fontSize: 17.5,
+                  textAlign: 'center',
+                  width: '70%',
+                }}>
+                Give us feedback or contact us at marketappwm@gmail.com
+              </Text>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  setView({
+                    help: false,
+                    feedback: true,
+                  })
+                }>
+                <Text style={styles.submitFeedback}>Send Feedback</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        </View>
+      )}
+      {view.feedback && (
+        <View style={styles.userSettings}>
+          <View style={styles.userFeedbackSettings}>
+            <View style={styles.feedbackContainer}>
+              <Text>Tell us how we can improve!</Text>
+              <TextInput
+                style={styles.feedbackInput}
+                multiline={true}
+                textAlignVertical={'top'}
+              />
+              <TouchableWithoutFeedback>
+                <Text style={styles.submitFeedback}>Send Feedback</Text>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+          <View style={styles.maxLimitContainer}>
+            <Text
+              style={{
+                color: Colors.black,
+                fontSize: 17.5,
+                textAlign: 'center',
+                width: '70%',
+              }}>
+              If reached max. limit or for more concerns /issues, please contact
+              us at marketappwm@gmail.com
+            </Text>
+          </View>
+        </View>
+      )}
+    </>
+  );
+}
+
 function Support(props): JSX.Element {
   var options = ['Violations', 'Help'];
   return (
@@ -219,17 +638,13 @@ function Support(props): JSX.Element {
       {options.map(value => {
         return (
           <TouchableWithoutFeedback
-            onPress={() =>
-              props.setView({
-                settings: false,
-                profile: false,
-                notifications: false,
-                privacy: false,
-                support: false,
-                logout: false,
-                violations: true,
-              })
-            }>
+            onPress={() => {
+              if (value === 'Violations') {
+                props.setView({violations: true});
+              } else if (value === 'Help') {
+                props.setView({helpOrFeedback: true});
+              }
+            }}>
             <View
               style={
                 value === 'Violations'
@@ -374,6 +789,8 @@ function UserSettings(props): JSX.Element {
     support: false,
     logout: false,
     violations: false,
+    changePassword: false,
+    helpOrFeedback: false,
   });
 
   const options = {
@@ -385,6 +802,8 @@ function UserSettings(props): JSX.Element {
       support: false,
       violations: false,
       logout: false,
+      changePassword: false,
+      helpOrFeedback: false,
     },
     Profile: {
       settings: false,
@@ -394,6 +813,8 @@ function UserSettings(props): JSX.Element {
       support: false,
       violations: false,
       logout: false,
+      changePassword: false,
+      helpOrFeedback: false,
     },
     Notifications: {
       settings: false,
@@ -403,6 +824,8 @@ function UserSettings(props): JSX.Element {
       support: false,
       violations: false,
       logout: false,
+      changePassword: false,
+      helpOrFeedback: false,
     },
     Privacy: {
       settings: false,
@@ -412,6 +835,8 @@ function UserSettings(props): JSX.Element {
       support: false,
       violations: false,
       logout: false,
+      changePassword: false,
+      helpOrFeedback: false,
     },
     Support: {
       settings: false,
@@ -421,6 +846,8 @@ function UserSettings(props): JSX.Element {
       support: true,
       violations: false,
       logout: false,
+      changePassword: false,
+      helpOrFeedback: false,
     },
     Violations: {
       settings: false,
@@ -430,6 +857,8 @@ function UserSettings(props): JSX.Element {
       support: true,
       logout: false,
       violations: true,
+      changePassword: false,
+      helpOrFeedback: false,
     },
     'Log Out': {
       settings: false,
@@ -439,6 +868,8 @@ function UserSettings(props): JSX.Element {
       support: false,
       violations: false,
       logout: true,
+      changePassword: false,
+      helpOrFeedback: false,
     },
   };
 
@@ -495,11 +926,19 @@ function UserSettings(props): JSX.Element {
           </TouchableWithoutFeedback>
         </View>
       )}
-      {view.profile && <Profile profile={props.profile} />}
-      {view.notifications && <Notifications />}
+      {view.profile && <Profile profile={props.profile} setView={setView} />}
+      {view.notifications && <Notifications profile={props.profile.username} />}
       {view.privacy && <Privacy />}
       {view.support && <Support setView={setView} />}
       {view.violations && <Violations />}
+      {view.changePassword && (
+        <ChangePassword
+          profile={props.profile}
+          setView={setView}
+          login={props.login}
+        />
+      )}
+      {view.helpOrFeedback && <HelpOrFeedback />}
     </>
   );
 }
@@ -611,6 +1050,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     paddingBottom: 10,
   },
+  helpHeader: {
+    borderColor: 'gray',
+    borderBottomWidth: 1,
+    width: '85%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginTop: 30,
+  },
   notificationHeader: {
     borderBottomWidth: 1,
     borderColor: 'gray',
@@ -643,6 +1091,15 @@ const styles = StyleSheet.create({
     padding: 10,
     rowGap: 10,
   },
+  helpContainer: {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    rowGap: 30,
+  },
   toggle: {
     display: 'flex',
     flexDirection: 'row',
@@ -672,6 +1129,159 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     backgroundColor: Colors.white,
     paddingLeft: 10,
+  },
+  blackArrow: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    width: 20,
+    height: 20,
+  },
+  loginContainer: {
+    backgroundColor: Colors.white,
+    height: '80%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: 20,
+  },
+  wmLogo: {
+    width: 150,
+    height: 150,
+    borderRadius: 25,
+    overflow: 'hidden',
+  },
+  loginText: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: 10,
+  },
+  header: {
+    fontSize: 20,
+    width: 250,
+    textAlign: 'center',
+    color: Colors.black,
+  },
+  emailInput: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  input: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray',
+    width: 300,
+    height: 50,
+    color: Colors.black,
+    paddingLeft: 10,
+    margin: 0,
+  },
+  inputSmall: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray',
+    width: 225,
+    height: 50,
+    color: Colors.black,
+    paddingLeft: 10,
+    margin: 0,
+  },
+  loginButton: {
+    width: 250,
+    height: 40,
+    borderRadius: 15,
+    backgroundColor: 'rgb(17, 87, 64)',
+    textAlign: 'center',
+    lineHeight: 40,
+    color: Colors.white,
+  },
+  errorMessageContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '32.5%',
+    transform: [{translateX: -50}],
+    width: 250,
+    height: 150,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#D7D7D7',
+    borderRadius: 10,
+    padding: 15,
+  },
+  errorMessageBanner: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  exitErrorMessage: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: Colors.white,
+    height: 20,
+    width: 50,
+    textAlign: 'center',
+    lineHeight: 20,
+    borderRadius: 5,
+  },
+  errorMessageTextContainer: {
+    display: 'flex',
+    height: 70,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorMessage: {
+    color: 'black',
+    textAlign: 'center',
+  },
+  submitFeedback: {
+    width: '70%',
+    height: 40,
+    borderRadius: 15,
+    backgroundColor: 'rgb(17, 87, 64)',
+    textAlign: 'center',
+    lineHeight: 40,
+    color: Colors.white,
+  },
+  feedbackContainer: {
+    backgroundColor: Colors.white,
+    width: '100%',
+    height: '80%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    rowGap: 10,
+  },
+  feedbackInput: {
+    width: '80%',
+    height: '50%',
+    backgroundColor: '#D0D3D4',
+    borderRadius: 20,
+    padding: 20,
+  },
+  userFeedbackSettings: {
+    backgroundColor: '#f6f7f5',
+    display: 'flex',
+    height: '70%',
+    width: '80%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  maxLimitContainer: {
+    backgroundColor: Colors.white,
+    borderColor: 'gray',
+    borderRadius: 20,
+    width: '85%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
   },
 });
 

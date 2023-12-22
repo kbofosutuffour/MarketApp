@@ -352,6 +352,7 @@ function App(): JSX.Element {
   const [user, setUser] = useState({
     username: null,
     showLogin: true,
+    redirect: '',
   });
 
   const [posts, setPosts] = useState({
@@ -405,7 +406,6 @@ function App(): JSX.Element {
     await axios
       .get('http://10.0.2.2:8000/posts')
       .then(res => {
-        // console.log(res.data);
         setPosts({
           showPosts: true,
           posts: res.data,
@@ -502,10 +502,11 @@ function App(): JSX.Element {
   /**
    * Switches to login/register page
    */
-  const login = () => {
+  const login = (redirect = '') => {
     setUser({
       username: null,
       showLogin: true,
+      redirect: redirect,
     });
     setDesc({
       showDesc: false,
@@ -531,9 +532,9 @@ function App(): JSX.Element {
     // otherwise (i.e changing from profile to homepage), use the same
     // username
     if (username) {
-      setUser({username: username, showLogin: false});
+      setUser({username: username, showLogin: false, redirect: ''});
     } else {
-      setUser({...user, showLogin: false});
+      setUser({...user, showLogin: false, redirect: ''});
     }
 
     setDesc({
@@ -556,6 +557,7 @@ function App(): JSX.Element {
     setUser({
       username: user.username,
       showLogin: false,
+      redirect: '',
     });
     setDesc({
       showDesc: false,
@@ -640,7 +642,9 @@ function App(): JSX.Element {
         !showChats &&
         !showSettings &&
         !showPost.showPost &&
-        user.showLogin && <Login returnHome={returnHome} />}
+        user.showLogin && (
+          <Login returnHome={returnHome} redirect={user.redirect} />
+        )}
 
       {/* Home Page */}
       {!prodDesc.showDesc &&
