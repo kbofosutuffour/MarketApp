@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -90,35 +91,37 @@ function Post(props: {
               </Text>
             </TouchableWithoutFeedback>
           </View>
-          <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
-            <View style={styles.editPost}>
-              <Image
-                style={styles.editButtons}
-                source={require('./media/edit_post.png')}
-              />
-            </View>
-          </TouchableWithoutFeedback>
+          {props.main && (
+            <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+              <View style={styles.editPost}>
+                <Image
+                  style={styles.editButtons}
+                  source={require('./media/edit_post.png')}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          )}
 
           {/* Editing options for current user profile page */}
-          {props.data.username === props.current_user && options && (
-            <View style={styles.postOptions}>
-              <TouchableWithoutFeedback
-                onPress={() => props.viewPost(props.data.id)}>
-                <Text>Edit Post</Text>
-              </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  props.setDelete(props.data.id);
-                  props.setView({
-                    main: false,
-                    editProfile: false,
-                    deletePost: true,
-                  });
-                }}>
-                <Text>Delete Post</Text>
-              </TouchableWithoutFeedback>
-            </View>
-          )}
+          {props.main &&
+            props.data.username === props.current_user &&
+            options && (
+              <View style={styles.postOptions}>
+                <TouchableWithoutFeedback
+                  onPress={() => props.viewPost(props.data.id)}>
+                  <Text>Edit Post</Text>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    props.setDelete(props.data.id);
+                    props.setView({
+                      deletePost: true,
+                    });
+                  }}>
+                  <Text>Delete Post</Text>
+                </TouchableWithoutFeedback>
+              </View>
+            )}
           {props.data.username === props.current_user && statusOptions && (
             <View style={styles.statusOptions}>
               <TouchableWithoutFeedback
@@ -160,6 +163,20 @@ function Post(props: {
 }
 
 /**
+ * Navigation Bar if viewing a different user's screen
+ */
+function NavBar(props): JSX.Element {
+  return (
+    <>
+      <View style={styles.navigationBar}>
+        <Text style={styles.home}>User Profile</Text>
+      </View>
+      <View style={styles.goldBar} />
+    </>
+  );
+}
+
+/**
  * Component which allows users to edit their profile
  * @param props
  * @returns Edit Profile Screen
@@ -174,7 +191,6 @@ function EditProfile(props): JSX.Element {
         onPress={() =>
           props.setView({
             main: true,
-            editProfile: false,
           })
         }
       />
@@ -187,9 +203,6 @@ function EditProfile(props): JSX.Element {
           <TouchableOpacity
             onPress={() =>
               props.setView({
-                main: false,
-                editProfile: false,
-                deletePost: false,
                 changeProfilePicture: true,
               })
             }>
@@ -254,13 +267,15 @@ function Profile(props): JSX.Element {
   // The profile page, editing their profile, deleting a post,
   // and changing their profile picture
   const [view, setView] = useState({
-    main: true,
+    main: props.onMain,
     editProfile: false,
     deletePost: false,
     changeProfilePicture: false,
+    otherProfile: !props.onMain,
   });
   const [deletePostID, setDelete] = useState(null);
   const [changedPic, setChangedPic] = useState(null);
+  const [otherProfileShowOptions, setOtherProfileShowOptions] = useState(false);
 
   const [type, setType] = useState({
     sell_history: true,
@@ -284,6 +299,7 @@ function Profile(props): JSX.Element {
       editProfile: false,
       deletePost: false,
       changeProfilePicture: false,
+      otherProfile: false,
     });
     setDelete(null);
   };
@@ -304,7 +320,8 @@ function Profile(props): JSX.Element {
 
   return (
     <>
-      {view.main && (
+      {view.otherProfile && <NavBar type={'User Profile'} />}
+      {(view.main || view.otherProfile) && (
         <View style={styles.profilePage}>
           <View style={styles.profileView}>
             <Image
@@ -314,21 +331,59 @@ function Profile(props): JSX.Element {
               }}
             />
             <View style={styles.profileDescription}>
-              <Text style={{fontSize: 25, color: Colors.black}}>{props.profile.username}</Text>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  setView({
-                    main: false,
-                    editProfile: true,
-                    deletePost: false,
-                    changeProfilePicture: false,
-                  });
-                }}>
-                <Text style={styles.editProfileButton}>Edit Profile</Text>
-              </TouchableWithoutFeedback>
+              <Text style={{fontSize: 25, color: Colors.black}}>
+                {props.profile.username}
+              </Text>
+              {props.onMain && (
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    setView({
+                      main: false,
+                      editProfile: true,
+                      deletePost: false,
+                      changeProfilePicture: false,
+                      otherProfile: false,
+                    });
+                  }}>
+                  <Text style={styles.editProfileButton}>Edit Profile</Text>
+                </TouchableWithoutFeedback>
+              )}
             </View>
+            {view.otherProfile && (
+              <>
+                <TouchableWithoutFeedback
+                  onPress={() =>
+                    setOtherProfileShowOptions(!otherProfileShowOptions)
+                  }>
+                  <View style={styles.editPost}>
+                    <Image
+                      style={styles.editButtons}
+                      source={require('./media/edit_post.png')}
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
+                {otherProfileShowOptions && (
+                  <View style={styles.statusOptions}>
+                    <TouchableWithoutFeedback>
+                      <Text>Block User</Text>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback>
+                      <Text>Report User</Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                )}
+              </>
+            )}
           </View>
-          <View style={styles.typeView}>
+          <View
+            style={{
+              display: 'flex',
+              width: '100%',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: view.main ? 'center' : 'flex-start',
+              backgroundColor: Colors.white,
+            }}>
             <TouchableWithoutFeedback
               onPress={() =>
                 setType({
@@ -351,74 +406,82 @@ function Profile(props): JSX.Element {
                 <Text
                   style={{
                     color: type.sell_history ? 'black' : 'gray',
-                    width: 50,
+                    width: view.main ? 50 : 100,
                     textAlign: 'center',
-                    fontSize: 15,
+                    fontSize: view.main ? 15 : 17.5,
                   }}>
                   Sell History
                 </Text>
               </View>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                setType({
-                  sell_history: false,
-                  buy_history: true,
-                  saved_posts: false,
-                })
-              }>
-              <View
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderColor: 'gray',
-                  borderTopWidth: 0.5,
-                  padding: 20,
-                  width: '33.33%',
-                  backgroundColor: type.buy_history ? Colors.white : '#D7D7D7',
-                }}>
-                <Text
+            {view.main && (
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  setType({
+                    sell_history: false,
+                    buy_history: true,
+                    saved_posts: false,
+                  })
+                }>
+                <View
                   style={{
-                    color: type.buy_history ? 'black' : 'gray',
-                    width: 50,
-                    textAlign: 'center',
-                    fontSize: 15,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderColor: 'gray',
+                    borderTopWidth: 0.5,
+                    padding: 20,
+                    width: '33.33%',
+                    backgroundColor: type.buy_history
+                      ? Colors.white
+                      : '#D7D7D7',
                   }}>
-                  Buy History
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                setType({
-                  sell_history: false,
-                  buy_history: false,
-                  saved_posts: true,
-                })
-              }>
-              <View
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderColor: 'gray',
-                  borderTopWidth: 0.5,
-                  padding: 20,
-                  width: '33.33%',
-                  backgroundColor: type.saved_posts ? Colors.white : '#D7D7D7',
-                }}>
-                <Text
+                  <Text
+                    style={{
+                      color: type.buy_history ? 'black' : 'gray',
+                      width: 50,
+                      textAlign: 'center',
+                      fontSize: 15,
+                    }}>
+                    Buy History
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {view.main && (
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  setType({
+                    sell_history: false,
+                    buy_history: false,
+                    saved_posts: true,
+                  })
+                }>
+                <View
                   style={{
-                    color: type.saved_posts ? 'black' : 'gray',
-                    width: 50,
-                    textAlign: 'center',
-                    fontSize: 15,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderColor: 'gray',
+                    borderTopWidth: 0.5,
+                    padding: 20,
+                    width: '33.33%',
+                    backgroundColor: type.saved_posts
+                      ? Colors.white
+                      : '#D7D7D7',
                   }}>
-                  Saved Posts
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
+                  <Text
+                    style={{
+                      color: type.saved_posts ? 'black' : 'gray',
+                      width: 50,
+                      textAlign: 'center',
+                      fontSize: 15,
+                    }}>
+                    Saved Posts
+                  </Text>
+                </View>
+              </TouchableWithoutFeedback>
+            )}
           </View>
 
           {/* Where the user's posts are shown */}
@@ -446,6 +509,7 @@ function Profile(props): JSX.Element {
                         setView={setView}
                         setDelete={setDelete}
                         current_user={props.current_user}
+                        main={view.main}
                       />
                     );
                   }
@@ -461,6 +525,7 @@ function Profile(props): JSX.Element {
                       setView={setView}
                       setDelete={setDelete}
                       current_user={props.current_user}
+                      main={view.main}
                     />
                   );
                 }
@@ -493,6 +558,7 @@ function Profile(props): JSX.Element {
                   editProfile: false,
                   deletePost: false,
                   changeProfilePicture: false,
+                  otherProfile: false,
                 })
               }
             />
@@ -557,6 +623,7 @@ function Profile(props): JSX.Element {
                   editProfile: true,
                   deletePost: false,
                   changeProfilePicture: false,
+                  otherProfile: false,
                 });
               }}>
               <View style={styles.change}>
@@ -600,21 +667,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingTop: 15,
     paddingBottom: 15,
-    columnGap: 15,
+    columnGap: 20,
     backgroundColor: Colors.white,
   },
   profileDescription: {
     display: 'flex',
+    width: '47.5%',
     flexDirection: 'column',
     rowGap: 5,
-  },
-  typeView: {
-    display: 'flex',
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.white,
   },
   typeViewItem: {
     display: 'flex',
@@ -813,6 +873,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     columnGap: 300,
     width: '100%',
+  },
+  navigationBar: {
+    display: 'flex',
+    flexDirection: 'row',
+    padding: 20,
+    width: '100%',
+    height: '11%',
+  },
+  home: {
+    textAlign: 'center',
+    color: Colors.white,
+    fontSize: 30,
+  },
+  goldBar: {
+    backgroundColor: 'rgb(185, 151, 91)',
+    height: '1%',
   },
 });
 export default Profile;

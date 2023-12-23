@@ -8,6 +8,7 @@
 
 import axios from 'axios';
 import React, {useEffect, useState} from 'react';
+import Profile from './Profile';
 
 import {
   Image,
@@ -25,20 +26,27 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
  */
 function ProductDescription(props): JSX.Element {
   const [profile, setProfile] = useState({});
+  const [posts, setPosts] = useState({});
   const [liked, likePost] = useState(false);
+  const [mainScreen, showMain] = useState(true);
+  const [options, showOptions] = useState(false);
 
   // After the page renders, retrieve information on the user
   // who created the post from the database, stored in the preceeding
   // state variable
   useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = async () => {
     let request = 'http://10.0.2.2:8000/profile/' + props.post.username;
-    axios
+    await axios
       .get(request)
       .then(res => {
         setProfile(res.data);
       })
       .catch((err: any) => console.log(err));
-    axios
+    await axios
       .get(
         'http://10.0.2.2:8000/profiles/get_liked_posts/' + props.current_user,
       )
@@ -50,7 +58,14 @@ function ProductDescription(props): JSX.Element {
         );
       })
       .catch((err: any) => console.log(err));
-  }, []);
+    request = 'http://10.0.2.2:8000/posts/get_posts/' + props.post.username;
+    await axios
+      .get(request)
+      .then(res => {
+        setPosts(res.data);
+      })
+      .catch((err: any) => console.log(err));
+  };
 
   /**
    * @param buyer the username of the buyer
@@ -60,7 +75,7 @@ function ProductDescription(props): JSX.Element {
    * @param product the name of the product being discussed
    * @param image the display image of the product
    */
-  var getChats = (buyer, bpf, seller, spf, product, image) => {
+  var getChats = async (buyer, bpf, seller, spf, product, image) => {
     let data = new FormData();
     data.append('buyer', buyer);
     data.append('buyer_profile_picture', bpf);
@@ -70,7 +85,7 @@ function ProductDescription(props): JSX.Element {
     data.append('image', image);
     console.log(data);
 
-    axios
+    await axios
       .post('http://10.0.2.2:8000/rooms/', data)
       .then(res => {
         console.log(res.data);
@@ -103,73 +118,119 @@ function ProductDescription(props): JSX.Element {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <>
       {/* Button to return home */}
-      <TouchableWithoutFeedback onPress={props.returnHome}>
-        <View style={styles.returnHome}>
-          <Image
-            source={require('./media/home.png')}
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 10,
-              zIndex: 3,
-              backgroundColor: 'rgb(185, 151, 91)',
-            }}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-
-      <View style={styles.pdContainer}>
-        {/* Product Image(s) */}
-        <View style={styles.image}>
-          <Image
-            source={{uri: props.post.display_image}}
-            style={styles.displayImage}
-          />
-        </View>
-
-        {/* Product Description */}
-        <View style={styles.description}>
-          <View style={styles.profile}>
+      {mainScreen && (
+        <TouchableWithoutFeedback onPress={props.returnHome}>
+          <View style={styles.returnHome}>
             <Image
-              source={{uri: 'http://10.0.2.2:8000' + profile.profile_picture}}
-              style={styles.profilePicture}
+              source={require('./media/home.png')}
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 10,
+                zIndex: 3,
+                backgroundColor: 'rgb(185, 151, 91)',
+              }}
             />
-            <Text style={{fontSize: 20, color: Colors.black}}>
-              {profile.username}
-            </Text>
           </View>
-          <View style={styles.productDescription}>
-            <Text style={{fontSize: 20, color: Colors.black}}>
-              {props.post.product}
-            </Text>
-            <Text>{props.post.description}</Text>
-            <Text>${props.post.price}</Text>
+        </TouchableWithoutFeedback>
+      )}
+
+      {mainScreen && (
+        <View style={styles.pdContainer}>
+          {/* Product Image(s) */}
+          <View style={styles.image}>
+            <Image
+              source={{uri: props.post.display_image}}
+              style={styles.displayImage}
+            />
+          </View>
+
+          {/* Product Description */}
+          <View style={styles.description}>
+            <View style={styles.profile}>
+              <TouchableWithoutFeedback onPress={() => showMain(false)}>
+                <Image
+                  source={{
+                    uri: 'http://10.0.2.2:8000' + profile.profile_picture,
+                  }}
+                  style={styles.profilePicture}
+                />
+              </TouchableWithoutFeedback>
+              <Text style={{fontSize: 20, color: Colors.black, width: '55%'}}>
+                {profile.username}
+              </Text>
+              <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+                <View style={styles.editPost}>
+                  <Image
+                    style={styles.editButtons}
+                    source={require('./media/edit_post.png')}
+                  />
+                </View>
+              </TouchableWithoutFeedback>
+              {options && (
+                <View style={styles.statusOptions}>
+                  <TouchableWithoutFeedback
+                    onPress={() => props.viewReport(props.post, {})}>
+                    <Text>Report Post</Text>
+                  </TouchableWithoutFeedback>
+                  <TouchableWithoutFeedback
+                    onPress={() => props.viewReport({}, profile)}>
+                    <Text>Report User</Text>
+                  </TouchableWithoutFeedback>
+                </View>
+              )}
+            </View>
+            <View style={styles.productDescription}>
+              <Text style={{fontSize: 20, color: Colors.black}}>
+                {props.post.product}
+              </Text>
+              <Text>{props.post.description}</Text>
+              <Text>${props.post.price}</Text>
+            </View>
           </View>
         </View>
-      </View>
-
+      )}
+      {!mainScreen && (
+        <>
+          <Profile
+            profile={profile}
+            posts={posts}
+            current_user={profile.username}
+            onMain={false}
+          />
+        </>
+      )}
       {/* Product Description Footer */}
       <View style={styles.footerContainer}>
         <View style={styles.goldBar} />
         <View style={styles.footer}>
-          <TouchableWithoutFeedback
-            onPress={() => like_viewed_post(props.post.id, profile)}>
-            <View
-              style={{
-                width: 30,
-                height: 30,
-                borderColor: Colors.white,
-                borderWidth: 1,
-                borderRadius: 15,
-                backgroundColor: liked ? 'red' : 'rgb(17, 87, 64)',
-              }}
-            />
-          </TouchableWithoutFeedback>
-          <Text style={{fontSize: 25, color: Colors.white}}>
-            ${props.post.price}
-          </Text>
+          {mainScreen && (
+            <TouchableWithoutFeedback
+              onPress={() => like_viewed_post(props.post.id, profile)}>
+              <View
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderColor: Colors.white,
+                  borderWidth: 1,
+                  borderRadius: 15,
+                  backgroundColor: liked ? 'red' : 'rgb(17, 87, 64)',
+                }}
+              />
+            </TouchableWithoutFeedback>
+          )}
+          {mainScreen && (
+            <Text style={{fontSize: 25, color: Colors.white}}>
+              ${props.post.price}
+            </Text>
+          )}
+          {!mainScreen && (
+            <TouchableWithoutFeedback onPress={() => showMain(true)}>
+              <Text style={styles.message}>Return</Text>
+            </TouchableWithoutFeedback>
+          )}
           <TouchableWithoutFeedback
             onPress={() => {
               getChats(
@@ -197,7 +258,7 @@ function ProductDescription(props): JSX.Element {
           </TouchableWithoutFeedback>
         </View>
       </View>
-    </SafeAreaView>
+    </>
   );
 }
 
@@ -231,7 +292,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    columnGap: 10,
+    columnGap: 20,
     padding: 10,
     borderBottomColor: 'gray',
     borderWidth: 0.5,
@@ -256,7 +317,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   productDescription: {
-    padding: 10,
+    padding: 20,
     display: 'flex',
     flexDirection: 'column',
     rowGap: 10,
@@ -289,6 +350,30 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(185, 151, 91)',
     height: '10%',
     width: '100%',
+  },
+  statusOptions: {
+    width: '30%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.black,
+    backgroundColor: Colors.white,
+    rowGap: 5,
+    position: 'relative',
+    right: 150,
+  },
+  editPost: {
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
+  editButtons: {
+    width: 10,
+    height: 30,
   },
 });
 

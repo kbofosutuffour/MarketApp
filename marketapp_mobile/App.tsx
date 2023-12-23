@@ -28,6 +28,7 @@ import Chats from './Chats';
 import UserSettings from './UserSettings';
 import CreatePost from './Post';
 import Login from './Login';
+import Report from './Report';
 
 function Footer(props): JSX.Element {
   //Footer component that is displayed on various screens
@@ -271,7 +272,9 @@ function Post(props: {
           />
         </View>
         <View style={styles.postText}>
-          <Text>{props.data.product}</Text>
+          <Text style={{color: 'black', fontSize: 17.5}}>
+            {props.data.product}
+          </Text>
           <Text>{props.data.username}</Text>
           <Text>${props.data.price}</Text>
         </View>
@@ -391,6 +394,12 @@ function App(): JSX.Element {
   const [showSettings, setSettings] = useState(false);
 
   const [category, setCategory] = useState('');
+  const [reportUser, setReporting] = useState({
+    showReport: false,
+    post: {},
+    profile: {},
+    sentFrom: user.username,
+  });
 
   // When the defined components finish rendering, fetch
   // The posts that are currently stored in the database
@@ -518,6 +527,12 @@ function App(): JSX.Element {
     setSettings(false);
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: false,
+      post: {},
+      profile: {},
+      sentFrom: user.username,
+    });
   };
 
   /**
@@ -548,6 +563,12 @@ function App(): JSX.Element {
     setPost({...showPost, showPost: false});
     setCategory('');
     setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: false,
+      post: {},
+      profile: {},
+      sentFrom: user.username,
+    });
   };
 
   /**
@@ -569,6 +590,12 @@ function App(): JSX.Element {
     setSettings(false);
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: false,
+      post: {},
+      profile: {},
+      sentFrom: user.username,
+    });
   };
 
   /**
@@ -586,6 +613,12 @@ function App(): JSX.Element {
     setSettings(false);
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: false,
+      post: {},
+      profile: {},
+      sentFrom: user.username,
+    });
   };
 
   /**
@@ -603,6 +636,12 @@ function App(): JSX.Element {
     setSettings(true);
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: false,
+      post: {},
+      profile: {},
+      sentFrom: user.username,
+    });
   };
 
   /**
@@ -624,6 +663,35 @@ function App(): JSX.Element {
       id: id,
     });
     setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: false,
+      post: {},
+      profile: {},
+      sentFrom: user.username,
+    });
+  };
+
+  /**
+   * Switches to the settings page
+   */
+  const viewReport = (post = {}, profile_data = {}) => {
+    setUser({...user, showLogin: false});
+    setDesc({
+      showDesc: false,
+      post: {},
+    });
+    setPosts({...posts, showPosts: false});
+    setProfile({...profile, showProfile: false});
+    setChats(false);
+    setSettings(false);
+    setPost({...showPost, showPost: false});
+    setSearch({...searchedPosts, showSearchBar: false});
+    setReporting({
+      showReport: true,
+      post: post,
+      profile: profile_data,
+      sentFrom: user.username,
+    });
   };
 
   return (
@@ -642,7 +710,8 @@ function App(): JSX.Element {
         !showChats &&
         !showSettings &&
         !showPost.showPost &&
-        user.showLogin && (
+        user.showLogin &&
+        !reportUser.showReport && (
           <Login returnHome={returnHome} redirect={user.redirect} />
         )}
 
@@ -652,7 +721,8 @@ function App(): JSX.Element {
         !showChats &&
         !showSettings &&
         !showPost.showPost &&
-        !user.showLogin && (
+        !user.showLogin &&
+        !reportUser.showReport && (
           <View>
             <NavBar
               searchedPosts={searchedPosts}
@@ -718,7 +788,8 @@ function App(): JSX.Element {
         !showChats &&
         !showSettings &&
         !showPost.showPost &&
-        !user.showLogin && (
+        !user.showLogin &&
+        !reportUser.showReport && (
           <>
             <ProductDescription
               post={prodDesc.post}
@@ -726,6 +797,7 @@ function App(): JSX.Element {
               viewChats={viewChats}
               current_user={profile.data.username}
               current_user_pfp={profile.data.profile_picture}
+              viewReport={viewReport}
             />
           </>
         )}
@@ -737,7 +809,8 @@ function App(): JSX.Element {
         !showChats &&
         !showSettings &&
         !showPost.showPost &&
-        !user.showLogin && (
+        !user.showLogin &&
+        !reportUser.showReport && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -755,6 +828,8 @@ function App(): JSX.Element {
               viewSettings={viewSettings}
               viewPost={viewPost}
               current_user={user.username}
+              onMain={true}
+              viewReport={viewReport}
             />
             <Footer
               returnHome={returnHome}
@@ -772,7 +847,8 @@ function App(): JSX.Element {
         showChats &&
         !showSettings &&
         !showPost.showPost &&
-        !user.showLogin && (
+        !user.showLogin &&
+        !reportUser.showReport && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -804,7 +880,8 @@ function App(): JSX.Element {
         !showChats &&
         showSettings &&
         !showPost.showPost &&
-        !user.showLogin && (
+        !user.showLogin &&
+        !reportUser.showReport && (
           <>
             <NavBar
               searchedPosts={searchedPosts}
@@ -838,7 +915,8 @@ function App(): JSX.Element {
         !showChats &&
         !showSettings &&
         showPost.showPost &&
-        !user.showLogin && (
+        !user.showLogin &&
+        !reportUser.showReport && (
           <>
             <CreatePost
               username={'admin'}
@@ -847,6 +925,15 @@ function App(): JSX.Element {
             />
           </>
         )}
+      {reportUser.showReport && (
+        <Report
+          user={Object.keys(reportUser.profile).length > 0}
+          isPost={Object.keys(reportUser.post).length > 0}
+          post={reportUser.post}
+          profile={reportUser.profile}
+          returnHome={returnHome}
+        />
+      )}
     </SafeAreaView>
   );
 }

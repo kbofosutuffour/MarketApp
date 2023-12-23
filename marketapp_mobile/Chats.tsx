@@ -44,9 +44,9 @@ function Room(props): JSX.Element {
           }}
         />
         <View>
-          <Text>{props.other_user}</Text>
+          <Text style={{color: 'black', fontSize: 18.5}}>{props.other_user}</Text>
         </View>
-        <Image style={styles.roomImage} source={{uri: props.display_image}} />
+        <Image style={styles.productImage} source={{uri: props.display_image}} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -209,43 +209,45 @@ function Chats(props): JSX.Element {
         backgroundColor: Colors.white,
         height: '79%',
       }}>
-      {rooms.showRoom &&
-        rooms.rooms.buyers.map(value => {
-          return (
-            <Room
-              other_user={value.seller}
-              rooms={value}
-              chats={chats}
-              setRooms={setRooms}
-              getChats={getChats}
-              profile_picture={value.seller_profile_picture}
-              display_image={value.image}
-              product={value.product}
-              id={value.id}
-              seller={false}
-              buyer={true}
-            />
-          );
-        })}
-      {rooms.showRoom &&
-        !chats.showChats &&
-        rooms.rooms.sellers.map(value => {
-          return (
-            <Room
-              other_user={value.buyer}
-              rooms={value}
-              chats={chats}
-              setRooms={setRooms}
-              getChats={getChats}
-              profile_picture={value.buyer_profile_picture}
-              display_image={value.image}
-              product={value.product}
-              id={value.id}
-              seller={value.seller}
-              buyer={value.buyer}
-            />
-          );
-        })}
+      <ScrollView>
+        {rooms.showRoom &&
+          rooms.rooms.buyers.map(value => {
+            return (
+              <Room
+                other_user={value.seller}
+                rooms={value}
+                chats={chats}
+                setRooms={setRooms}
+                getChats={getChats}
+                profile_picture={value.seller_profile_picture}
+                display_image={value.image}
+                product={value.product}
+                id={value.id}
+                seller={false}
+                buyer={true}
+              />
+            );
+          })}
+        {rooms.showRoom &&
+          !chats.showChats &&
+          rooms.rooms.sellers.map(value => {
+            return (
+              <Room
+                other_user={value.buyer}
+                rooms={value}
+                chats={chats}
+                setRooms={setRooms}
+                getChats={getChats}
+                profile_picture={value.buyer_profile_picture}
+                display_image={value.image}
+                product={value.product}
+                id={value.id}
+                seller={value.seller}
+                buyer={value.buyer}
+              />
+            );
+          })}
+      </ScrollView>
       {!rooms.showRoom && chats.showChats && (
         <>
           <View style={styles.post}>
@@ -259,7 +261,9 @@ function Chats(props): JSX.Element {
             </View>
 
             <View style={styles.postText}>
-              <Text style={{color: 'black', fontSize: 17.5}}>{chats.product}</Text>
+              <Text style={{color: 'black', fontSize: 17.5}}>
+                {chats.product}
+              </Text>
             </View>
             <View style={styles.editPost}>
               <Image
@@ -351,6 +355,14 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     backgroundColor: Colors.black,
   },
+  productImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: Colors.black,
+    position: 'absolute',
+    right: 30,
+  },
   profilePicture: {
     width: 50,
     height: 50,
@@ -364,6 +376,7 @@ const styles = StyleSheet.create({
   room: {
     display: 'flex',
     flexDirection: 'row',
+    width: '100%',
     backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'flex-start',
@@ -371,7 +384,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 0.5,
     rowGap: 20,
-    columnGap: 20,
+    columnGap: 30,
   },
   date: {
     marginTop: 10,
