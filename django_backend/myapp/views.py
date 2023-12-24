@@ -46,14 +46,14 @@ class Posts(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def create(self, request):
+        print('testing')
         serializer = PostSerializer(data=request.data)
-        print(request.data, 'request')
         if serializer.is_valid():
             new_post = serializer.save()
             print(new_post.id, 'post_id')
             return Response({'message': 'You have successfully edited your post', 'post_id': new_post.id})
         else:
-            print(serializer.errors)
+            print(serializer.errors, 'error')
             return Response({'error': serializer.errors})
     
     def partial_update(self, request, pk=None):

@@ -96,7 +96,6 @@ function ProductDescription(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     setPhotos(new_photos);
-    console.log(new_photos)
   };
 
   /**
@@ -119,11 +118,13 @@ function ProductDescription(props): JSX.Element {
     data.append('image', image);
 
     await axios
-      .post('http://10.0.2.2:8000/rooms/', data)
-      .then(res => {
-        props.viewChats();
+      .post('http://10.0.2.2:8000/rooms/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       })
       .catch((err: any) => console.log(err));
+    props.viewChats();
   };
 
   /**

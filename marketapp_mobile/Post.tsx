@@ -54,9 +54,6 @@ function EditPost(props): JSX.Element {
 
     await axios
       .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data)
-      .then(response => {
-        console.log(response);
-      })
       .catch((err: any) => console.log(err, data));
   };
 
@@ -212,7 +209,11 @@ function NewPost(props): JSX.Element {
 
     let post_id;
     await axios
-      .post('http://10.0.2.2:8000/posts/', post)
+      .post('http://10.0.2.2:8000/posts/', post, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .then(response => {
         post_id = response.data.post_id;
       })
@@ -227,10 +228,9 @@ function NewPost(props): JSX.Element {
 
     await axios
       .post('http://10.0.2.2:8000/images/', additional_images)
-      .then(response => {
-        post_id = response.data.post_id;
-      })
       .catch((err: any) => console.log(err));
+
+    props.returnHome();
   };
 
   /**
@@ -239,7 +239,7 @@ function NewPost(props): JSX.Element {
    */
   const chooseImage = async () => {
     const res = await DocumentPicker.pick({
-      type: [DocumentPicker.types.allFiles],
+      type: [DocumentPicker.types.images],
       allowMultiSelection: true,
     });
 
@@ -376,7 +376,6 @@ function NewPost(props): JSX.Element {
       <TouchableOpacity
         onPress={async () => {
           await postData();
-          props.returnHome();
         }}
         style={styles.submit}>
         <View>

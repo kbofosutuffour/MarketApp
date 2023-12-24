@@ -919,7 +919,7 @@ function App(): JSX.Element {
         !reportUser.showReport && (
           <>
             <CreatePost
-              username={'admin'}
+              username={user.username}
               returnHome={returnHome}
               showPost={showPost}
             />
