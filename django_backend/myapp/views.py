@@ -49,10 +49,9 @@ class Posts(viewsets.ModelViewSet):
         serializer = PostSerializer(data=request.data)
         print(request.data, 'request')
         if serializer.is_valid():
-            #create the post, then save it as a draft for the user
-            # serializer.username = 'admin'
-            serializer.save()
-            return Response({'message': 'You have successfully edited your post'})
+            new_post = serializer.save()
+            print(new_post.id, 'post_id')
+            return Response({'message': 'You have successfully edited your post', 'post_id': new_post.id})
         else:
             print(serializer.errors)
             return Response({'error': serializer.errors})
@@ -358,7 +357,16 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
         except:
             print('error')
             return Response({'error': 'There was an error editing your profile settings.  Please try again.'})
-        
+
+class ReportViewSet(viewsets.ModelViewSet):
+
+    queryset = Report.objects.all()
+    serializer_class = ReportSerializer
+
+class ImageViewSet(viewsets.ModelViewSet):
+
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
 #----------------------------
 
 def home(request):

@@ -932,6 +932,7 @@ function App(): JSX.Element {
           post={reportUser.post}
           profile={reportUser.profile}
           returnHome={returnHome}
+          current_user={user.username}
         />
       )}
     </SafeAreaView>

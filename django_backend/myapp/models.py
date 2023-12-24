@@ -129,11 +129,11 @@ class Image(models.Model):
     """
     Image object is used to hold multiple images for a unique post object
     """
-    post = models.ForeignKey(
+    post = models.OneToOneField(
         Post,
         on_delete=models.CASCADE,
         default=None,
-        null=True
+        primary_key=True
     )
 
     image1 = models.ImageField("images/", upload_to="posts", default=None)
@@ -154,11 +154,59 @@ class UserSettings(models.Model):
     new_messages = models.BooleanField(blank=True, default=False)
     liked_posts_updates = models.BooleanField(blank=True, default=False)
     blocked_users = models.ManyToManyField(Profile, blank=True, related_name="blocked_users")
+    show_joined_date = models.BooleanField(blank=True, default=False)
 
     # Violations
     scamming = models.BooleanField(blank=True, default=False)
-    harassment = models.BooleanField(blank=True, default=False),
+    harassment = models.BooleanField(blank=True, default=False)
     illegal_goods = models.BooleanField(blank=True, default=False)
+    nickname = models.BooleanField(blank=True, default=False)
+    language = models.BooleanField(blank=True, default=False)
+    noShow = models.BooleanField(blank=True, default=False)
+    postName = models.BooleanField(blank=True, default=False)
+    damaged_product = models.BooleanField(blank=True, default=False)
+    already_sold = models.BooleanField(blank=True, default=False)
+
+class Violations(models.TextChoices):
+    SCAMMING = "SCAMMING", _("SCAMMING")
+    HARASSMENT = "HARASSMENT", _("HARASSMENT")
+    ILLEGAL_GOODS = "ILLEGAL GOODS", _("ILLEGAL GOODS")
+    NICKNAME = "NICKNAME", _("NICKNAME")
+    LANGUAGE = "LANGUAGE", _("LANGUAGE")
+    NO_SHOW = "NO SHOW", _("NO SHOW")
+    POST_NAME = "POST NAME", _("POST NAME")
+    DAMAGED_PRODUCT = "DAMAGED PRODUCT", _("DAMAGED PRODUCT")
+    ALREADY_SOLD = "ALREADY SOLD", _("ALREADY SOLD")
+
+class Report(models.Model):
+    """
+    Table to record all reporting history on the app
+    """
+
+    profile = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="profile",
+        default=None,
+        blank=True,
+        null=True
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="post",
+        default=None,
+        blank=True,
+        null=True
+    )
+    datetime = models.DateTimeField(default=datetime.datetime.now)
+    reported_by = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="reported_by",
+    )
+    violation = models.CharField(max_length=100, choices=Violations.choices, blank=False)
+
 
 
     

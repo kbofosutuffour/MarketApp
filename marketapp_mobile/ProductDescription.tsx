@@ -16,6 +16,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -30,7 +31,9 @@ function ProductDescription(props): JSX.Element {
   const [liked, likePost] = useState(false);
   const [mainScreen, showMain] = useState(true);
   const [options, showOptions] = useState(false);
+  const [view, setView] = useState(0);
 
+  const [photos, setPhotos] = useState([]);
   // After the page renders, retrieve information on the user
   // who created the post from the database, stored in the preceeding
   // state variable
@@ -38,6 +41,12 @@ function ProductDescription(props): JSX.Element {
     getData();
   }, []);
 
+  /**
+   * Used to get profile information on the creator of the post,
+   * the current user's liked posts to potentially add the post in the description,
+   * and other posts created by the creator of the post on screen for their profile
+   * page
+   */
   const getData = async () => {
     let request = 'http://10.0.2.2:8000/profile/' + props.post.username;
     await axios
@@ -65,9 +74,34 @@ function ProductDescription(props): JSX.Element {
         setPosts(res.data);
       })
       .catch((err: any) => console.log(err));
+
+    addAllImages();
   };
 
   /**
+   * Adding any additional posts to the product description page
+   */
+  const addAllImages = async () => {
+    let new_photos = [];
+    new_photos.push(props.post.display_image);
+    await axios
+      .get('http://10.0.2.2:8000/images/' + props.post.id)
+      .then(res => {
+        let indexes = Object.keys(res.data);
+        for (let i = 0; i < Object.keys(res.data).length; i++) {
+          if (indexes[i] !== 'post' && res.data[indexes[i]]) {
+            new_photos.push(res.data[indexes[i]]);
+          }
+        }
+      })
+      .catch((err: any) => console.log(err));
+    setPhotos(new_photos);
+    console.log(new_photos)
+  };
+
+  /**
+   * Used to create a new chat room between the current user
+   * and the creator of the post on screen
    * @param buyer the username of the buyer
    * @param bpf the profile picture of the buyer
    * @param seller the username of the seller
@@ -83,17 +117,21 @@ function ProductDescription(props): JSX.Element {
     data.append('seller_profile_picture', spf);
     data.append('product', product);
     data.append('image', image);
-    console.log(data);
 
     await axios
       .post('http://10.0.2.2:8000/rooms/', data)
       .then(res => {
-        console.log(res.data);
         props.viewChats();
       })
       .catch((err: any) => console.log(err));
   };
 
+  /**
+   * Used to add the post on screen to the current user's
+   * list of liked posts
+   * @param id the post id of the post on screen
+   * @param profile the profile data of the creator of the post on screen
+   */
   const like_viewed_post = async (id, profile) => {
     let previous_posts = profile.liked_posts;
     let data = {
@@ -141,10 +179,25 @@ function ProductDescription(props): JSX.Element {
         <View style={styles.pdContainer}>
           {/* Product Image(s) */}
           <View style={styles.image}>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setView(view - 1 >= 0 ? view - 1 : photos.length - 1);
+              }}>
+              <View style={styles.previousImage} />
+            </TouchableWithoutFeedback>
+
             <Image
-              source={{uri: props.post.display_image}}
+              source={{
+                uri: photos[view] ? photos[view] : props.post.display_image,
+              }}
               style={styles.displayImage}
             />
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setView(view + 1 < photos.length ? view + 1 : 0);
+              }}>
+              <View style={styles.nextImage} />
+            </TouchableWithoutFeedback>
           </View>
 
           {/* Product Description */}
@@ -275,6 +328,7 @@ const styles = StyleSheet.create({
     height: '50%',
     backgroundColor: 'rgb(17, 87, 64)',
     display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -374,6 +428,20 @@ const styles = StyleSheet.create({
   editButtons: {
     width: 10,
     height: 30,
+  },
+  previousImage: {
+    height: '60%',
+    width: '20%',
+    position: 'absolute',
+    left: 0,
+    zIndex: 1,
+  },
+  nextImage: {
+    height: '60%',
+    width: '20%',
+    position: 'absolute',
+    right: 0,
+    zIndex: 1,
   },
 });
 

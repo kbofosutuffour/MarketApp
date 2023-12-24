@@ -24,7 +24,7 @@ function UserOptions(props): JSX.Element {
     <TouchableWithoutFeedback
       onPress={() => {
         setSelected(!selected);
-        props.setSelected(props.reason);
+        props.setSelected(props.selected.add(props.reason));
       }}>
       <Text
         style={{
@@ -45,27 +45,69 @@ function UserOptions(props): JSX.Element {
 
 function Report(props): JSX.Element {
   const [confirmed, canSubmit] = useState(false);
-  const [selected, setSelected] = useState('');
+  const [selected, setSelected] = useState(new Set());
 
-  const user_options = [
-    'Inappropriate nickname',
-    'Scam',
-    'Harassment',
-    'Use of Inappropriate language',
-    'Spamming',
-    "Didn't show up",
-    'Other',
-  ];
+  const user_options = {
+    'Inappropriate nickname': 'NICKNAME',
+    Scam: 'SCAMMING',
+    Harassment: 'HARASSMENT',
+    'Use of Inappropriate language': 'HARASSMENT',
+    Spamming: 'SCAMMING',
+    "Didn't show up": 'NO SHOW',
+  };
 
-  const post_options = [
-    'Inaccurate post names/description',
-    'Inappropriate post names/description',
-    'Scams',
-    'Damaged product',
-    'Already sold',
-    "Didn't show up",
-    'Other',
-  ];
+  const post_options = {
+    'Inaccurate post names/description': 'POST NAME',
+    'Inappropriate post names/description': 'POST NAME',
+    Scams: 'SCAMMING',
+    'Damaged product': 'DAMMAGED PRODUCTS',
+    'Already sold': 'ALREADY SOLD',
+    "Didn't show up": 'NO SHOW',
+  };
+
+  /** Function used to save a report to the database
+   * @param user whether the report involves a user
+   * @param post whether the report involves a post
+   * @param violation the type of violation
+   */
+  const submitReport = async (user = false, post = false, violation) => {
+    let profile_id = null;
+    let current_user_id = null;
+
+    // Getting the id of the user being reported
+    if (user) {
+      await axios
+        .get(
+          'http://10.0.2.2:8000/profiles/get_id/' +
+            props.profile.username +
+            '/',
+        )
+        .then(response => {
+          profile_id = response.data.id;
+        })
+        .catch((err: any) => console.log(err));
+    }
+
+    // Getting the id of the user making the report (current user)
+    await axios
+      .get('http://10.0.2.2:8000/profiles/get_id/' + props.current_user + '/')
+      .then(response => {
+        current_user_id = response.data.id;
+      })
+      .catch((err: any) => console.log(err));
+
+    console.log(violation, user_options[violation], user);
+    let data = {
+      violation: user ? user_options[violation] : post_options[violation],
+      profile: profile_id,
+      post: props.post.id,
+      reported_by: current_user_id,
+    };
+    await axios
+      .post('http://10.0.2.2:8000/report/', data)
+      .catch((err: any) => console.log(err));
+  };
+
   return (
     <>
       {props.user && (
@@ -119,8 +161,14 @@ function Report(props): JSX.Element {
             </View>
 
             <View style={styles.reasonContainer}>
-              {user_options.map(value => {
-                return <UserOptions reason={value} setSelected={setSelected} />;
+              {Object.keys(user_options).map(value => {
+                return (
+                  <UserOptions
+                    reason={value}
+                    setSelected={setSelected}
+                    selected={selected}
+                  />
+                );
               })}
             </View>
 
@@ -148,7 +196,15 @@ function Report(props): JSX.Element {
                   Return
                 </Text>
               </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (confirmed) {
+                    selected.forEach(async value => {
+                      await submitReport(true, false, value);
+                    });
+                    props.returnHome();
+                  }
+                }}>
                 <Text
                   style={{
                     width: '50%',
@@ -221,8 +277,14 @@ function Report(props): JSX.Element {
             </View>
 
             <View style={styles.reasonContainer}>
-              {post_options.map(value => {
-                return <UserOptions reason={value} setSelected={setSelected} />;
+              {Object.keys(post_options).map(value => {
+                return (
+                  <UserOptions
+                    reason={value}
+                    setSelected={setSelected}
+                    selected={selected}
+                  />
+                );
               })}
             </View>
 
@@ -250,7 +312,15 @@ function Report(props): JSX.Element {
                   Return
                 </Text>
               </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (confirmed) {
+                    selected.forEach(async value => {
+                      await submitReport(false, true, value);
+                    });
+                    props.returnHome();
+                  }
+                }}>
                 <Text
                   style={{
                     width: '40%',

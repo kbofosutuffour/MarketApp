@@ -50,25 +50,12 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Profile
-		fields = ['id', 'username', 'profile_picture', 'first_name', 'last_name', 'saved_posts', 'drafts', 'liked_posts', 'buy_history']
+		fields = ['id', 'username', 'profile_picture', 'first_name', 'last_name', 'saved_posts', 'drafts', 'liked_posts', 'buy_history', 'date']
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ['url', 'username', 'password', 'email', 'is_staff']
-
-class EditPostForm(serializers.ModelSerializer):
-
-	class Meta:
-		model = Post
-		fields = '__all__'
-		exclude = ['username', 'date', 'sold', 'selling', 'pending']
-
-	def __init__(self, *args, **kwargs):
-		super(EditPostForm, self).__init__(*args, **kwargs)
-		# self.fields['additional_images'].required = False
-		self.fields['status'].required = False
-		
 
 class RoomSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -86,3 +73,15 @@ class UserSettingsSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserSettings
 		fields = ['username', 'new_messages', 'liked_posts_updates', 'blocked_users']
+
+class ReportSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Report
+		fields = '__all__'
+
+class ImageSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Image
+		fields = '__all__'

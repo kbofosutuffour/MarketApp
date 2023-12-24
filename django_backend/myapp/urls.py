@@ -21,6 +21,8 @@ router.register(r'messages', Messages, basename='messages')
 router.register(r'edit_profile', EditProfileViewSet, basename='edit_profile')
 router.register(r'edit_post', EditPostViewSet, basename='edit-post')
 router.register(r'user_settings', UserSettingsViewSet, basename='user_settings')
+router.register(r'report', ReportViewSet, basename="report")
+router.register(r'images', ImageViewSet, basename="images")
 
 urlpatterns = [
     path('', include(router.urls)),

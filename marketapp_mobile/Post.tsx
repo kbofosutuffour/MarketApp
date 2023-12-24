@@ -25,6 +25,7 @@ function EditPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
 
   const [display, setDisplay] = useState('');
+  const [images, setImages] = useState([]);
   const [newData, setNewData] = useState(null);
 
   useEffect(() => {
@@ -50,7 +51,7 @@ function EditPost(props): JSX.Element {
         data.append(key, value);
       }
     }
-    console.log(props.post.display_image, 'test');
+
     await axios
       .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data)
       .then(response => {
@@ -77,7 +78,6 @@ function EditPost(props): JSX.Element {
       },
     });
     setNewData(image);
-    console.log(res[0].type);
     setDisplay(res[0].uri);
   };
 
@@ -196,47 +196,100 @@ function NewPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
 
   const [display, setDisplay] = useState('');
+  const [images, setImages] = useState([]);
 
+  const MAX_NUMBER_OF_IMAGES = 5;
+
+  /**
+   * Function used to create a new post in the database
+   */
   const postData = async () => {
-    let data = new FormData();
+    // Data to create the new post
+    let post = new FormData();
     for (const [key, value] of Object.entries(props.post)) {
-      data.append(key, value);
+      post.append(key, value);
     }
-    // data.append('username', props.post.username);
-    // data.append('product', props.post.product);
-    // data.append('price', props.post.price);
+
+    let post_id;
     await axios
-      .post('http://10.0.2.2:8000/posts/', data)
+      .post('http://10.0.2.2:8000/posts/', post)
       .then(response => {
-        console.log(response);
+        post_id = response.data.post_id;
+      })
+      .catch((err: any) => console.log(err));
+
+    // Data to add any additional images for a post
+    let additional_images = new FormData();
+    additional_images.append('post', post_id);
+    for (let i = 1; i < images.length; i++) {
+      additional_images.append('image' + i, images[i]);
+    }
+
+    await axios
+      .post('http://10.0.2.2:8000/images/', additional_images)
+      .then(response => {
+        post_id = response.data.post_id;
       })
       .catch((err: any) => console.log(err));
   };
 
+  /**
+   * Function to allow the user to select an image on their device
+   * for their new post
+   */
   const chooseImage = async () => {
     const res = await DocumentPicker.pick({
       type: [DocumentPicker.types.allFiles],
+      allowMultiSelection: true,
     });
+
     let image = {
       uri: res[0].uri,
       type: res[0].type,
       name: 'image.png',
     };
+
     props.setPost({...props.post, display_image: image});
     setDisplay(res[0].uri);
+
+    let data = [];
+    data.push(null);
+
+    for (let i = 1; i < MAX_NUMBER_OF_IMAGES; i++) {
+      image = {
+        uri: res[i].uri,
+        type: res[i].type,
+        name: 'image.png',
+      };
+      data.push(image);
+    }
+
+    setImages(data);
   };
 
   return (
     <>
       <View style={styles.postItem}>
         <Button
-          title="Select your display image"
+          title="Select your image(s)"
           onPress={chooseImage}
           color={'rgb(17, 87, 64)'}
         />
-        {display && (
-          <Image source={{uri: display}} style={{width: 200, height: 200}} />
-        )}
+        <ScrollView style={styles.imagesContainer} horizontal={true}>
+          {display && (
+            <Image source={{uri: display}} style={{width: 200, height: 200}} />
+          )}
+          {images.map(image => {
+            if (image) {
+              return (
+                <Image
+                  source={{uri: image.uri}}
+                  style={{width: 200, height: 200}}
+                />
+              );
+            }
+          })}
+        </ScrollView>
       </View>
       <View style={styles.postItem}>
         <TextInput
@@ -321,8 +374,8 @@ function NewPost(props): JSX.Element {
       </View>
 
       <TouchableOpacity
-        onPress={() => {
-          postData();
+        onPress={async () => {
+          await postData();
           props.returnHome();
         }}
         style={styles.submit}>
@@ -479,6 +532,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '20%',
     padding: 5,
+  },
+  imagesContainer: {
+    display: 'flex',
+    flexDirection: 'row',
   },
   input: {
     width: '70%',
