@@ -280,8 +280,11 @@ function Profile(props): JSX.Element {
   const [type, setType] = useState({
     sell_history: true,
     buy_history: false,
-    saved_posts: false,
+    liked_posts: false,
   });
+
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [buyHistory, setBuyHistory] = useState([]);
 
   /**
    * Function to delete the post in the database
@@ -316,6 +319,12 @@ function Profile(props): JSX.Element {
         setPosts(res.data);
       })
       .catch((err: any) => console.log(err));
+    axios
+      .get(
+        'http://10.0.2.2:8000/profiles/get_liked_posts/' +
+          props.profile.username,
+      )
+      .then(res => setLikedPosts(res.data.liked_posts));
   }, []);
 
   return (
@@ -389,7 +398,7 @@ function Profile(props): JSX.Element {
                 setType({
                   sell_history: true,
                   buy_history: false,
-                  saved_posts: false,
+                  liked_posts: false,
                 })
               }>
               <View
@@ -420,7 +429,7 @@ function Profile(props): JSX.Element {
                   setType({
                     sell_history: false,
                     buy_history: true,
-                    saved_posts: false,
+                    liked_posts: false,
                   })
                 }>
                 <View
@@ -454,7 +463,7 @@ function Profile(props): JSX.Element {
                   setType({
                     sell_history: false,
                     buy_history: false,
-                    saved_posts: true,
+                    liked_posts: true,
                   })
                 }>
                 <View
@@ -466,18 +475,18 @@ function Profile(props): JSX.Element {
                     borderTopWidth: 0.5,
                     padding: 20,
                     width: '33.33%',
-                    backgroundColor: type.saved_posts
+                    backgroundColor: type.liked_posts
                       ? Colors.white
                       : '#D7D7D7',
                   }}>
                   <Text
                     style={{
-                      color: type.saved_posts ? 'black' : 'gray',
+                      color: type.liked_posts ? 'black' : 'gray',
                       width: 50,
                       textAlign: 'center',
                       fontSize: 15,
                     }}>
-                    Saved Posts
+                    Liked Posts
                   </Text>
                 </View>
               </TouchableWithoutFeedback>
@@ -496,27 +505,7 @@ function Profile(props): JSX.Element {
                 padding: 0,
               }}>
               {posts.map(post => {
-                if (type.saved_posts) {
-                  if (
-                    props.profile.saved_posts &&
-                    props.profile.saved_posts.includes(post.id)
-                  ) {
-                    return (
-                      <Post
-                        data={post}
-                        setDesc={props.setDesc}
-                        viewPost={props.viewPost}
-                        setView={setView}
-                        setDelete={setDelete}
-                        current_user={props.current_user}
-                        main={view.main}
-                      />
-                    );
-                  }
-                } else if (type.buy_history) {
-                  //TODO: Add buy history to post model
-                  return;
-                } else if (type.sell_history) {
+                if (type.sell_history) {
                   return (
                     <Post
                       data={post}
@@ -528,6 +517,35 @@ function Profile(props): JSX.Element {
                       main={view.main}
                     />
                   );
+                }
+              })}
+              {props.all_posts.map(post => {
+                if (type.liked_posts) {
+                  if (likedPosts.length && likedPosts.includes(post.id)) {
+                    return (
+                      <Post
+                        data={post}
+                        setDesc={props.setDesc}
+                        viewPost={props.viewPost}
+                        setView={setView}
+                        current_user={props.current_user}
+                        main={view.main}
+                      />
+                    );
+                  }
+                } else if (type.buy_history) {
+                  if (buyHistory.length && buyHistory.includes(post.id)) {
+                    return (
+                      <Post
+                        data={post}
+                        setDesc={props.setDesc}
+                        viewPost={props.viewPost}
+                        setView={setView}
+                        current_user={props.current_user}
+                        main={view.main}
+                      />
+                    );
+                  }
                 }
               })}
             </View>

@@ -30,6 +30,21 @@ import CreatePost from './Post';
 import Login from './Login';
 import Report from './Report';
 
+import vehicles from './media/categories/Vehicles-96.png';
+import food from './media/categories/Food-96.png';
+import clothes from './media/categories/Clothes-96.png';
+import entertainment from './media/categories/Entertainments-96.png';
+import free_stuff from './media/categories/Free_stuff-96.png';
+import furniture from './media/categories/Furniture-96.png';
+import hobbies from './media/categories/Hobbies-96.png';
+import book from './media/categories/Book-96.png';
+import dorm_goods from './media/categories/Dorm_goods-96.png';
+import supplies from './media/categories/Office_Supplies-96.png';
+import misc from './media/categories/Misc-96.png';
+import wm_logo from './media/categories/wm_logo.jpg';
+
+import {formatDistance} from 'date-fns';
+
 function Footer(props): JSX.Element {
   //Footer component that is displayed on various screens
   return (
@@ -256,6 +271,25 @@ function Post(props: {
   };
   setDesc: any;
 }): JSX.Element {
+  /**
+   * Get's the number of seconds since the post has been created
+   * @param postDateTime the datetime of the post
+   * @returns the the number of seconds since the post has been created
+   */
+  const getDifference = postDateTime => {
+    let temp = postDateTime.split('T');
+    let [date, time] = [temp[0].split('-'), temp[1].split(':')];
+    let post = new Date(
+      Number(date[0]),
+      Number(date[1]) - 1,
+      Number(date[2]),
+      Number(time[0]) - 4,
+      Number(time[1]),
+      Number(time[2].split('.')[0]),
+    );
+    return formatDistance(new Date(), post, {includeSeconds: true});
+  };
+
   return (
     <TouchableWithoutFeedback //Makes the post component react to a tap
       onPress={() => {
@@ -277,6 +311,9 @@ function Post(props: {
           </Text>
           <Text>{props.data.username}</Text>
           <Text>${props.data.price}</Text>
+          <Text style={{position: 'relative', top: 20, fontStyle: 'italic'}}>
+            {'Posted ' + getDifference(props.data.date) + ' ago'}
+          </Text>
         </View>
         <View style={styles.editPost} />
       </View>
@@ -285,30 +322,29 @@ function Post(props: {
 }
 
 /**
+ * Component that displays all of the possible categories for a post.
+ * Shown when the user is performing a search
  * @returns All possible categories for a post
  */
 function Categories(props): JSX.Element {
-  //Component that displays all of the possible categories for a post.
-  //Shown when the user is performing a search
-
-  const categories = [
-    'Furniture',
-    'Clothing',
-    'Free Stuff',
-    'Vehicles',
-    'W&M Merch',
-    'Hobbies',
-    'Office Supplies',
-    'Dorm Goods',
-    'Food',
-    'Entertainment',
-    'Books/Textbooks',
-    'Misc.',
-  ];
+  const categories = {
+    Furniture: furniture,
+    Clothing: clothes,
+    'Free Stuff': free_stuff,
+    Vehicles: vehicles,
+    'W&M Merch': wm_logo,
+    Hobbies: hobbies,
+    'Office Supplies': supplies,
+    'Dorm Goods': dorm_goods,
+    Food: food,
+    Entertainment: entertainment,
+    'Books/Textbooks': book,
+    'Misc.': misc,
+  };
 
   return (
     <View style={styles.category}>
-      {categories.map(value => {
+      {Object.keys(categories).map(value => {
         return (
           <>
             <TouchableWithoutFeedback onPress={() => props.setCategory(value)}>
@@ -318,15 +354,7 @@ function Categories(props): JSX.Element {
                     ? styles.categoryItemSelected
                     : styles.categoryItem
                 }>
-                <View
-                  // eslint-disable-next-line react-native/no-inline-styles
-                  style={{
-                    backgroundColor: 'gray',
-                    borderRadius: 10,
-                    width: 80,
-                    height: 80,
-                  }}
-                />
+                <Image source={categories[value]} />
                 <Text>{value}</Text>
               </View>
             </TouchableWithoutFeedback>
@@ -401,6 +429,9 @@ function App(): JSX.Element {
     sentFrom: user.username,
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+  const [hasSeenDraft, setHasSeenDraft] = useState(false);
+
   // When the defined components finish rendering, fetch
   // The posts that are currently stored in the database
   useEffect(() => {
@@ -415,12 +446,22 @@ function App(): JSX.Element {
     await axios
       .get('http://10.0.2.2:8000/posts')
       .then(res => {
+        if (res.data.length === 0) {
+          setErrorMessage(
+            'There are currently no posts.  Create a post or try again later.',
+          );
+        }
         setPosts({
           showPosts: true,
           posts: res.data,
         });
       })
-      .catch((err: any) => console.log(err));
+      .catch((err: any) => {
+        console.log(err);
+        setErrorMessage(
+          'There are currently no posts.  Create a post or try again later.',
+        );
+      });
 
     // asynchronous function that gets the profile information
     // for the given username
@@ -747,9 +788,20 @@ function App(): JSX.Element {
                     /* Only show posts not created by the user on the home page */
                     if (
                       post.username !== user.username &&
-                      post.status !== 'SOLD'
+                      post.status !== 'SOLD' &&
+                      !post.draft
                     ) {
                       return <Post data={post} setDesc={setDesc} />;
+                    } else if (
+                      post.username === user.username &&
+                      post.draft &&
+                      !errorMessage &&
+                      !hasSeenDraft
+                    ) {
+                      setErrorMessage(
+                        'You have a draft. Would you like to continue writing it?',
+                      );
+                      setHasSeenDraft(true);
                     }
                   })}
                 {searchedPosts.showResults &&
@@ -824,7 +876,7 @@ function App(): JSX.Element {
             <Profile
               profile={profile.data}
               returnHome={returnHome}
-              posts={posts.posts}
+              all_posts={posts.posts}
               viewSettings={viewSettings}
               viewPost={viewPost}
               current_user={user.username}
@@ -935,6 +987,28 @@ function App(): JSX.Element {
           current_user={user.username}
         />
       )}
+      {errorMessage && user.username && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setErrorMessage('');
+              viewProfile();
+            }}>
+            <Text style={styles.draftMessage}>Yes</Text>
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+            <Text style={styles.draftMessage}>No</Text>
+          </TouchableWithoutFeedback>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -1022,15 +1096,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   category: {
-    backgroundColor: 'rgb(17, 87, 64)',
+    backgroundColor: 'white',
+    height: '100%',
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    columnGap: 20,
+    columnGap: 10,
     rowGap: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 20,
+    paddingBottom: 10,
   },
   categoryItem: {
     backgroundColor: Colors.white,
@@ -1046,7 +1121,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    padding: 10,
+    padding: 5,
     borderWidth: 5,
     borderColor: 'rgb(185, 151, 91)',
   },
@@ -1101,6 +1176,52 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorMessageContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '32.5%',
+    transform: [{translateX: -50}],
+    width: 250,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#D7D7D7',
+    borderRadius: 10,
+    padding: 15,
+  },
+  errorMessageBanner: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  exitErrorMessage: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: Colors.white,
+    height: 20,
+    width: 50,
+    textAlign: 'center',
+    lineHeight: 20,
+    borderRadius: 5,
+  },
+  errorMessageTextContainer: {
+    display: 'flex',
+    height: 70,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorMessage: {
+    color: 'black',
+    textAlign: 'center',
+  },
+  draftMessage: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: Colors.white,
+    textAlign: 'center',
+    padding: 10,
+    marginTop: 10,
+    borderRadius: 20,
   },
 });
 
