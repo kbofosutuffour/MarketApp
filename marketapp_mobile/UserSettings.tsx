@@ -661,11 +661,19 @@ function Support(props): JSX.Element {
 }
 
 function Violations(props): JSX.Element {
+
   const [settings, setSettings] = useState({
     scamming: false,
     harassment: false,
     illegal_goods: false,
+    nickname: false,
+    language: false,
+    no_show: false,
+    post_name: false,
+    damaged_product: false,
+    already_sold: false,
   });
+
   return (
     <View style={styles.userSettings}>
       <View style={styles.notificationSettingsContainer}>
@@ -673,99 +681,42 @@ function Violations(props): JSX.Element {
           <Text style={styles.settingsOption}>Violations</Text>
         </View>
         <View style={styles.toggleContainer}>
-          <View style={styles.violationsToggle}>
-            <View>
-              <Text style={{width: 100}}>Scamming</Text>
-            </View>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                setSettings({...settings, scamming: !settings.scamming})
-              }>
-              <Text
-                // eslint-disable-next-line react-native/no-inline-styles
-                style={{
-                  backgroundColor: settings.scamming
-                    ? 'rgb(17, 87, 64)'
-                    : '#D7D7D7',
-                  color: settings.scamming ? Colors.white : Colors.black,
-                  position: 'absolute',
-                  right: 10,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 60,
-                  height: 25,
-                  lineHeight: 25,
-                  borderRadius: 10,
-                  textAlign: 'center',
-                }}>
-                Appeal
-              </Text>
-            </TouchableWithoutFeedback>
-          </View>
-          <View style={styles.violationsToggle}>
-            <View>
-              <Text style={{width: 100}}>Harassment</Text>
-            </View>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                setSettings({...settings, harassment: !settings.harassment})
-              }>
-              <Text
-                // eslint-disable-next-line react-native/no-inline-styles
-                style={{
-                  backgroundColor: settings.harassment
-                    ? 'rgb(17, 87, 64)'
-                    : '#D7D7D7',
-                  color: settings.harassment ? Colors.white : Colors.black,
-                  position: 'absolute',
-                  right: 10,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 60,
-                  height: 25,
-                  lineHeight: 25,
-                  borderRadius: 10,
-                  textAlign: 'center',
-                }}>
-                Appeal
-              </Text>
-            </TouchableWithoutFeedback>
-          </View>
-          <View style={styles.violationsToggle}>
-            <View>
-              <Text style={{width: 100}}>Illegal Goods</Text>
-            </View>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                setSettings({
-                  ...settings,
-                  illegal_goods: !settings.illegal_goods,
-                })
-              }>
-              <Text
-                // eslint-disable-next-line react-native/no-inline-styles
-                style={{
-                  backgroundColor: settings.illegal_goods
-                    ? 'rgb(17, 87, 64)'
-                    : '#D7D7D7',
-                  color: settings.illegal_goods ? Colors.white : Colors.black,
-                  position: 'absolute',
-                  right: 10,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 60,
-                  height: 25,
-                  lineHeight: 25,
-                  borderRadius: 10,
-                  textAlign: 'center',
-                }}>
-                Appeal
-              </Text>
-            </TouchableWithoutFeedback>
-          </View>
+          {Object.keys(settings).map(value => {
+            return (
+              <View style={styles.violationsToggle}>
+                <View>
+                  <Text style={{width: 100}}>
+                    {value.toUpperCase().split('_').join(' ')}
+                  </Text>
+                </View>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    setSettings({...settings, [value]: !settings[value]});
+                  }}>
+                  <Text
+                    // eslint-disable-next-line react-native/no-inline-styles
+                    style={{
+                      backgroundColor: settings[value]
+                        ? 'rgb(17, 87, 64)'
+                        : '#D7D7D7',
+                      color: settings[value] ? Colors.white : Colors.black,
+                      position: 'absolute',
+                      right: 10,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: 60,
+                      height: 25,
+                      lineHeight: 25,
+                      borderRadius: 10,
+                      textAlign: 'center',
+                    }}>
+                    Appeal
+                  </Text>
+                </TouchableWithoutFeedback>
+              </View>
+            );
+          })}
         </View>
       </View>
     </View>

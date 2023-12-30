@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, {useEffect, useState} from 'react';
 import CheckBox from '@react-native-community/checkbox';
 import DocumentPicker from 'react-native-document-picker';
+import camera from './media/camera_1.png';
 
 import {
   Button,
@@ -268,6 +269,7 @@ function ForgotPassword(props): JSX.Element {
 function Register(props): JSX.Element {
   const [hasRead, setRead] = useState(false);
   const [email, setEmail] = useState('');
+  const [agreed, setAgreement] = useState(false);
 
   const [profile, setProfile] = useState({
     first_name: '',
@@ -314,6 +316,7 @@ function Register(props): JSX.Element {
       profile.password === confirmPassword &&
       profile.password.length >= 8 &&
       profile.username.length > 0 &&
+      agreed &&
       Object.keys(profile.profile_picture).length;
 
     if (validInformation) {
@@ -358,6 +361,10 @@ function Register(props): JSX.Element {
       props.setErrorMessage('Please enter a username.');
     } else if (!Object.keys(profile.profile_picture).length) {
       props.setErrorMessage('Please select a profile picture');
+    } else if (!agreed) {
+      props.setErrorMessage(
+        'Must accept Terms and Conditions and Privacy Policy',
+      );
     } else {
       props.setErrorMessage(
         'An unknown error has occurred.  Please try again later',
@@ -383,14 +390,13 @@ function Register(props): JSX.Element {
       </TouchableWithoutFeedback>
       <View style={styles.loginContainer}>
         <TouchableWithoutFeedback onPress={() => chooseImage()}>
-          <Image
-            style={styles.profilePicture}
-            source={
-              profilePicture
-                ? {uri: profilePicture}
-                : require('./media/camera.png')
-            }
-          />
+          <View style={styles.profilePicture}>
+            <Image
+              source={profilePicture ? {uri: profilePicture} : camera}
+              width={profilePicture ? 150 : 100}
+              height={profilePicture ? 150 : 100}
+            />
+          </View>
         </TouchableWithoutFeedback>
 
         <View style={styles.createAccountText}>
@@ -468,9 +474,22 @@ function Register(props): JSX.Element {
           </Text>
 
           <View style={styles.termsAndConditionsContainer}>
+            <TouchableWithoutFeedback onPress={() => setAgreement(!agreed)}>
+              <View style={styles.outerCircle}>
+                <View
+                  // eslint-disable-next-line react-native/no-inline-styles
+                  style={{
+                    backgroundColor: agreed ? Colors.black : Colors.white,
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
             <Text>I have read and agreed to the </Text>
             <Text style={styles.termsAndConditionsBold}>
-              Terms and Conditions{' '}
+              Terms and Conditions
             </Text>
           </View>
           <View style={styles.termsAndConditionsContainer}>
@@ -663,7 +682,7 @@ function Login(props): JSX.Element {
         verifyEmail: false,
       });
     }
-  })
+  });
 
   const login = async () => {
     const data = {
@@ -857,9 +876,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   profilePicture: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
     width: 150,
     height: 150,
-    padding: 20,
     borderRadius: 75,
     borderWidth: 2,
     borderColor: Colors.black,
@@ -946,6 +968,17 @@ const styles = StyleSheet.create({
   errorMessage: {
     color: 'black',
     textAlign: 'center',
+  },
+  outerCircle: {
+    display: 'flex',
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderColor: Colors.black,
+    borderWidth: 1,
   },
 });
 

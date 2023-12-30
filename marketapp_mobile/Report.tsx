@@ -24,7 +24,14 @@ function UserOptions(props): JSX.Element {
     <TouchableWithoutFeedback
       onPress={() => {
         setSelected(!selected);
-        props.setSelected(props.selected.add(props.reason));
+
+        // must use !selected because Report component has not re-rendered, so
+        // the state variable has not changed yet
+        if (!selected) {
+          props.setSelected(props.selected.add(props.reason));
+        } else {
+          props.selected.delete(props.reason);
+        }
       }}>
       <Text
         style={{
@@ -46,6 +53,7 @@ function UserOptions(props): JSX.Element {
 function Report(props): JSX.Element {
   const [confirmed, canSubmit] = useState(false);
   const [selected, setSelected] = useState(new Set());
+  const [errorMessage, setErrorMessage] = useState('');
 
   const user_options = {
     'Inappropriate nickname': 'NICKNAME',
@@ -96,7 +104,6 @@ function Report(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
 
-    console.log(violation, user_options[violation], user);
     let data = {
       violation: user ? user_options[violation] : post_options[violation],
       profile: profile_id,
@@ -119,7 +126,18 @@ function Report(props): JSX.Element {
           <View style={styles.goldBar} />
 
           {/* Report screen body */}
-          <View style={styles.reportContainer}>
+          <View
+            style={{
+              display: 'flex',
+              backgroundColor: 'white',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              rowGap: 15,
+              width: '100%',
+              height: '89%',
+              opacity: errorMessage ? 0.6 : 1.0,
+            }}>
             <Text style={{fontSize: 17.5, color: 'black'}}>
               Would you like to report this user?
             </Text>
@@ -198,9 +216,17 @@ function Report(props): JSX.Element {
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
                 onPress={() => {
-                  if (confirmed) {
+                  if (!confirmed) {
+                    setErrorMessage(
+                      'Please confirm before continuing the report',
+                    );
+                  } else if (selected.size < 1) {
+                    setErrorMessage(
+                      'Please select your reason(s) for reporting',
+                    );
+                  } else {
                     selected.forEach(async value => {
-                      await submitReport(true, false, value);
+                      await submitReport(false, true, value);
                     });
                     props.returnHome();
                   }
@@ -233,7 +259,18 @@ function Report(props): JSX.Element {
           <View style={styles.goldBar} />
 
           {/* Report screen body */}
-          <View style={styles.reportContainerPost}>
+          <View
+            style={{
+              display: 'flex',
+              backgroundColor: 'white',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              rowGap: 10,
+              width: '100%',
+              height: '89%',
+              opacity: errorMessage ? 0.6 : 1.0,
+            }}>
             <Text style={{fontSize: 20, color: 'black'}}>
               Would you like to report this post?
             </Text>
@@ -314,7 +351,15 @@ function Report(props): JSX.Element {
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
                 onPress={() => {
-                  if (confirmed) {
+                  if (!confirmed) {
+                    setErrorMessage(
+                      'Please confirm before continuing the report',
+                    );
+                  } else if (selected.size < 1) {
+                    setErrorMessage(
+                      'Please select your reason(s) for reporting',
+                    );
+                  } else {
                     selected.forEach(async value => {
                       await submitReport(false, true, value);
                     });
@@ -340,31 +385,23 @@ function Report(props): JSX.Element {
           </View>
         </>
       )}
+      {errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  reportContainer: {
-    display: 'flex',
-    backgroundColor: 'white',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    rowGap: 15,
-    width: '100%',
-    height: '89%',
-  },
-  reportContainerPost: {
-    display: 'flex',
-    backgroundColor: 'white',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    rowGap: 10,
-    width: '100%',
-    height: '89%',
-  },
   profileContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -418,6 +455,44 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 15,
+  },
+  errorMessageContainer: {
+    //TODO: Fix hard-coded numbers
+    position: 'absolute',
+    transform: [{translateX: 50}, {translateY: 300}],
+    width: 300,
+    height: 150,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#D7D7D7',
+    borderRadius: 10,
+    padding: 15,
+  },
+  errorMessageBanner: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  exitErrorMessage: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: Colors.white,
+    height: 20,
+    width: 50,
+    textAlign: 'center',
+    lineHeight: 20,
+    borderRadius: 5,
+  },
+  errorMessageTextContainer: {
+    display: 'flex',
+    height: 70,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorMessage: {
+    color: 'black',
+    textAlign: 'center',
   },
 });
 export default Report;
