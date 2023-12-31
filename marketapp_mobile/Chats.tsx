@@ -412,6 +412,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   post: {
+    position: 'absolute',
+    width: '100%',
     backgroundColor: 'white',
     display: 'flex',
     flexDirection: 'row',
@@ -425,6 +427,7 @@ const styles = StyleSheet.create({
     width: 75,
     height: 75,
     display: 'flex',
+    marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },

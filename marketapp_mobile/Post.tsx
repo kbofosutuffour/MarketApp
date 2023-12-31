@@ -53,7 +53,11 @@ function EditPost(props): JSX.Element {
     }
 
     await axios
-      .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data)
+      .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .catch((err: any) => console.log(err, data));
   };
 
@@ -64,7 +68,7 @@ function EditPost(props): JSX.Element {
     let image = {
       uri: res[0].uri,
       type: res[0].type,
-      name: 'image',
+      name: 'image.png',
     };
     props.setPost({
       ...props.post,
@@ -227,7 +231,11 @@ function NewPost(props): JSX.Element {
     }
 
     await axios
-      .post('http://10.0.2.2:8000/images/', additional_images)
+      .post('http://10.0.2.2:8000/images/', additional_images, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .catch((err: any) => console.log(err));
 
     props.returnHome();
@@ -255,7 +263,7 @@ function NewPost(props): JSX.Element {
     let data = [];
     data.push(null);
 
-    for (let i = 1; i < MAX_NUMBER_OF_IMAGES; i++) {
+    for (let i = 1; i < res.length; i++) {
       image = {
         uri: res[i].uri,
         type: res[i].type,
@@ -263,7 +271,7 @@ function NewPost(props): JSX.Element {
       };
       data.push(image);
     }
-
+    console.log(data)
     setImages(data);
   };
 
@@ -406,12 +414,12 @@ function CreatePost(props): JSX.Element {
   const categories = [
     'CLOTHING',
     'FURNITURE',
-    'FREE_STUFF',
+    'FREE STUFF',
     'VEHICLES',
     'TECHNOLOGY',
     'HOBBIES',
-    'OFFICE_SUPPLIES',
-    'DORM_GOODS',
+    'OFFICE SUPPLIES',
+    'DORM GOODS',
     'FOOD',
     'ENTERTAINMENT',
     'BOOKS',

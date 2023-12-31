@@ -431,14 +431,14 @@ const styles = StyleSheet.create({
     height: 30,
   },
   previousImage: {
-    height: '60%',
+    height: '90%',
     width: '20%',
     position: 'absolute',
     left: 0,
     zIndex: 1,
   },
   nextImage: {
-    height: '60%',
+    height: '90%',
     width: '20%',
     position: 'absolute',
     right: 0,
