@@ -51,7 +51,7 @@ class Posts(viewsets.ModelViewSet):
         if serializer.is_valid():
             new_post = serializer.save()
             print(new_post.id, 'post_id')
-            return Response({'message': 'You have successfully edited your post', 'post_id': new_post.id})
+            return Response({'message': 'You have successfully created your post', 'post_id': new_post.id})
         else:
             print(serializer.errors, 'error')
             return Response({'error': serializer.errors})
@@ -132,7 +132,8 @@ class EditPostViewSet(viewsets.ViewSet):
         post = Post.objects.get(pk=pk)
         serializer = PostSerializer(post, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            new_post = serializer.save()
+            return Response({'message': 'You have successfully created your post', 'post_id': new_post.id})
         else:
             print(serializer.errors)
             return Response({'error': serializer.errors})

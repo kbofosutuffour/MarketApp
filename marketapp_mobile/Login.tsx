@@ -323,14 +323,23 @@ function Register(props): JSX.Element {
       for (const [key, value] of Object.entries(profile)) {
         data.append(key, value);
       }
+      //TODO: Add logic for if user has a user set up, but NOT a password
       await axios
-        .post('http://10.0.2.2:8000/users/', {
-          username: profile.username,
-          password: profile.password,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          email: email,
-        })
+        .post(
+          'http://10.0.2.2:8000/users/',
+          {
+            username: profile.username,
+            password: profile.password,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: email,
+          },
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        )
         .then(response => {
           console.log(response);
         })
@@ -342,7 +351,11 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post('http://10.0.2.2:8000/profiles/', data)
+        .post('http://10.0.2.2:8000/profiles/', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
         .then(response => {
           console.log(response);
           props.returnHome(profile.username);
