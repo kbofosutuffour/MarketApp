@@ -29,6 +29,7 @@ import UserSettings from './UserSettings';
 import CreatePost from './Post';
 import Login from './Login';
 import Report from './Report';
+import Landing from './Landing';
 
 import vehicles from './media/categories/Vehicles-96.png';
 import food from './media/categories/Food-96.png';
@@ -276,7 +277,7 @@ function Post(props: {
    * @param postDateTime the datetime of the post
    * @returns the the number of seconds since the post has been created
    */
-  const getDifference = postDateTime => {
+  const getDifference = (postDateTime: string) => {
     let temp = postDateTime.split('T');
     let [date, time] = [temp[0].split('-'), temp[1].split(':')];
     let post = new Date(
@@ -405,11 +406,17 @@ function App(): JSX.Element {
   const [profile, setProfile] = useState({
     showProfile: false,
     data: {},
+    settings: {},
+    date: '',
+    id: '',
+    posts: [],
+    liked_posts: [],
   });
 
-  const [settings, setSettingsTitle] = useState({
-    settings: false,
-    text: 'Settings',
+  const [settings, setUserSettings] = useState({
+    showSettings: false,
+    title: 'Settings',
+    data: {},
   });
 
   const [showPost, setPost] = useState({
@@ -419,7 +426,7 @@ function App(): JSX.Element {
 
   const [showChats, setChats] = useState(false);
 
-  const [showSettings, setSettings] = useState(false);
+  // const [showSettings, setSettings] = useState(false);
 
   const [category, setCategory] = useState('');
   const [reportUser, setReporting] = useState({
@@ -432,15 +439,30 @@ function App(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState('');
   const [hasSeenDraft, setHasSeenDraft] = useState(false);
 
+  const [hasloaded, setHasLoaded] = useState(false);
+
   // When the defined components finish rendering, fetch
-  // The posts that are currently stored in the database
+  // posts and profile informaiton from the database
   useEffect(() => {
     fetchData();
   }, [user.username]);
 
+  // Used to remove the landing screen if a user is logged in
+  // and their data has been retrieved from the database
+  useEffect(() => {
+    if (Object.keys(profile.data).length) {
+      setHasLoaded(true);
+    }
+  }, [profile]);
+
   // The axios is a JavaScript library that is used to perform
   // various HTTP requests from existing API's.  Common HTTP requests
   // include get, post, put, and delete
+
+  /**
+   * gets all posts stored in the database as well as profile information
+   * of the current user
+   */
   const fetchData = async () => {
     // asynchronous function that gets all existing posts
     await axios
@@ -466,17 +488,54 @@ function App(): JSX.Element {
     // asynchronous function that gets the profile information
     // for the given username
     // TODO: Create a state variable for the user that is logged in
+    let data = {
+      showProfile: false,
+      data: {},
+      settings: {},
+      date: '',
+      id: '',
+      posts: [],
+      liked_posts: [],
+    };
 
     if (user.username) {
       await axios
         .get('http://10.0.2.2:8000/profile/' + user.username)
         .then(res => {
-          setProfile({
-            showProfile: false,
-            data: res.data,
-          });
+          data.showProfile = false;
+          data.data = res.data;
         })
         .catch((err: any) => console.log(err));
+
+      let profile_id;
+      await axios
+        .get('http://10.0.2.2:8000/profiles/get_date_created/' + user.username)
+        .then(res => {
+          data.date = res.data.date.split('-');
+        });
+      await axios
+        .get('http://10.0.2.2:8000/profiles/get_id/' + user.username)
+        .then(res => {
+          profile_id = res.data.id;
+          data.id = res.data.id;
+        });
+      await axios
+        .get('http://10.0.2.2:8000/posts/get_posts/' + user.username)
+        .then(res => {
+          data.posts = res.data;
+        });
+      await axios
+        .get('http://10.0.2.2:8000/profiles/get_liked_posts/' + user.username)
+        .then(res => {
+          data.liked_posts = res.data.liked_posts;
+        });
+      await axios
+        .get('http://10.0.2.2:8000/user_settings/' + profile_id)
+        .then(res => {
+          data.settings = res.data;
+          setUserSettings({...settings, data: res.data});
+        });
+      setProfile(data);
     }
   };
 
@@ -563,9 +622,17 @@ function App(): JSX.Element {
       post: {},
     });
     setPosts({...posts, showPosts: false});
-    setProfile({...profile, showProfile: false});
+    setProfile({
+      showProfile: false,
+      data: {},
+      settings: {},
+      date: '',
+      id: '',
+      posts: [],
+      liked_posts: [],
+    });
     setChats(false);
-    setSettings(false);
+    setUserSettings({...settings, showSettings: false});
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
     setReporting({
@@ -574,6 +641,7 @@ function App(): JSX.Element {
       profile: {},
       sentFrom: user.username,
     });
+    setHasLoaded(false);
   };
 
   /**
@@ -600,7 +668,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: true});
     setProfile({...profile, showProfile: false});
     setChats(false);
-    setSettings(false);
+    setUserSettings({...settings, showSettings: false});
     setPost({...showPost, showPost: false});
     setCategory('');
     setSearch({...searchedPosts, showSearchBar: false});
@@ -628,7 +696,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: true});
     setChats(false);
-    setSettings(false);
+    setUserSettings({...settings, showSettings: false});
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
     setReporting({
@@ -651,7 +719,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: false});
     setChats(true);
-    setSettings(false);
+    setUserSettings({...settings, showSettings: false});
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
     setReporting({
@@ -674,7 +742,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: false});
     setChats(false);
-    setSettings(true);
+    setUserSettings({...settings, showSettings: true});
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
     setReporting({
@@ -698,7 +766,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: false});
     setChats(false);
-    setSettings(false);
+    setUserSettings({...settings, showSettings: false});
     setPost({
       showPost: true,
       id: id,
@@ -724,7 +792,7 @@ function App(): JSX.Element {
     setPosts({...posts, showPosts: false});
     setProfile({...profile, showProfile: false});
     setChats(false);
-    setSettings(false);
+    setUserSettings({...settings, showSettings: false});
     setPost({...showPost, showPost: false});
     setSearch({...searchedPosts, showSearchBar: false});
     setReporting({
@@ -745,22 +813,19 @@ function App(): JSX.Element {
       {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
           This produces the effect of changing what is seen on the screen */}
 
+      {/* Landing Page */}
+      {!hasloaded && <Landing showLogin={user.showLogin} />}
+
       {/* Login/Register Page */}
-      {!prodDesc.showDesc &&
-        !profile.showProfile &&
-        !showChats &&
-        !showSettings &&
-        !showPost.showPost &&
-        user.showLogin &&
-        !reportUser.showReport && (
-          <Login returnHome={returnHome} redirect={user.redirect} />
-        )}
+      {user.showLogin && (
+        <Login returnHome={returnHome} redirect={user.redirect} />
+      )}
 
       {/* Home Page */}
       {!prodDesc.showDesc &&
         !profile.showProfile &&
         !showChats &&
-        !showSettings &&
+        !settings.showSettings &&
         !showPost.showPost &&
         !user.showLogin &&
         !reportUser.showReport && (
@@ -835,148 +900,123 @@ function App(): JSX.Element {
 
       {/* Product Description Page */}
 
-      {prodDesc.showDesc &&
-        !profile.showProfile &&
-        !showChats &&
-        !showSettings &&
-        !showPost.showPost &&
-        !user.showLogin &&
-        !reportUser.showReport && (
-          <>
-            <ProductDescription
-              post={prodDesc.post}
-              returnHome={returnHome}
-              viewChats={viewChats}
-              current_user={profile.data.username}
-              current_user_pfp={profile.data.profile_picture}
-              viewReport={viewReport}
-            />
-          </>
-        )}
+      {prodDesc.showDesc && (
+        <>
+          <ProductDescription
+            post={prodDesc.post}
+            all_posts={posts.posts}
+            returnHome={returnHome}
+            viewChats={viewChats}
+            current_user={profile.data.username}
+            current_user_pfp={profile.data.profile_picture}
+            viewReport={viewReport}
+          />
+        </>
+      )}
 
       {/* Profile Page */}
 
-      {!prodDesc.showDesc &&
-        profile.showProfile &&
-        !showChats &&
-        !showSettings &&
-        !showPost.showPost &&
-        !user.showLogin &&
-        !reportUser.showReport && (
-          <>
-            <NavBar
-              searchedPosts={searchedPosts}
-              posts={posts}
-              searchPosts={searchPosts}
-              setPosts={setPosts}
-              setSearch={setSearch}
-              type={'Profile'}
-              viewSettings={viewSettings}
-            />
-            <Profile
-              profile={profile.data}
-              returnHome={returnHome}
-              all_posts={posts.posts}
-              viewSettings={viewSettings}
-              viewPost={viewPost}
-              current_user={user.username}
-              onMain={true}
-              viewReport={viewReport}
-            />
-            <Footer
-              returnHome={returnHome}
-              viewProfile={viewProfile}
-              viewChats={viewChats}
-              type={'Profile'}
-            />
-          </>
-        )}
+      {profile.showProfile && (
+        <>
+          <NavBar
+            searchedPosts={searchedPosts}
+            posts={posts}
+            searchPosts={searchPosts}
+            setPosts={setPosts}
+            setSearch={setSearch}
+            type={'Profile'}
+            viewSettings={viewSettings}
+          />
+          <Profile
+            profile={profile}
+            returnHome={returnHome}
+            all_posts={posts.posts}
+            viewSettings={viewSettings}
+            viewPost={viewPost}
+            current_user={user.username}
+            onMain={true}
+            viewReport={viewReport}
+            date={profile.date}
+            userSettings={settings}
+            profile_id={profile.id}
+          />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+            type={'Profile'}
+          />
+        </>
+      )}
 
       {/* Chat Rooms */}
 
-      {!prodDesc.showDesc &&
-        !profile.showProfile &&
-        showChats &&
-        !showSettings &&
-        !showPost.showPost &&
-        !user.showLogin &&
-        !reportUser.showReport && (
-          <>
-            <NavBar
-              searchedPosts={searchedPosts}
-              posts={posts}
-              searchPosts={searchPosts}
-              setPosts={setPosts}
-              setSearch={setSearch}
-              type={'My Chats'}
-              viewSettings={viewSettings}
-            />
-            <Chats
-              profile={profile.data}
-              viewChats={viewChats}
-              current_user={user.username}
-            />
-            <Footer
-              returnHome={returnHome}
-              viewProfile={viewProfile}
-              viewChats={viewChats}
-              type={'Chats'}
-            />
-          </>
-        )}
+      {showChats && (
+        <>
+          <NavBar
+            searchedPosts={searchedPosts}
+            posts={posts}
+            searchPosts={searchPosts}
+            setPosts={setPosts}
+            setSearch={setSearch}
+            type={'My Chats'}
+            viewSettings={viewSettings}
+          />
+          <Chats
+            profile={profile.data}
+            viewChats={viewChats}
+            current_user={user.username}
+          />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+            type={'Chats'}
+          />
+        </>
+      )}
 
       {/* Settings Page */}
 
-      {!prodDesc.showDesc &&
-        !profile.showProfile &&
-        !showChats &&
-        showSettings &&
-        !showPost.showPost &&
-        !user.showLogin &&
-        !reportUser.showReport && (
-          <>
-            <NavBar
-              searchedPosts={searchedPosts}
-              posts={posts}
-              searchPosts={searchPosts}
-              setPosts={setPosts}
-              setSearch={setSearch}
-              type={'Settings'}
-              viewSettings={viewSettings}
-            />
-            <UserSettings
-              viewSettings={viewSettings}
-              settings={settings}
-              setSettingsTitle={setSettingsTitle}
-              login={login}
-              profile={profile.data}
-            />
-            <Footer
-              returnHome={returnHome}
-              viewProfile={viewProfile}
-              viewChats={viewChats}
-              type={'Profile'}
-            />
-          </>
-        )}
+      {settings.showSettings && (
+        <>
+          <NavBar
+            searchedPosts={searchedPosts}
+            posts={posts}
+            searchPosts={searchPosts}
+            setPosts={setPosts}
+            setSearch={setSearch}
+            type={'Settings'}
+            viewSettings={viewSettings}
+          />
+          <UserSettings
+            viewSettings={viewSettings}
+            userSettings={settings}
+            setUserSettings={setUserSettings}
+            login={login}
+            profile={profile.data}
+            date={profile.date}
+          />
+          <Footer
+            returnHome={returnHome}
+            viewProfile={viewProfile}
+            viewChats={viewChats}
+            type={'Profile'}
+          />
+        </>
+      )}
 
       {/* Create & Edit Post Page */}
 
-      {!prodDesc.showDesc &&
-        !profile.showProfile &&
-        !showChats &&
-        !showSettings &&
-        showPost.showPost &&
-        !user.showLogin &&
-        !reportUser.showReport && (
-          <>
-            <CreatePost
-              username={user.username}
-              returnHome={returnHome}
-              showPost={showPost}
-            />
-          </>
-        )}
+      {showPost.showPost && (
+        <>
+          <CreatePost
+            username={user.username}
+            returnHome={returnHome}
+            showPost={showPost}
+          />
+        </>
+      )}
       {reportUser.showReport && (
         <Report
           user={Object.keys(reportUser.profile).length > 0}

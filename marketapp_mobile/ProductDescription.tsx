@@ -250,7 +250,7 @@ function ProductDescription(props): JSX.Element {
         <>
           <Profile
             profile={profile}
-            posts={posts}
+            all_posts={props.all_posts}
             current_user={profile.username}
             onMain={false}
           />

@@ -182,7 +182,24 @@ function NavBar(props): JSX.Element {
  * @returns Edit Profile Screen
  */
 function EditProfile(props): JSX.Element {
-  const [showDate, changeDateSettings] = useState(false);
+  const [showDate, setShowDate] = useState(false);
+
+  useEffect(() => {
+    setShowDate(props.userSettings.data.show_joined_date);
+  }, [props.userSettings.data.show_joined_date]);
+
+  const changeDateSettings = async value => {
+    axios.patch(
+      'http://10.0.2.2:8000/user_settings/show_joined_date/' +
+        props.profile_id +
+        '/',
+      {
+        username: props.profile_id,
+        show_joined_date: value,
+      },
+    );
+    setShowDate(value);
+  };
 
   return (
     <View style={{height: '80%'}}>
@@ -209,7 +226,8 @@ function EditProfile(props): JSX.Element {
             <View>
               <Image
                 source={{
-                  uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                  uri:
+                    'http://10.0.2.2:8000' + props.profile.data.profile_picture,
                 }}
                 style={styles.profilePictureBorder}
               />
@@ -293,9 +311,6 @@ function Profile(props): JSX.Element {
   const removePost = async id => {
     await axios
       .delete('http://10.0.2.2:8000/posts/' + id + '/')
-      .then(response => {
-        console.log(response);
-      })
       .catch((err: any) => console.log(err));
     setView({
       main: true,
@@ -310,21 +325,8 @@ function Profile(props): JSX.Element {
   // Function that retrieves all of the post created
   // by the user currently in the database after the page renders
   useEffect(() => {
-    var request =
-      // eslint-disable-next-line prettier/prettier
-      'http://10.0.2.2:8000/posts/get_posts/' + props.profile.username;
-    axios
-      .get(request)
-      .then(res => {
-        setPosts(res.data);
-      })
-      .catch((err: any) => console.log(err));
-    axios
-      .get(
-        'http://10.0.2.2:8000/profiles/get_liked_posts/' +
-          props.profile.username,
-      )
-      .then(res => setLikedPosts(res.data.liked_posts));
+    setPosts(view.main ? props.profile.posts : props.posts);
+    setLikedPosts(props.profile.liked_posts);
   }, []);
 
   return (
@@ -336,12 +338,16 @@ function Profile(props): JSX.Element {
             <Image
               style={styles.profilePicture}
               source={{
-                uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                uri: view.main
+                  ? 'http://10.0.2.2:8000' + props.profile.data.profile_picture
+                  : 'http://10.0.2.2:8000' + props.profile.profile_picture,
               }}
             />
             <View style={styles.profileDescription}>
               <Text style={{fontSize: 25, color: Colors.black}}>
-                {props.profile.username}
+                {view.main
+                  ? props.profile.data.username
+                  : props.profile.username}
               </Text>
               {props.onMain && (
                 <TouchableWithoutFeedback
@@ -504,43 +510,34 @@ function Profile(props): JSX.Element {
                 alignItems: 'flex-end',
                 padding: 0,
               }}>
-              {posts.map(post => {
-                if (type.sell_history) {
-                  return (
-                    <Post
-                      data={post}
-                      setDesc={props.setDesc}
-                      viewPost={props.viewPost}
-                      setView={setView}
-                      setDelete={setDelete}
-                      current_user={props.current_user}
-                      main={view.main}
-                    />
-                  );
-                }
-              })}
               {props.all_posts.map(post => {
-                if (type.liked_posts) {
-                  if (likedPosts.length && likedPosts.includes(post.id)) {
+                if (type.sell_history) {
+                  if (
+                    view.main &&
+                    post.username === props.profile.data.username
+                  ) {
                     return (
                       <Post
                         data={post}
                         setDesc={props.setDesc}
                         viewPost={props.viewPost}
                         setView={setView}
+                        setDelete={setDelete}
                         current_user={props.current_user}
                         main={view.main}
                       />
                     );
-                  }
-                } else if (type.buy_history) {
-                  if (buyHistory.length && buyHistory.includes(post.id)) {
+                  } else if (
+                    view.otherProfile &&
+                    post.username === props.profile.username
+                  ) {
                     return (
                       <Post
                         data={post}
                         setDesc={props.setDesc}
                         viewPost={props.viewPost}
                         setView={setView}
+                        setDelete={setDelete}
                         current_user={props.current_user}
                         main={view.main}
                       />
@@ -548,12 +545,47 @@ function Profile(props): JSX.Element {
                   }
                 }
               })}
+              {view.main &&
+                props.all_posts.map(post => {
+                  if (type.liked_posts) {
+                    if (likedPosts.length && likedPosts.includes(post.id)) {
+                      return (
+                        <Post
+                          data={post}
+                          setDesc={props.setDesc}
+                          viewPost={props.viewPost}
+                          setView={setView}
+                          current_user={props.current_user}
+                          main={view.main}
+                        />
+                      );
+                    }
+                  } else if (type.buy_history) {
+                    if (buyHistory.length && buyHistory.includes(post.id)) {
+                      return (
+                        <Post
+                          data={post}
+                          setDesc={props.setDesc}
+                          viewPost={props.viewPost}
+                          setView={setView}
+                          current_user={props.current_user}
+                          main={view.main}
+                        />
+                      );
+                    }
+                  }
+                })}
             </View>
           </ScrollView>
         </View>
       )}
       {view.editProfile && (
-        <EditProfile profile={props.profile} setView={setView} />
+        <EditProfile
+          profile={props.profile}
+          setView={setView}
+          profile_id={props.profile_id}
+          userSettings={props.userSettings}
+        />
       )}
       {view.deletePost && (
         <View
@@ -603,7 +635,8 @@ function Profile(props): JSX.Element {
                   source={{
                     uri: changedPic
                       ? changedPic.uri
-                      : 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                      : 'http://10.0.2.2:8000' +
+                        props.profile.data.profile_picture,
                   }}
                 />
               </View>
@@ -614,7 +647,7 @@ function Profile(props): JSX.Element {
               onPress={async () => {
                 let data = new FormData();
                 data.append('profile_picture', changedPic);
-                data.append('username', props.profile.username);
+                data.append('username', props.profile.data.username);
 
                 let profile_id;
                 await axios
@@ -632,9 +665,6 @@ function Profile(props): JSX.Element {
                     'http://10.0.2.2:8000/edit_profile/' + profile_id + '/',
                     data,
                   )
-                  .then(response => {
-                    console.log('');
-                  })
                   .catch((err: any) => console.log(err));
                 setView({
                   main: false,

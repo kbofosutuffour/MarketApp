@@ -366,6 +366,18 @@ function Register(props): JSX.Element {
             'An error has occurred within our server.  Please try again later',
           );
         });
+
+      await axios
+        .post('http://127.0.0.1:8000/user_settings/', {
+          username: profile.username,
+        })
+        .catch((err: any) => console.log(err));
+
+      await axios
+        .post('http://127.0.0.1:8000/report/', {
+          username: profile.username,
+        })
+        .catch((err: any) => console.log(err));
     } else if (profile.password !== confirmPassword) {
       props.setErrorMessage('Passwords do not match.  Please try again.');
     } else if (profile.password.length < 8) {

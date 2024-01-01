@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {format} from 'date-fns';
 
 function Profile(props): JSX.Element {
   const options = [
@@ -19,6 +20,16 @@ function Profile(props): JSX.Element {
     'History',
     'Blocked Users',
   ];
+
+  const [dateCreated, setDateCreated] = useState([]);
+  const [showDate, setShowDate] = useState(false);
+  const [userSettings, setUserSettings] = useState({});
+
+  useEffect(() => {
+    setUserSettings(props.userSettings);
+    setDateCreated(props.date);
+  }, [props.userSettings]);
+
   return (
     <View style={styles.userSettings}>
       <View style={styles.profileDescription}>
@@ -36,7 +47,10 @@ function Profile(props): JSX.Element {
             {props.profile.email ? props.profile.email : '[No email]'}
           </Text>
           <Text style={{fontSize: 15, color: 'gray', width: 150}}>
-            Member Since January 1st, 1990
+            {/* {dateCreated && userSettings.data.show_joined_date
+              ? 'Joined ' +
+                format(new Date(dateCreated[0], dateCreated[1]), 'MMMM yyyy')
+              : ''} */}
           </Text>
         </View>
       </View>
@@ -523,7 +537,7 @@ function Privacy(): JSX.Element {
     <View style={styles.userSettings}>
       <View style={styles.notificationSettingsContainer}>
         <View style={styles.notificationHeader}>
-          <Text style={styles.settingsOption}>Liked Post Updates</Text>
+          <Text style={styles.settingsOption}>Privacy Policy</Text>
         </View>
         <View style={styles.toggleContainer}>
           <View
@@ -661,7 +675,6 @@ function Support(props): JSX.Element {
 }
 
 function Violations(props): JSX.Element {
-
   const [settings, setSettings] = useState({
     scamming: false,
     harassment: false,
@@ -724,14 +737,6 @@ function Violations(props): JSX.Element {
 }
 
 function UserSettings(props): JSX.Element {
-  useEffect(() => {
-    props.setSettingsTitle({
-      settings: true,
-      text: 'Settings',
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const [view, setView] = useState({
     settings: true,
     profile: false,
@@ -845,9 +850,9 @@ function UserSettings(props): JSX.Element {
                   <TouchableWithoutFeedback
                     onPress={() => {
                       setView(options[value]);
-                      props.setSettingsTitle({
-                        settings: true,
-                        text: value,
+                      props.setUserSettings({
+                        ...props.userSettings,
+                        title: value,
                       });
                     }}>
                     <View
@@ -877,11 +882,23 @@ function UserSettings(props): JSX.Element {
           </TouchableWithoutFeedback>
         </View>
       )}
-      {view.profile && <Profile profile={props.profile} setView={setView} />}
-      {view.notifications && <Notifications profile={props.profile.username} />}
-      {view.privacy && <Privacy />}
+      {view.profile && (
+        <Profile
+          profile={props.profile}
+          setView={setView}
+          date={props.date}
+          userSettings={props.userSettings.data}
+        />
+      )}
+      {view.notifications && (
+        <Notifications
+          profile={props.profile.username}
+          userSettings={props.userSettings.data}
+        />
+      )}
+      {view.privacy && <Privacy userSettings={props.userSettings.data} />}
       {view.support && <Support setView={setView} />}
-      {view.violations && <Violations />}
+      {view.violations && <Violations userSettings={props.userSettings.data} />}
       {view.changePassword && (
         <ChangePassword
           profile={props.profile}

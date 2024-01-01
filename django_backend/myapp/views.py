@@ -43,6 +43,7 @@ class Posts(viewsets.ModelViewSet):
         posts = self.filter_queryset(posts)
         # page = self.paginate_queryset(posts)
         serializer = self.get_serializer(posts, many=True)
+        print(serializer.data)
         return Response(serializer.data)
     
     def create(self, request):
@@ -173,7 +174,12 @@ class Profiles(viewsets.ModelViewSet):
 
         return Response({'liked_posts': post_ids})
 
+    @action(methods=['get'], detail=False, url_path=r'get_date_created/(?P<username>\w+)')
+    def get_date_created(self, request, username, *args, **kwargs):
 
+        profile = Profile.objects.get(username=username)
+        return Response({'date': profile.date})
+    
     def create(self, request):
         serializer = ProfileSerializer(data=request.data)
         try:
@@ -353,6 +359,21 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
         try:
             settings = UserSettings.objects.get(pk=username)
             settings.liked_posts_updates = request.data['liked_post_updates']
+            settings.save()
+            return Response({'message': 'You have successfully edited your profile settings'})
+        except:
+            print('error')
+            return Response({'error': 'There was an error editing your profile settings.  Please try again.'})
+
+
+    @action(methods=['patch'], detail=False, url_path=r'show_joined_date/(?P<username>\w+)')
+    def show_joined_date(self, request, username=None):
+        """
+        Changing the liked post settings of a post
+        """
+        try:
+            settings = UserSettings.objects.get(pk=username)
+            settings.show_joined_date = request.data['show_joined_date']
             settings.save()
             return Response({'message': 'You have successfully edited your profile settings'})
         except:
