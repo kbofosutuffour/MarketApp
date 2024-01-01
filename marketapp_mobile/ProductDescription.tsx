@@ -32,6 +32,7 @@ function ProductDescription(props): JSX.Element {
   const [mainScreen, showMain] = useState(true);
   const [options, showOptions] = useState(false);
   const [view, setView] = useState(0);
+  const [userSettings, setUserSettings] = useState({});
 
   const [photos, setPhotos] = useState([]);
   // After the page renders, retrieve information on the user
@@ -49,10 +50,16 @@ function ProductDescription(props): JSX.Element {
    */
   const getData = async () => {
     let request = 'http://10.0.2.2:8000/profile/' + props.post.username;
+    let data = {
+      data: {},
+      userSettings: {},
+      date: [],
+      id: '',
+    };
     await axios
       .get(request)
       .then(res => {
-        setProfile(res.data);
+        data.data = res.data;
       })
       .catch((err: any) => console.log(err));
     await axios
@@ -67,14 +74,24 @@ function ProductDescription(props): JSX.Element {
         );
       })
       .catch((err: any) => console.log(err));
-    request = 'http://10.0.2.2:8000/posts/get_posts/' + props.post.username;
     await axios
-      .get(request)
+      .get(
+        'http://10.0.2.2:8000/profiles/get_date_created/' + props.post.username,
+      )
       .then(res => {
-        setPosts(res.data);
-      })
-      .catch((err: any) => console.log(err));
-
+        data.date = res.data.date.split('-');
+      });
+    await axios
+      .get('http://10.0.2.2:8000/profiles/get_id/' + props.post.username)
+      .then(res => {
+        data.id = res.data.id;
+      });
+    await axios
+      .get('http://10.0.2.2:8000/user_settings/' + data.id)
+      .then(res => {
+        data.userSettings = res.data;
+      });
+    setProfile(data);
     addAllImages();
   };
 
@@ -204,16 +221,20 @@ function ProductDescription(props): JSX.Element {
           {/* Product Description */}
           <View style={styles.description}>
             <View style={styles.profile}>
-              <TouchableWithoutFeedback onPress={() => showMain(false)}>
-                <Image
-                  source={{
-                    uri: 'http://10.0.2.2:8000' + profile.profile_picture,
-                  }}
-                  style={styles.profilePicture}
-                />
-              </TouchableWithoutFeedback>
+              {profile.data && (
+                <TouchableWithoutFeedback onPress={() => showMain(false)}>
+                  <Image
+                    source={{
+                      uri:
+                        'http://10.0.2.2:8000' + profile.data.profile_picture,
+                    }}
+                    style={styles.profilePicture}
+                  />
+                </TouchableWithoutFeedback>
+              )}
+              {!profile.data && <View style={styles.profilePicture} />}
               <Text style={{fontSize: 20, color: Colors.black, width: '55%'}}>
-                {profile.username}
+                {profile.data ? profile.data.username : ''}
               </Text>
               <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
                 <View style={styles.editPost}>
@@ -253,6 +274,7 @@ function ProductDescription(props): JSX.Element {
             all_posts={props.all_posts}
             current_user={profile.username}
             onMain={false}
+            userSettings={props.userSettings}
           />
         </>
       )}
@@ -296,8 +318,9 @@ function ProductDescription(props): JSX.Element {
                 },
                 props.post.username,
                 {
-                  uri: 'http://10.0.2.2:8000' + profile.profile_picture,
-                  type: 'image/' + profile.profile_picture.split('.').pop(),
+                  uri: 'http://10.0.2.2:8000' + profile.data.profile_picture,
+                  type:
+                    'image/' + profile.data.profile_picture.split('.').pop(),
                   name: 'image.png',
                 },
                 props.post.product,

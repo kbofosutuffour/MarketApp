@@ -44,9 +44,14 @@ function Room(props): JSX.Element {
           }}
         />
         <View>
-          <Text style={{color: 'black', fontSize: 18.5}}>{props.other_user}</Text>
+          <Text style={{color: 'black', fontSize: 18.5}}>
+            {props.other_user}
+          </Text>
         </View>
-        <Image style={styles.productImage} source={{uri: props.display_image}} />
+        <Image
+          style={styles.productImage}
+          source={{uri: props.display_image}}
+        />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -127,17 +132,10 @@ function Chats(props): JSX.Element {
   // After the page is rendered, retrieve all of the chatrooms the user is in
   // from the database
   useEffect(() => {
-    var room_request =
-      'http://10.0.2.2:8000/rooms/get_rooms/' + props.profile.username;
-    axios
-      .get(room_request)
-      .then(res => {
-        setRooms({
-          showRoom: true,
-          rooms: res.data,
-        });
-      })
-      .catch((err: any) => console.log(err));
+    setRooms({
+      showRoom: true,
+      rooms: props.rooms,
+    });
   }, []);
 
   /**
@@ -422,6 +420,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 0.8,
     borderColor: 'grey',
+    zIndex: 1,
   },
   postImageContainer: {
     width: 75,

@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import DocumentPicker from 'react-native-document-picker';
+import {format} from 'date-fns';
 
 /**
  * @param props
@@ -235,14 +236,22 @@ function EditProfile(props): JSX.Element {
           </TouchableOpacity>
           <View>
             <Text style={{color: 'black', fontSize: 22.5}}>
-              {props.profile.username}
+              {props.profile.data.username}
             </Text>
             <Text style={{textDecorationLine: 'underline'}}>
-              {props.profile.email
-                ? props.profile.email
+              {props.profile.data.email
+                ? props.profile.data.email
                 : 'useremail@email.com'}
             </Text>
-            <Text>Date Joined</Text>
+            <Text>
+              {props.profile.date
+                ? 'Joined ' +
+                  format(
+                    new Date(props.profile.date[0], props.profile.date[1]),
+                    'MMMM yyyy',
+                  )
+                : ''}
+            </Text>
           </View>
         </View>
 
@@ -338,16 +347,13 @@ function Profile(props): JSX.Element {
             <Image
               style={styles.profilePicture}
               source={{
-                uri: view.main
-                  ? 'http://10.0.2.2:8000' + props.profile.data.profile_picture
-                  : 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                uri:
+                  'http://10.0.2.2:8000' + props.profile.data.profile_picture,
               }}
             />
             <View style={styles.profileDescription}>
               <Text style={{fontSize: 25, color: Colors.black}}>
-                {view.main
-                  ? props.profile.data.username
-                  : props.profile.username}
+                {props.profile.data.username}
               </Text>
               {props.onMain && (
                 <TouchableWithoutFeedback
@@ -362,6 +368,17 @@ function Profile(props): JSX.Element {
                   }}>
                   <Text style={styles.editProfileButton}>Edit Profile</Text>
                 </TouchableWithoutFeedback>
+              )}
+              {view.otherProfile && (
+                <Text>
+                  {props.profile.userSettings.show_joined_date
+                    ? 'Joined ' +
+                      format(
+                        new Date(props.profile.date[0], props.profile.date[1]),
+                        'MMMM yyyy',
+                      )
+                    : ''}
+                </Text>
               )}
             </View>
             {view.otherProfile && (
@@ -512,25 +529,7 @@ function Profile(props): JSX.Element {
               }}>
               {props.all_posts.map(post => {
                 if (type.sell_history) {
-                  if (
-                    view.main &&
-                    post.username === props.profile.data.username
-                  ) {
-                    return (
-                      <Post
-                        data={post}
-                        setDesc={props.setDesc}
-                        viewPost={props.viewPost}
-                        setView={setView}
-                        setDelete={setDelete}
-                        current_user={props.current_user}
-                        main={view.main}
-                      />
-                    );
-                  } else if (
-                    view.otherProfile &&
-                    post.username === props.profile.username
-                  ) {
+                  if (post.username === props.profile.data.username) {
                     return (
                       <Post
                         data={post}
@@ -583,7 +582,6 @@ function Profile(props): JSX.Element {
         <EditProfile
           profile={props.profile}
           setView={setView}
-          profile_id={props.profile_id}
           userSettings={props.userSettings}
         />
       )}

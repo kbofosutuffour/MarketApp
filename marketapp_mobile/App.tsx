@@ -426,7 +426,7 @@ function App(): JSX.Element {
 
   const [showChats, setChats] = useState(false);
 
-  // const [showSettings, setSettings] = useState(false);
+  const [rooms, setRooms] = useState({});
 
   const [category, setCategory] = useState('');
   const [reportUser, setReporting] = useState({
@@ -506,7 +506,12 @@ function App(): JSX.Element {
           data.data = res.data;
         })
         .catch((err: any) => console.log(err));
-
+      await axios
+        .get('http://10.0.2.2:8000/rooms/get_rooms/' + user.username)
+        .then(res => {
+          setRooms(res.data);
+        })
+        .catch((err: any) => console.log(err));
       let profile_id;
       await axios
         .get('http://10.0.2.2:8000/profiles/get_date_created/' + user.username)
@@ -936,9 +941,7 @@ function App(): JSX.Element {
             current_user={user.username}
             onMain={true}
             viewReport={viewReport}
-            date={profile.date}
             userSettings={settings}
-            profile_id={profile.id}
           />
           <Footer
             returnHome={returnHome}
@@ -966,6 +969,7 @@ function App(): JSX.Element {
             profile={profile.data}
             viewChats={viewChats}
             current_user={user.username}
+            rooms={rooms}
           />
           <Footer
             returnHome={returnHome}
