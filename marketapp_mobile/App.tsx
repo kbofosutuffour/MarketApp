@@ -760,7 +760,7 @@ function App(): JSX.Element {
 
   /**
    * Switches to the create/edit post screen
-   * @param id
+   * @param id the id of the post
    */
   const viewPost = (id = null) => {
     setUser({...user, showLogin: false});
@@ -808,6 +808,40 @@ function App(): JSX.Element {
     });
   };
 
+  /**
+   * Boolean on whether the user is on top of the page
+   */
+  const [onTop, isOnTop] = useState(true);
+
+  /**
+   * Used to detect whether the user has scrolled to the
+   * top of the page.  Used in conjunction with refreshPage to
+   * refresh the page when user swipes down
+   * @param height the height of the scroll view
+   */
+  const handleScroll = (height: number) => {
+    isOnTop(height === 0 ? true : false);
+  };
+
+  /**
+   * Maximum vertical speed considered before
+   * the page will refresh
+   */
+  const MAX_VELOCITY = 4;
+
+  /**
+   * Function responsible for reloading the page.
+   * Reloads if the user is on the top of all posts
+   * and their swiping velocity is over a specific threshold
+   * @param velocity the vertical velocity of a user's scroll
+   */
+  const refreshPage = (velocity: number | undefined) => {
+    if (onTop && velocity && velocity > MAX_VELOCITY) {
+      setHasLoaded(false);
+      fetchData();
+    }
+  };
+
   return (
     <SafeAreaView style={backgroundStyle}>
       {/* SaveAreaView Components make it so that developers can safely view the styling layout on different device sizes */}
@@ -848,6 +882,13 @@ function App(): JSX.Element {
             />
             <ScrollView
               contentInsetAdjustmentBehavior="automatic"
+              scrollEventThrottle={3}
+              onScroll={event =>
+                handleScroll(event.nativeEvent.contentOffset.y)
+              }
+              onScrollEndDrag={event =>
+                refreshPage(event.nativeEvent.velocity?.y)
+              }
               style={styles.scrollView}>
               <View
                 style={{
@@ -873,6 +914,58 @@ function App(): JSX.Element {
                       );
                       setHasSeenDraft(true);
                     }
+                  })}
+                {posts.showPosts &&
+                  posts.posts.map(post => {
+                    /* Only show posts not created by the user on the home page */
+                    if (
+                      post.username !== user.username &&
+                      post.status !== 'SOLD' &&
+                      !post.draft
+                    ) {
+                      return <Post data={post} setDesc={setDesc} />;
+                    } else if (
+                      post.username === user.username &&
+                      post.draft &&
+                      !errorMessage &&
+                      !hasSeenDraft
+                    ) {
+                      setErrorMessage(
+                        'You have a draft. Would you like to continue writing it?',
+                      );
+                      setHasSeenDraft(true);
+                    }
+                  })}
+                {posts.showPosts &&
+                  posts.posts.map(post => {
+                    /* Only show posts not created by the user on the home page */
+                    if (
+                      post.username !== user.username &&
+                      post.status !== 'SOLD' &&
+                      !post.draft
+                    ) {
+                      return <Post data={post} setDesc={setDesc} />;
+                    } else if (
+                      post.username === user.username &&
+                      post.draft &&
+                      !errorMessage &&
+                      !hasSeenDraft
+                    ) {
+                      setErrorMessage(
+                        'You have a draft. Would you like to continue writing it?',
+                      );
+                      setHasSeenDraft(true);
+                    }
+                  })}
+                {searchedPosts.showResults &&
+                  searchedPosts.posts.length > 0 &&
+                  searchedPosts.posts.map(post => {
+                    return <Post data={post} setDesc={setDesc} />;
+                  })}
+                {searchedPosts.showResults &&
+                  searchedPosts.posts.length > 0 &&
+                  searchedPosts.posts.map(post => {
+                    return <Post data={post} setDesc={setDesc} />;
                   })}
                 {searchedPosts.showResults &&
                   searchedPosts.posts.length > 0 &&
