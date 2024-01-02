@@ -915,48 +915,6 @@ function App(): JSX.Element {
                       setHasSeenDraft(true);
                     }
                   })}
-                {posts.showPosts &&
-                  posts.posts.map(post => {
-                    /* Only show posts not created by the user on the home page */
-                    if (
-                      post.username !== user.username &&
-                      post.status !== 'SOLD' &&
-                      !post.draft
-                    ) {
-                      return <Post data={post} setDesc={setDesc} />;
-                    } else if (
-                      post.username === user.username &&
-                      post.draft &&
-                      !errorMessage &&
-                      !hasSeenDraft
-                    ) {
-                      setErrorMessage(
-                        'You have a draft. Would you like to continue writing it?',
-                      );
-                      setHasSeenDraft(true);
-                    }
-                  })}
-                {posts.showPosts &&
-                  posts.posts.map(post => {
-                    /* Only show posts not created by the user on the home page */
-                    if (
-                      post.username !== user.username &&
-                      post.status !== 'SOLD' &&
-                      !post.draft
-                    ) {
-                      return <Post data={post} setDesc={setDesc} />;
-                    } else if (
-                      post.username === user.username &&
-                      post.draft &&
-                      !errorMessage &&
-                      !hasSeenDraft
-                    ) {
-                      setErrorMessage(
-                        'You have a draft. Would you like to continue writing it?',
-                      );
-                      setHasSeenDraft(true);
-                    }
-                  })}
                 {searchedPosts.showResults &&
                   searchedPosts.posts.length > 0 &&
                   searchedPosts.posts.map(post => {
