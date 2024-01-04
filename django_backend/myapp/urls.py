@@ -23,6 +23,7 @@ router.register(r'edit_post', EditPostViewSet, basename='edit-post')
 router.register(r'user_settings', UserSettingsViewSet, basename='user_settings')
 router.register(r'report', ReportViewSet, basename="report")
 router.register(r'images', ImageViewSet, basename="images")
+router.register(r'feedback', FeedbackViewSet, basename="feedback")
 
 urlpatterns = [
     path('', include(router.urls)),

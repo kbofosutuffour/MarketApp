@@ -136,7 +136,7 @@ function Report(props): JSX.Element {
               rowGap: 15,
               width: '100%',
               height: '89%',
-              opacity: errorMessage ? 0.6 : 1.0,
+              opacity: !errorMessage ? 1.0 : 0.6,
             }}>
             <Text style={{fontSize: 17.5, color: 'black'}}>
               Would you like to report this user?

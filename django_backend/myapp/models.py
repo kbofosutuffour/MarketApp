@@ -74,19 +74,11 @@ class Post(models.Model):
 class Profile(models.Model):
     """
     Profile table is used to hold data on profile info
-
-    Attributes: 
-        username (charfield): Name created by the user
-        profile_picture (charfield): A user's selected profile picture
-        first_name (charfield): A user's defined first name
-        last_name (charfield): A user's defined last name
-        email (charfield): A user's defined email
-        saved_posts (manytomanyfield): A users list of saved posts
-        drafts (manytomanyfield): A users list of drafted posts
     """
     username = models.CharField(max_length=500, default=None, unique=True)
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     date = models.DateField(default=datetime.date.today)
+    email = models.CharField(default="none@wm.edu")
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     saved_posts = models.ManyToManyField(Post, blank=True, related_name="saved_posts")
@@ -208,5 +200,12 @@ class Report(models.Model):
     violation = models.CharField(max_length=100, choices=Violations.choices, blank=False)
 
 
+class Feedback(models.Model):
+    username = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="feedback_username",
+    )
+    datetime = models.DateTimeField(default=datetime.datetime.now, blank=True)
+    content = models.TextField(max_length=1000, blank=True)
 
-    

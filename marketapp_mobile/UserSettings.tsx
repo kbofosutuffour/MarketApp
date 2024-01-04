@@ -59,16 +59,9 @@ function Profile(props): JSX.Element {
           <TouchableWithoutFeedback
             onPress={() => {
               if (value === 'Change Password') {
-                props.setView({
-                  settings: false,
-                  profile: false,
-                  notifications: false,
-                  privacy: false,
-                  support: false,
-                  logout: false,
-                  violations: false,
-                  changePassword: true,
-                });
+                props.setView({changePassword: true});
+              } else if (value === 'Edit Profile') {
+                props.viewProfile();
               }
             }}>
             <View
@@ -371,7 +364,7 @@ function ChangePassword(props): JSX.Element {
   );
 }
 
-function Notifications(props): JSX.Element {
+function Notifications(props: any): JSX.Element {
   const [newMessages, setNewMessages] = useState(true);
   const [likedPostUpdates, setLikedPostUpdates] = useState(true);
   const [userSettings, setUserSettings] = useState({});
@@ -575,11 +568,30 @@ function Privacy(): JSX.Element {
   );
 }
 
-function HelpOrFeedback(props): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function HelpOrFeedback(props: any): JSX.Element {
   const [view, setView] = useState({
     help: true,
     feedback: false,
   });
+
+  const [content, setContent] = useState('');
+
+  const sendFeedback = async () => {
+    axios.post('http://10.0.2.2:8000/feedback/', {
+      username: props.profile.id,
+      email: props.profile.email,
+      first_name: props.profile.first_name,
+      last_name: props.profile.last_name,
+      content: content,
+    });
+
+    // Return to the mains settings screen with a message telling
+    // the user the message was sent
+    props.setView({settings: true});
+    props.setErrorMessage('Feedback submitted.  Thank you for your input!');
+    setContent('');
+  };
 
   return (
     <>
@@ -621,8 +633,12 @@ function HelpOrFeedback(props): JSX.Element {
                 style={styles.feedbackInput}
                 multiline={true}
                 textAlignVertical={'top'}
+                onChangeText={text => setContent(text)}
               />
-              <TouchableWithoutFeedback>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  sendFeedback();
+                }}>
                 <Text style={styles.submitFeedback}>Send Feedback</Text>
               </TouchableWithoutFeedback>
             </View>
@@ -645,7 +661,7 @@ function HelpOrFeedback(props): JSX.Element {
   );
 }
 
-function Support(props): JSX.Element {
+function Support(props: any): JSX.Element {
   var options = ['Violations', 'Help'];
   return (
     <View style={styles.userSettings}>
@@ -674,8 +690,20 @@ function Support(props): JSX.Element {
   );
 }
 
-function Violations(props): JSX.Element {
-  const [settings, setSettings] = useState({
+function Violations(props: any): JSX.Element {
+  interface template {
+    scamming: boolean;
+    harassment: boolean;
+    illegal_goods: boolean;
+    nickname: boolean;
+    language: boolean;
+    no_show: boolean;
+    post_name: boolean;
+    damaged_product: boolean;
+    already_sold: boolean;
+  }
+
+  const [settings, setSettings]: [template, Function] = useState({
     scamming: false,
     harassment: false,
     illegal_goods: false,
@@ -687,6 +715,18 @@ function Violations(props): JSX.Element {
     already_sold: false,
   });
 
+  const violations = [
+    'scamming',
+    'harassment',
+    'illegal_goods',
+    'nickname',
+    'language',
+    'no_show',
+    'post_name',
+    'damaged_product',
+    'already_sold',
+  ];
+
   return (
     <View style={styles.userSettings}>
       <View style={styles.notificationSettingsContainer}>
@@ -694,40 +734,48 @@ function Violations(props): JSX.Element {
           <Text style={styles.settingsOption}>Violations</Text>
         </View>
         <View style={styles.toggleContainer}>
-          {Object.keys(settings).map(value => {
+          {Object.keys(props.userSettings).map(value => {
             return (
-              <View style={styles.violationsToggle}>
-                <View>
-                  <Text style={{width: 100}}>
-                    {value.toUpperCase().split('_').join(' ')}
-                  </Text>
-                </View>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    setSettings({...settings, [value]: !settings[value]});
-                  }}>
-                  <Text
-                    // eslint-disable-next-line react-native/no-inline-styles
-                    style={{
-                      backgroundColor: settings[value]
-                        ? 'rgb(17, 87, 64)'
-                        : '#D7D7D7',
-                      color: settings[value] ? Colors.white : Colors.black,
-                      position: 'absolute',
-                      right: 10,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      width: 60,
-                      height: 25,
-                      lineHeight: 25,
-                      borderRadius: 10,
-                      textAlign: 'center',
+              violations.includes(value) &&
+              props.userSettings[value] && (
+                <View style={styles.violationsToggle}>
+                  <View>
+                    <Text style={{width: 100}}>
+                      {value.toUpperCase().split('_').join(' ')}
+                    </Text>
+                  </View>
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      setSettings({
+                        ...settings,
+                        [value]: !settings[value as keyof template],
+                      });
                     }}>
-                    Appeal
-                  </Text>
-                </TouchableWithoutFeedback>
-              </View>
+                    <Text
+                      // eslint-disable-next-line react-native/no-inline-styles
+                      style={{
+                        backgroundColor: settings[value as keyof template]
+                          ? 'rgb(17, 87, 64)'
+                          : '#D7D7D7',
+                        color: settings[value as keyof template]
+                          ? Colors.white
+                          : Colors.black,
+                        position: 'absolute',
+                        right: 10,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: 60,
+                        height: 25,
+                        lineHeight: 25,
+                        borderRadius: 10,
+                        textAlign: 'center',
+                      }}>
+                      Appeal
+                    </Text>
+                  </TouchableWithoutFeedback>
+                </View>
+              )
             );
           })}
         </View>
@@ -736,103 +784,34 @@ function Violations(props): JSX.Element {
   );
 }
 
-function UserSettings(props): JSX.Element {
-  const [view, setView] = useState({
-    settings: true,
-    profile: false,
-    notifications: false,
-    privacy: false,
-    support: false,
-    logout: false,
-    violations: false,
-    changePassword: false,
-    helpOrFeedback: false,
-  });
+function UserSettings(props: any): JSX.Element {
+  const [view, setView]: [any, Function] = useState({settings: true});
 
-  const options = {
-    Settings: {
-      settings: true,
-      profile: false,
-      notifications: false,
-      privacy: false,
-      support: false,
-      violations: false,
-      logout: false,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-    Profile: {
-      settings: false,
-      profile: true,
-      notifications: false,
-      privacy: false,
-      support: false,
-      violations: false,
-      logout: false,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-    Notifications: {
-      settings: false,
-      profile: false,
-      notifications: true,
-      privacy: false,
-      support: false,
-      violations: false,
-      logout: false,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-    Privacy: {
-      settings: false,
-      profile: false,
-      notifications: false,
-      privacy: true,
-      support: false,
-      violations: false,
-      logout: false,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-    Support: {
-      settings: false,
-      profile: false,
-      notifications: false,
-      privacy: false,
-      support: true,
-      violations: false,
-      logout: false,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-    Violations: {
-      settings: false,
-      profile: false,
-      notifications: false,
-      privacy: false,
-      support: true,
-      logout: false,
-      violations: true,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-    'Log Out': {
-      settings: false,
-      profile: false,
-      notifications: false,
-      privacy: false,
-      support: false,
-      violations: false,
-      logout: true,
-      changePassword: false,
-      helpOrFeedback: false,
-    },
-  };
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const options = [
+    'Settings',
+    'Profile',
+    'Notifications',
+    'Privacy',
+    'Support',
+    'Violations',
+    'Logout',
+  ];
 
   return (
     <>
       {view.settings && (
-        <View style={styles.userSettings}>
+        <View
+          // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            backgroundColor: '#f6f7f5',
+            height: '80%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            opacity: !errorMessage ? 1 : 0.6,
+          }}>
           <View style={styles.profilePictureContainer}>
             <Image
               source={{
@@ -841,15 +820,15 @@ function UserSettings(props): JSX.Element {
               style={styles.profilePictureBorder}
             />
           </View>
-          {Object.keys(options).map(value => {
+          {options.map(value => {
             return (
               value !== 'Settings' &&
               value !== 'Violations' &&
-              value !== 'Log Out' && (
+              value !== 'Logout' && (
                 <>
                   <TouchableWithoutFeedback
                     onPress={() => {
-                      setView(options[value]);
+                      setView({[value.toLowerCase()]: true});
                       props.setUserSettings({
                         ...props.userSettings,
                         title: value,
@@ -888,6 +867,7 @@ function UserSettings(props): JSX.Element {
           setView={setView}
           date={props.date}
           userSettings={props.userSettings.data}
+          viewProfile={props.viewProfile}
         />
       )}
       {view.notifications && (
@@ -906,7 +886,25 @@ function UserSettings(props): JSX.Element {
           login={props.login}
         />
       )}
-      {view.helpOrFeedback && <HelpOrFeedback />}
+      {view.helpOrFeedback && (
+        <HelpOrFeedback
+          profile={props.profile}
+          setView={setView}
+          setErrorMessage={setErrorMessage}
+        />
+      )}
+      {errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }

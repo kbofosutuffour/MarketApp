@@ -40,13 +40,33 @@ function EditPost(props): JSX.Element {
         setDisplay(response.data.display_image);
       })
       .catch((err: any) => console.log(err));
+
+    await axios
+      .get('http://10.0.2.2:8000/images/' + props.id)
+      .then(response => {
+        let response_images = Object.values(response.data);
+        let newList = [];
+        for (let i = 0; i < response_images.length; i++) {
+          if (typeof response_images[i] !== 'number') {
+            newList.push(response_images[i]);
+          }
+        }
+        setImages(newList);
+        console.log(newList);
+      })
+      .catch((err: any) => console.log(err));
   };
 
   const postData = async () => {
     let data = new FormData();
     for (const [key, value] of Object.entries(props.post)) {
       if (key === 'display_image') {
-        data.append('display_image', newData);
+        let displayLength = display.split('.').length;
+        data.append('display_image', {
+          uri: display,
+          type: 'image/' + display.split('.')[displayLength - 1],
+          name: 'image.png',
+        });
       } else {
         data.append(key, value);
       }
@@ -90,9 +110,21 @@ function EditPost(props): JSX.Element {
           onPress={chooseImage}
           color={'rgb(17, 87, 64)'}
         />
-        {display && (
-          <Image source={{uri: display}} style={{width: 200, height: 200}} />
-        )}
+        <ScrollView style={styles.imagesContainer} horizontal={true}>
+          {display && (
+            <Image source={{uri: display}} style={{width: 200, height: 200}} />
+          )}
+          {images.map(image => {
+            return (
+              image && (
+                <Image
+                  source={{uri: image}}
+                  style={{width: 200, height: 200}}
+                />
+              )
+            ); 
+          })}
+        </ScrollView>
       </View>
       <View style={styles.postItem}>
         <TextInput
@@ -271,7 +303,6 @@ function NewPost(props): JSX.Element {
       };
       data.push(image);
     }
-    console.log(data)
     setImages(data);
   };
 
@@ -288,14 +319,14 @@ function NewPost(props): JSX.Element {
             <Image source={{uri: display}} style={{width: 200, height: 200}} />
           )}
           {images.map(image => {
-            if (image) {
-              return (
+            return (
+              image && (
                 <Image
                   source={{uri: image.uri}}
                   style={{width: 200, height: 200}}
                 />
-              );
-            }
+              )
+            );
           })}
         </ScrollView>
       </View>

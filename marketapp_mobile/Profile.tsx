@@ -114,7 +114,7 @@ function Post(props: {
                 </TouchableWithoutFeedback>
                 <TouchableWithoutFeedback
                   onPress={() => {
-                    props.setDelete(props.data.id);
+                    props.setDelete(props.data);
                     props.setView({
                       deletePost: true,
                     });
@@ -300,7 +300,7 @@ function Profile(props): JSX.Element {
     changeProfilePicture: false,
     otherProfile: !props.onMain,
   });
-  const [deletePostID, setDelete] = useState(null);
+  const [deletePostData, setDelete] = useState(null);
   const [changedPic, setChangedPic] = useState(null);
   const [otherProfileShowOptions, setOtherProfileShowOptions] = useState(false);
 
@@ -318,6 +318,11 @@ function Profile(props): JSX.Element {
    * @param id The id of the selected post
    */
   const removePost = async id => {
+    // Note: MUST delete additional post images before deleting a post
+    // To maintain foreign key integrity in the database
+    await axios
+      .delete('http://10.0.2.2:8000/images/' + id + '/')
+      .catch((err: any) => console.log(err));
     await axios
       .delete('http://10.0.2.2:8000/posts/' + id + '/')
       .catch((err: any) => console.log(err));
@@ -589,17 +594,23 @@ function Profile(props): JSX.Element {
         <View
           style={{
             backgroundColor: Colors.white,
-            width: '80%',
-            height: '40%',
             display: 'flex',
             flexDirection: 'column',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            width: '100%',
+            height: '80%',
             rowGap: 20,
+            padding: 20,
           }}>
-          <Text>Are you sure you want to delete this post?</Text>
-          <View>
-            <Button title="YES" onPress={() => removePost(deletePostID)} />
-            <Button
-              title="NO"
+          <Text style={{fontSize: 20, color: 'black', textAlign: 'center'}}>Are you sure you want to delete this post?</Text>
+          <Post data={deletePostData} />
+          <View style={{display: 'flex', flexDirection: 'row', columnGap: 10}}>
+            <TouchableWithoutFeedback
+              onPress={() => removePost(deletePostData.id)}>
+              <Text style={styles.deleteYes}>YES</Text>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
               onPress={() =>
                 setView({
                   main: true,
@@ -608,8 +619,9 @@ function Profile(props): JSX.Element {
                   changeProfilePicture: false,
                   otherProfile: false,
                 })
-              }
-            />
+              }>
+              <Text style={styles.deleteNo}>NO</Text>
+            </TouchableWithoutFeedback>
           </View>
         </View>
       )}
@@ -935,6 +947,22 @@ const styles = StyleSheet.create({
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
     height: '1%',
+  },
+  deleteYes: {
+    padding: 10,
+    borderRadius: 10,
+    width: 100,
+    backgroundColor: 'red',
+    color: 'white',
+    textAlign: 'center',
+  },
+  deleteNo: {
+    padding: 10,
+    borderRadius: 10,
+    width: 100,
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: 'white',
+    textAlign: 'center',
   },
 });
 export default Profile;

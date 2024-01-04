@@ -480,9 +480,9 @@ function App(): JSX.Element {
       })
       .catch((err: any) => {
         console.log(err);
-        setErrorMessage(
-          'There are currently no posts.  Create a post or try again later.',
-        );
+        // setErrorMessage(
+        //   'There are currently no posts.  Create a post or try again later.',
+        // );
       });
 
     // asynchronous function that gets the profile information
@@ -568,7 +568,7 @@ function App(): JSX.Element {
               return ((value !== 'and') && (value !== 'the'))
         });
 
-      var desc = posts.posts[i].description
+      let desc = posts.posts[i].description
         .toLowerCase()
         .split(' ')
         .filter((value: string) => {
@@ -576,13 +576,15 @@ function App(): JSX.Element {
               return ((value !== 'and') && (value !== 'the'));
         });
 
-      var post_category = posts.posts[i].category;
+      let post_category = posts.posts[i].category;
+      let post_username = posts.posts[i].username;
 
       input.forEach((element: any) => {
         if (category.length) {
           if (
             category.toUpperCase() === post_category &&
-            (prod.includes(element) || desc.includes(element))
+            (prod.includes(element) || desc.includes(element)) &&
+            post_username !== user.username
           ) {
             try {
               results.push(posts.posts[i]);
@@ -591,7 +593,10 @@ function App(): JSX.Element {
             }
           }
         } else {
-          if (prod.includes(element) || desc.includes(element)) {
+          if (
+            (prod.includes(element) || desc.includes(element)) &&
+            post_username !== user.username
+          ) {
             try {
               results.push(posts.posts[i]);
             } catch {
@@ -920,16 +925,6 @@ function App(): JSX.Element {
                   searchedPosts.posts.map(post => {
                     return <Post data={post} setDesc={setDesc} />;
                   })}
-                {searchedPosts.showResults &&
-                  searchedPosts.posts.length > 0 &&
-                  searchedPosts.posts.map(post => {
-                    return <Post data={post} setDesc={setDesc} />;
-                  })}
-                {searchedPosts.showResults &&
-                  searchedPosts.posts.length > 0 &&
-                  searchedPosts.posts.map(post => {
-                    return <Post data={post} setDesc={setDesc} />;
-                  })}
                 {searchedPosts.showSearchBar && !searchedPosts.showResults && (
                   <Categories category={category} setCategory={setCategory} />
                 )}
@@ -1051,6 +1046,7 @@ function App(): JSX.Element {
             login={login}
             profile={profile.data}
             date={profile.date}
+            viewProfile={viewProfile}
           />
           <Footer
             returnHome={returnHome}

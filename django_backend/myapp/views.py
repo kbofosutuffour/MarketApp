@@ -154,8 +154,36 @@ class Profiles(viewsets.ModelViewSet):
     View to list all of the profiles in the system
     """
 
+    # profiles = Profile.objects.all()
+    # response = []
+    # for profile in profiles:
+    #     data = {}
+    #     data.id = profile.id
+    #     data.username = profile.username
+    #     data.profile_picture = profile.profile_picture
+    #     data.email = 'test'
+    #     data.first_name = profile.first_name
+    #     data.last_name = profile.last_name
+    #     data.date = str(profile.date)
+
+    #     posts = profile.liked_posts.all()
+    #     post_ids = []
+    #     for post in posts:
+    #         post_ids.append(post.id)
+    #     data.liked_posts = post_ids
+    #     response.append(data)
+    # print('different profile get')
+    # return Response({"data": response})
+
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        print(instance)
+        return Response(serializer.data)
+    
 
     @action(methods=['get'], detail=False, url_path=r'get_id/(?P<username>\w+)')
     def get_id(self, request, username, *args, **kwargs):
@@ -208,7 +236,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=False)
     def login(self, request, *args, **kwargs):
-        print(request.data)
 
         #authenticates the login information
         user = auth.authenticate(username=request.data['username'], password=request.data['password']) 
@@ -229,7 +256,6 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(methods=['post'], detail=False)
     def verify(self, request, *args, **kwargs):
-        print(request.data)
 
         code = random.randint(0,99999)
         code = str(code)
@@ -238,7 +264,6 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(methods=['post'], detail=False)
     def change_password(self, request, *args, **kwargs):
-        print(request.data)
         if (request.data['username'] and request.data['password']):
             try:
                 user = User.objects.get(username=request.data['username'], email=request.data['email'])
@@ -300,7 +325,6 @@ class Rooms(viewsets.ModelViewSet):
         })
     
     def create(self, request):
-        print(request.data['buyer'], request.data['seller'], request.data['product'])
         serializer = RoomSerializer(data=request.data)
         try:
             exists = Room.objects.get(seller=request.data['seller'], buyer=request.data['buyer'], product=request.data['product'])
@@ -389,6 +413,19 @@ class ImageViewSet(viewsets.ModelViewSet):
 
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+
+class FeedbackViewSet(viewsets.ModelViewSet):
+
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        send_feedback_email(request.data)
+        return Response(serializer.data)
 #----------------------------
 
 def home(request):
@@ -452,6 +489,35 @@ def send_code(request, code, email):
     #         recipient_list=[email]
     #     )
 
+def send_feedback_email(feedback):
+    """
+    Function used to send the user their verification code via email
+    """
+    number = len(Feedback.objects.all())
+
+    date = datetime.datetime.now()
+    date = date.strftime("%B %d, %Y")
+    message = f"""
+    Title: User Feedback #{number}
+
+    Date: {datetime.datetime.now()}
+    From: {feedback['first_name']} {feedback['last_name']}
+    Username: {feedback['username']}
+    Email: {feedback['email']}
+
+    Content: {feedback['content']}
+    """
+
+    #send user an email
+    send_mail(
+        subject="User Feedback #" + str(number),
+        message=message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=['marketappwm@gmail.com']
+    )
+
+
+
 class EditPostView(FormView):
     """
     View used for the functionality of the edit post screes (edit_post.html)
@@ -507,7 +573,6 @@ class EditPostView(FormView):
 
             # whether a post is SELLING, PENDING, or SOLD
             post.status = request.POST["status"]
-            print(post.status, request.POST["status"])
 
             post.save()
             return self.form_valid(form, request)
@@ -564,30 +629,32 @@ def getImage(request):
 @api_view()
 def profile(request, user):
     """
-    View used for the funcitonality of the profile page (profile.html)
+    View used for the functionality of the profile page (profile.html)
     """
-    print(user)
-    posts = Post.objects.filter(username=user)
     try:
         profile = Profile.objects.get(username=user)
-        saved_posts = list(profile.saved_posts.all())
+        posts = profile.liked_posts.all()
+        liked_posts = []
+        for post in posts:
+            liked_posts.append(post.id)
         drafts = list(profile.drafts.all())
         hasProfile = True
         context = {
+            'id': profile.id,
             'hasProfile': hasProfile,
             'username': user,
             'profile_picture': profile.profile_picture.url,
             'first_name': profile.first_name,
             'last_name': profile.last_name,
-            # 'saved_posts': saved_posts,
-            # 'drafts': drafts,
+            'date': profile.date,
+            'email': profile.email,
+            'liked_posts': liked_posts,
+            'drafts': drafts,
         }
-
     except: 
         hasProfile = False
         context = {
-            'hasProfile': hasProfile,
-            'username': user
+            'error': 'Error retrieving the profile'
         }
 
     return Response(context)
