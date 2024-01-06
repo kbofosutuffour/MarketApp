@@ -243,16 +243,23 @@ class UserViewSet(viewsets.ModelViewSet):
         #authenticates the user and checks if user has a profile
         if user is not None:
             #auth.login(request, user)
+            user = User.objects.get(username=request.data['username'])
+            print(user.is_staff, 'isadmin')
             try:
                 Profile.objects.get(username=request.data['username'])
             except:
                 return Response({'login': 1, 'register': 1, 'message': 'login successful'})
             
-            return Response({'login': 1, 'register': 0, 'message': 'login successful, redirect to registration page'})
+            return Response({
+                'login': 1,
+                'register': 0,
+                'message': 'login successful, redirect to registration page',
+                'admin': user.is_staff
+            })
         
         #else, reload the login screen and display error message
         else:
-            return Response({'login': 0, 'message': 'credentials invalid' })
+            return Response({'login': 0, 'message': 'credentials invalid'})
         
     @action(methods=['post'], detail=False)
     def verify(self, request, *args, **kwargs):

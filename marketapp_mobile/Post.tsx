@@ -271,6 +271,8 @@ function NewPost(props): JSX.Element {
       .catch((err: any) => console.log(err));
 
     props.returnHome();
+    props.getProfile();
+    props.setHasLoaded(false);
   };
 
   /**
@@ -481,6 +483,8 @@ function CreatePost(props): JSX.Element {
             categories={categories}
             returnHome={props.returnHome}
             username={props.username}
+            getProfile={props.getProfile}
+            setHasLoaded={props.setHasLoaded}
           />
         )}
         {view.editPost && (

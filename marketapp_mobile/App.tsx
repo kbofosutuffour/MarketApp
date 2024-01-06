@@ -239,6 +239,8 @@ function NavBar(props): JSX.Element {
 }
 
 function Post(props: {
+  setDelete: any;
+  user: any;
   //Component that holds the information on the provided post in the props object
   data: {
     display_image: any;
@@ -272,23 +274,27 @@ function Post(props: {
   };
   setDesc: any;
 }): JSX.Element {
+  const [options, showOptions]: [boolean, Function] = useState(false);
+
   /**
    * Get's the number of seconds since the post has been created
    * @param postDateTime the datetime of the post
    * @returns the the number of seconds since the post has been created
    */
   const getDifference = (postDateTime: string) => {
-    let temp = postDateTime.split('T');
-    let [date, time] = [temp[0].split('-'), temp[1].split(':')];
-    let post = new Date(
-      Number(date[0]),
-      Number(date[1]) - 1,
-      Number(date[2]),
-      Number(time[0]) - 4,
-      Number(time[1]),
-      Number(time[2].split('.')[0]),
-    );
-    return formatDistance(new Date(), post, {includeSeconds: true});
+    if (postDateTime) {
+      let temp = postDateTime.split('T');
+      let [date, time] = [temp[0].split('-'), temp[1].split(':')];
+      let post = new Date(
+        Number(date[0]),
+        Number(date[1]) - 1,
+        Number(date[2]),
+        Number(time[0]) - 4,
+        Number(time[1]),
+        Number(time[2].split('.')[0]),
+      );
+      return formatDistance(new Date(), post, {includeSeconds: true});
+    }
   };
 
   return (
@@ -316,7 +322,35 @@ function Post(props: {
             {'Posted ' + getDifference(props.data.date) + ' ago'}
           </Text>
         </View>
-        <View style={styles.editPost} />
+
+        {props.user && props.user.admin && (
+          <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+            <View style={styles.editPost}>
+              <Image
+                style={styles.editButtons}
+                source={require('./media/edit_post.png')}
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        )}
+
+        {/* Editing options for current user profile page */}
+        {props.user && props.user.admin && options && (
+          <View style={styles.postOptions}>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                props.setDelete({
+                  data: props.data,
+                  deletePost: true,
+                });
+              }}>
+              <Text>Delete Post</Text>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback>
+              <Text>Flag Post</Text>
+            </TouchableWithoutFeedback>
+          </View>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -385,6 +419,7 @@ function App(): JSX.Element {
     username: null,
     showLogin: true,
     redirect: '',
+    admin: false,
   });
 
   const [posts, setPosts] = useState({
@@ -441,8 +476,13 @@ function App(): JSX.Element {
 
   const [hasloaded, setHasLoaded] = useState(false);
 
+  const [deletePost, setDelete]: [any, Function] = useState({
+    data: {},
+    deletePost: false,
+  });
+
   // When the defined components finish rendering, fetch
-  // posts and profile informaiton from the database
+  // posts and profile information from the database
   useEffect(() => {
     fetchData();
   }, [user.username]);
@@ -464,26 +504,7 @@ function App(): JSX.Element {
    * of the current user
    */
   const fetchData = async () => {
-    // asynchronous function that gets all existing posts
-    await axios
-      .get('http://10.0.2.2:8000/posts')
-      .then(res => {
-        if (res.data.length === 0) {
-          setErrorMessage(
-            'There are currently no posts.  Create a post or try again later.',
-          );
-        }
-        setPosts({
-          showPosts: true,
-          posts: res.data,
-        });
-      })
-      .catch((err: any) => {
-        console.log(err);
-        // setErrorMessage(
-        //   'There are currently no posts.  Create a post or try again later.',
-        // );
-      });
+    await getPosts();
 
     // asynchronous function that gets the profile information
     // for the given username
@@ -506,12 +527,7 @@ function App(): JSX.Element {
           data.data = res.data;
         })
         .catch((err: any) => console.log(err));
-      await axios
-        .get('http://10.0.2.2:8000/rooms/get_rooms/' + user.username)
-        .then(res => {
-          setRooms(res.data);
-        })
-        .catch((err: any) => console.log(err));
+      await getRooms();
       let profile_id;
       await axios
         .get('http://10.0.2.2:8000/profiles/get_date_created/' + user.username)
@@ -542,6 +558,65 @@ function App(): JSX.Element {
         });
       setProfile(data);
     }
+  };
+
+  /**
+   * asynchronous function that gets all existing posts
+   */
+  const getPosts = async () => {
+    await axios
+      .get('http://10.0.2.2:8000/posts')
+      .then(res => {
+        if (res.data.length === 0) {
+          setErrorMessage(
+            'There are currently no posts.  Create a post or try again later.',
+          );
+        }
+        setPosts({
+          showPosts: true,
+          posts: res.data,
+        });
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
+  };
+
+  const getUserSettings = async () => {
+    await axios
+      .get('http://10.0.2.2:8000/user_settings/' + profile.data.id)
+      .then(res => {
+        setProfile({...profile, settings: res.data});
+        setUserSettings({...settings, data: res.data});
+      });
+  };
+
+  const getProfile = async () => {
+    let data = {};
+    let posts = [];
+    await axios
+      .get('http://10.0.2.2:8000/profile/' + user.username)
+      .then(res => {
+        data = res.data;
+      })
+      .catch((err: any) => console.log(err));
+    // await axios
+    //   .get('http://10.0.2.2:8000/posts/get_posts/' + user.username)
+    //   .then(res => {
+    //     posts = res.data;
+    //     console.log(res.data);
+    //   });
+    setProfile({...profile, data: data, posts: posts});
+    await getPosts();
+  };
+
+  const getRooms = async () => {
+    await axios
+      .get('http://10.0.2.2:8000/rooms/get_rooms/' + user.username)
+      .then(res => {
+        setRooms(res.data);
+      })
+      .catch((err: any) => console.log(err));
   };
 
   // function used to show results of a user search
@@ -626,6 +701,7 @@ function App(): JSX.Element {
       username: null,
       showLogin: true,
       redirect: redirect,
+      admin: false,
     });
     setDesc({
       showDesc: false,
@@ -658,7 +734,7 @@ function App(): JSX.Element {
    * Switches to home page
    * @param username the username of the current user logged on
    */
-  const returnHome = (username = null) => {
+  const returnHome = (username = null, admin = false) => {
     // needed for weird bug with calling a function through props
     username = typeof username === 'string' ? username : null;
 
@@ -666,7 +742,12 @@ function App(): JSX.Element {
     // otherwise (i.e changing from profile to homepage), use the same
     // username
     if (username) {
-      setUser({username: username, showLogin: false, redirect: ''});
+      setUser({
+        username: username,
+        showLogin: false,
+        redirect: '',
+        admin: admin,
+      });
     } else {
       setUser({...user, showLogin: false, redirect: ''});
     }
@@ -698,6 +779,7 @@ function App(): JSX.Element {
       username: user.username,
       showLogin: false,
       redirect: '',
+      admin: user.admin,
     });
     setDesc({
       showDesc: false,
@@ -832,7 +914,7 @@ function App(): JSX.Element {
    * Maximum vertical speed considered before
    * the page will refresh
    */
-  const MAX_VELOCITY = 4;
+  const MAX_VELOCITY = 3.75;
 
   /**
    * Function responsible for reloading the page.
@@ -845,6 +927,27 @@ function App(): JSX.Element {
       setHasLoaded(false);
       fetchData();
     }
+  };
+
+  /**
+   * Function to delete the post in the database
+   * @param id The id of the selected post
+   */
+  const removePost = async (id: number | string) => {
+    // Note: MUST delete additional post images before deleting a post
+    // To maintain foreign key integrity in the database
+    await axios
+      .delete('http://10.0.2.2:8000/images/' + id + '/')
+      .catch((err: any) => console.log(err));
+    await axios
+      .delete('http://10.0.2.2:8000/posts/' + id + '/')
+      .catch((err: any) => console.log(err));
+    setDelete({
+      data: {},
+      deletePost: false,
+    });
+    await getPosts();
+    refreshPage(MAX_VELOCITY + 1);
   };
 
   return (
@@ -896,8 +999,10 @@ function App(): JSX.Element {
               }
               style={styles.scrollView}>
               <View
+                // eslint-disable-next-line react-native/no-inline-styles
                 style={{
-                  backgroundColor: isDarkMode ? Colors.black : Colors.white,
+                  backgroundColor: Colors.white,
+                  opacity: !deletePost.deletePost ? 1.0 : 0.6,
                 }}>
                 {posts.showPosts &&
                   posts.posts.map(post => {
@@ -907,7 +1012,14 @@ function App(): JSX.Element {
                       post.status !== 'SOLD' &&
                       !post.draft
                     ) {
-                      return <Post data={post} setDesc={setDesc} />;
+                      return (
+                        <Post
+                          data={post}
+                          setDesc={setDesc}
+                          user={user}
+                          setDelete={setDelete}
+                        />
+                      );
                     } else if (
                       post.username === user.username &&
                       post.draft &&
@@ -923,7 +1035,14 @@ function App(): JSX.Element {
                 {searchedPosts.showResults &&
                   searchedPosts.posts.length > 0 &&
                   searchedPosts.posts.map(post => {
-                    return <Post data={post} setDesc={setDesc} />;
+                    return (
+                      <Post
+                        data={post}
+                        setDesc={setDesc}
+                        user={user}
+                        setDelete={setDelete}
+                      />
+                    );
                   })}
                 {searchedPosts.showSearchBar && !searchedPosts.showResults && (
                   <Categories category={category} setCategory={setCategory} />
@@ -946,6 +1065,54 @@ function App(): JSX.Element {
               viewChats={viewChats}
               type={'Home'}
             />
+            {deletePost.deletePost && (
+              <View
+                // eslint-disable-next-line react-native/no-inline-styles
+                style={{
+                  backgroundColor: Colors.white,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  position: 'absolute',
+                  top: '30%',
+                  justifyContent: 'flex-start',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '40%',
+                  rowGap: 20,
+                  padding: 20,
+                }}>
+                <Text
+                  style={{fontSize: 20, color: 'black', textAlign: 'center'}}>
+                  Are you sure you want to delete this post?
+                </Text>
+                <Post
+                  data={deletePost.data}
+                  setDelete={undefined}
+                  user={undefined}
+                  setDesc={undefined}
+                />
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    columnGap: 10,
+                  }}>
+                  <TouchableWithoutFeedback
+                    onPress={() => removePost(deletePost.data.id)}>
+                    <Text style={styles.deleteYes}>YES</Text>
+                  </TouchableWithoutFeedback>
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setDelete({
+                        deletePost: false,
+                        data: {},
+                      })
+                    }>
+                    <Text style={styles.deleteNo}>NO</Text>
+                  </TouchableWithoutFeedback>
+                </View>
+              </View>
+            )}
           </View>
         )}
 
@@ -988,6 +1155,8 @@ function App(): JSX.Element {
             onMain={true}
             viewReport={viewReport}
             userSettings={settings}
+            getProfile={getProfile}
+            setHasLoaded={setHasLoaded}
           />
           <Footer
             returnHome={returnHome}
@@ -1065,6 +1234,8 @@ function App(): JSX.Element {
             username={user.username}
             returnHome={returnHome}
             showPost={showPost}
+            getProfile={getProfile}
+            setHasLoaded={setHasLoaded}
           />
         </>
       )}
@@ -1173,6 +1344,7 @@ const styles = StyleSheet.create({
   postText: {
     display: 'flex',
     flexDirection: 'column',
+    width: '60%',
   },
   product: {
     fontWeight: 'bold',
@@ -1182,9 +1354,6 @@ const styles = StyleSheet.create({
   },
   username: {
     fontWeight: '200',
-  },
-  editPost: {
-    backgroundColor: 'white',
   },
   category: {
     backgroundColor: 'white',
@@ -1313,6 +1482,46 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 10,
     borderRadius: 20,
+  },
+  editPost: {
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
+  editButtons: {
+    width: 10,
+    height: 30,
+  },
+  postOptions: {
+    width: '40%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.black,
+    backgroundColor: Colors.white,
+    rowGap: 5,
+    position: 'relative',
+    right: 170,
+  },
+  deleteYes: {
+    padding: 10,
+    borderRadius: 10,
+    width: 100,
+    backgroundColor: 'red',
+    color: 'white',
+    textAlign: 'center',
+  },
+  deleteNo: {
+    padding: 10,
+    borderRadius: 10,
+    width: 100,
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: 'white',
+    textAlign: 'center',
   },
 });
 

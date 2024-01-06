@@ -317,7 +317,7 @@ function Profile(props): JSX.Element {
    * Function to delete the post in the database
    * @param id The id of the selected post
    */
-  const removePost = async id => {
+  const removePost = async (id: string | number) => {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
@@ -334,6 +334,8 @@ function Profile(props): JSX.Element {
       otherProfile: false,
     });
     setDelete(null);
+    props.getProfile();
+    props.setHasLoaded(false);
   };
 
   // Function that retrieves all of the post created

@@ -261,7 +261,9 @@ function ProductDescription(props): JSX.Element {
               <Text style={{fontSize: 20, color: Colors.black}}>
                 {props.post.product}
               </Text>
-              <Text>{props.post.description}</Text>
+              {props.post.description !== 'null' && (
+                <Text>{props.post.description}</Text>
+              )}
               <Text>${props.post.price}</Text>
             </View>
           </View>
