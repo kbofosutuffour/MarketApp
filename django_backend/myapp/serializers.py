@@ -91,3 +91,15 @@ class FeedbackSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Feedback
 		fields = '__all__'
+
+class RatingSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Rating
+		fields = '__all__'
+
+class FlaggedPostSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = FlaggedPost
+		fields = '__all__'

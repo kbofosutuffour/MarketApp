@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {MutableRefObject, useEffect, useRef, useState} from 'react';
 
 import {
   Button,
@@ -129,6 +129,46 @@ function Chats(props): JSX.Element {
   const [text, setText] = useState('');
   const scrollViewRef = useRef(); //used for scrolling
 
+  let ws: MutableRefObject<null> | MutableRefObject<WebSocket> = React.useRef(null);
+
+  useEffect(() => {
+    if (ws && chats.id) {
+      ws.current = new WebSocket(
+        'ws://10.0.2.2:8000/ws/chat/' + chats.id + '/',
+      );
+      ws.current.onopen = () => {
+        // connection opened
+        // ws.current?.send('connection opened'); // send a message
+        console.log('connection opened');
+      };
+
+      ws.current.onmessage = e => {
+        // a message was received
+        let new_chats = chats.chats;
+        new_chats.push(e.data);
+        setChats({...chats, chats: new_chats});
+      };
+
+      ws.current.onerror = e => {
+        // an error occurred
+        console.log(e.message);
+      };
+
+      ws.current.onclose = e => {
+        // connection closed
+        console.log(e);
+        console.log('test')
+        console.log(e.code, e.reason);
+      };
+    }
+  }, [chats.id]);
+
+  // useEffect(() => {
+  //   if (!props.showChats) {
+  //     ws.current?.close();
+  //   }
+  // }, [props.showChats]);
+
   // After the page is rendered, retrieve all of the chatrooms the user is in
   // from the database
   useEffect(() => {
@@ -192,13 +232,13 @@ function Chats(props): JSX.Element {
       room: room_id,
       image: null,
     };
-    console.log(value);
-    await axios
-      .post('http://10.0.2.2:8000/messages/', data)
-      .then(res => {
-        getChats(room_id);
-      })
-      .catch((err: any) => console.log(err));
+    ws.current?.send(JSON.stringify(data));
+    // await axios
+    //   .post('http://10.0.2.2:8000/messages/', data)
+    //   .then(res => {
+    //     getChats(room_id);
+    //   })
+    //   .catch((err: any) => console.log(err));
   };
   return (
     <View

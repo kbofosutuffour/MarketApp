@@ -33,6 +33,7 @@ function ProductDescription(props): JSX.Element {
   const [options, showOptions] = useState(false);
   const [view, setView] = useState(0);
   const [userSettings, setUserSettings] = useState({});
+  const [rating, setRating] = useState('');
 
   const [photos, setPhotos] = useState([]);
   // After the page renders, retrieve information on the user

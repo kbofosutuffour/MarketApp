@@ -430,9 +430,67 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
         send_feedback_email(request.data)
         return Response(serializer.data)
+
+class RatingViewSet(viewsets.ModelViewSet):
+
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Only save the rating if the user hasn't already rated the user
+        rating = Rating.objects.get(
+            username=request.data['username'],
+            rated_by = request.data["rated_by"]
+        )
+        if rating:
+            rating.rating = request.data["score"]
+            rating.save()
+        else:
+            self.perform_create(serializer)
+
+        return Response(serializer.data)
+    
+    @action(methods=['get'], detail=False, url_path=r'get_rating/(?P<username>\w+)')
+    def get_rating(self, request, username):
+        ratings = Rating.objects.filter(username=username)
+        total_number = len(ratings)
+        total_score = 0
+        for rating in ratings:
+            total_score = total_score + rating.rating
+        if total_number == 0:
+            return Response({"error": "no rating"})
+        
+        return Response({
+            "rating": total_score / total_number,
+            "total_score": total_score,
+            "total_number": total_number
+        })
+
+class FlaggedPostViewSet(viewsets.ModelViewSet):
+
+    queryset = FlaggedPost.objects.all()
+    serializer_class = FlaggedPostSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Only save the flag if the user hasn't already flagged the post
+        exists = FlaggedPost.objects.get(
+            post=request.data['post'],
+            flagged_by = request.data["flagged_by"]
+        )
+        if not exists:
+            self.perform_create(serializer)
+
+        flags = FlaggedPost.objects.filter(post=request.data['post'])
+        print(len(flags), "number of flags")
+        return Response({"number_of_flags": len(flags)})
 #----------------------------
 
 def home(request):
