@@ -729,7 +729,6 @@ function Login(props): JSX.Element {
             } else {
               // passing the login user and if the user is an admin
               props.returnHome(info.username, response.data.admin);
-              console.log(response.data.admin)
             }
           } else {
             setErrorMessage('Invalid Login Credentials.  Please try again.');

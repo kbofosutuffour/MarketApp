@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import path, re_path
 from django.conf.urls import include
 from . import views
+from . import consumers
 from myapp.views import *
 from rest_framework.routers import DefaultRouter
 
@@ -24,10 +25,19 @@ router.register(r'user_settings', UserSettingsViewSet, basename='user_settings')
 router.register(r'report', ReportViewSet, basename="report")
 router.register(r'images', ImageViewSet, basename="images")
 router.register(r'feedback', FeedbackViewSet, basename="feedback")
+router.register(r'ratings', RatingViewSet, basename="ratings")
+router.register(r'flag', FlaggedPostViewSet, basename="flag")
 
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('search', views.search, name='search'),
     path('profile/<str:user>', views.profile, name='profile'),
+]
+
+# Information and code taken from Django Channel documentation:
+# https://channels.readthedocs.io/en/latest/tutorial/index.html
+
+websocket_urlpatterns = [
+    re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
 ]

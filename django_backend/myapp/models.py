@@ -66,6 +66,7 @@ class Post(models.Model):
         max_length=8,
     )
     purchased_by = models.CharField(max_length=500, blank=True, null=True, default=None)
+    flag = models.BooleanField(default=False, blank=True)
 
     def __str__(self) -> str:
         return self.product
@@ -201,6 +202,9 @@ class Report(models.Model):
 
 
 class Feedback(models.Model):
+    """
+    Table to record all user feedback
+    """
     username = models.ForeignKey(
         Profile,
         on_delete=models.CASCADE,
@@ -209,3 +213,33 @@ class Feedback(models.Model):
     datetime = models.DateTimeField(default=datetime.datetime.now, blank=True)
     content = models.TextField(max_length=1000, blank=True)
 
+class Rating(models.Model):
+    """
+    Table to record users ratings between one another
+    """
+    username = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="rating_username",
+    )
+    rated_by = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="rated_by",
+    )
+    rating = models.IntegerField()
+
+class FlaggedPost(models.Model):
+    """
+    Table to record which users flag which posts; needed for spam prevention
+    """
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="flagged_post",
+    )
+    flagged_by = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="flagged_by",
+    )

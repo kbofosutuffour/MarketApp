@@ -22,6 +22,7 @@
     "react-native-document-picker": "^9.0.1",
     "react-native-file-access": "^3.0.4",
     "react-native-image-picker": "^7.0.3",
+    "react-use-websocket": "^3.0.0",
     "typescript": "^5.1.3"
   },
   "devDependencies": {

@@ -41,6 +41,7 @@ ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne', #Daphne ASGI application server; used for chat feature
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'myapp', # myapp application we've created,
     'rest_framework', # needed for use with react native
     'corsheaders', # needed for cross-origin requests
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -162,6 +164,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT =  (os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = '/media/'
 
+# https://channels.readthedocs.io/en/latest/installation.html
+ASGI_APPLICATION = "myproject.asgi.django_application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Email settings taken from:
 # https://www.sitepoint.com/django-send-email/#:~:text=Let%E2%80%99s%20look%20at%20the%20settings%20required%20for%20sending,will%20use%20to%20connect%20with%20the%20SMTP%20server.
