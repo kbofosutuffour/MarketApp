@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
 import React, {MutableRefObject, useEffect, useRef, useState} from 'react';
 
@@ -15,6 +16,7 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {JsxElement} from 'typescript';
+import Footer from './Footer';
 
 /**
  *
@@ -127,12 +129,29 @@ function Chats(props): JSX.Element {
   });
 
   const [text, setText] = useState('');
+
+  /**
+   * Holds a reference to the scroll view used
+   * to display the chat; necessary for automatically
+   * scrolling to the bottom immediately after this component
+   * is created.
+   */
   const scrollViewRef = useRef(); //used for scrolling
 
-  let ws: MutableRefObject<null> | MutableRefObject<WebSocket> = React.useRef(null);
+  /**
+    Variable that serves as a web socket object.
+    Changes when a user selects a specific room 
+  */
+  let ws: MutableRefObject<null> | MutableRefObject<WebSocket> =
+    React.useRef(null);
 
+  /*
+    Creates a new web socket for the current chat room.
+    Web sockets (made using Django Channels) are necessary for
+    having real-time chat functionality
+  */
   useEffect(() => {
-    if (ws && chats.id) {
+    if (chats.id) {
       ws.current = new WebSocket(
         'ws://10.0.2.2:8000/ws/chat/' + chats.id + '/',
       );
@@ -145,7 +164,8 @@ function Chats(props): JSX.Element {
       ws.current.onmessage = e => {
         // a message was received
         let new_chats = chats.chats;
-        new_chats.push(e.data);
+        let data = JSON.parse(e.data);
+        new_chats.push(data);
         setChats({...chats, chats: new_chats});
       };
 
@@ -157,17 +177,53 @@ function Chats(props): JSX.Element {
       ws.current.onclose = e => {
         // connection closed
         console.log(e);
-        console.log('test')
         console.log(e.code, e.reason);
       };
     }
   }, [chats.id]);
 
-  // useEffect(() => {
-  //   if (!props.showChats) {
-  //     ws.current?.close();
-  //   }
-  // }, [props.showChats]);
+  /**
+   * Returns user to the home page after
+   * closing the web socket for chatting
+   */
+  const returnHome = () => {
+    ws.current?.close();
+    props.returnHome();
+  };
+
+  /**
+   * Switches user to the profile page
+   * after closing the web socket for chatting
+   */
+  const viewProfile = () => {
+    ws.current?.close();
+    props.viewProfile();
+  };
+
+  /**
+   * Switches user to chat rooms after closing
+   * the web socket for chatting; removes all
+   * state information for a specific chat room
+   */
+  const viewChats = () => {
+    ws.current?.close();
+    setRooms({...rooms, showRoom: true});
+    setChats({
+      showChats: false,
+      chats: [],
+      id: null,
+      buyer: {
+        username: null,
+        profile_picture: null,
+      },
+      seller: {
+        username: null,
+        profile_picture: null,
+      },
+      image: '',
+      product: '',
+    })
+  }
 
   // After the page is rendered, retrieve all of the chatrooms the user is in
   // from the database
@@ -225,67 +281,81 @@ function Chats(props): JSX.Element {
       .catch((err: any) => console.log(err));
   };
 
-  const sendMessage = async (value, room_id) => {
+  /**
+   * Sends a message to the other user via the
+   * implemented web socket (Django channel), and then
+   * stores the message in the database.
+   * @param value the text message
+   * @param room_id the unique id of the chat room
+   */
+  const sendMessage = async (value: string, room_id: string) => {
     let data = {
       value: value,
       username: props.profile.username,
       room: room_id,
       image: null,
     };
+    await axios
+      .post('http://10.0.2.2:8000/messages/', data)
+      .then(() => {
+        // If there isn't a webserver running,
+        // show the new message on the sender side
+        if (!ws.current) {
+          getChats(room_id);
+        }
+      })
+      .catch((err: any) => console.log(err));
     ws.current?.send(JSON.stringify(data));
-    // await axios
-    //   .post('http://10.0.2.2:8000/messages/', data)
-    //   .then(res => {
-    //     getChats(room_id);
-    //   })
-    //   .catch((err: any) => console.log(err));
   };
   return (
     <View
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
         backgroundColor: Colors.white,
-        height: '79%',
+        height: '106%',
       }}>
-      <ScrollView>
-        {rooms.showRoom &&
-          rooms.rooms.buyers.map(value => {
-            return (
-              <Room
-                other_user={value.seller}
-                rooms={value}
-                chats={chats}
-                setRooms={setRooms}
-                getChats={getChats}
-                profile_picture={value.seller_profile_picture}
-                display_image={value.image}
-                product={value.product}
-                id={value.id}
-                seller={false}
-                buyer={true}
-              />
-            );
-          })}
-        {rooms.showRoom &&
-          !chats.showChats &&
-          rooms.rooms.sellers.map(value => {
-            return (
-              <Room
-                other_user={value.buyer}
-                rooms={value}
-                chats={chats}
-                setRooms={setRooms}
-                getChats={getChats}
-                profile_picture={value.buyer_profile_picture}
-                display_image={value.image}
-                product={value.product}
-                id={value.id}
-                seller={value.seller}
-                buyer={value.buyer}
-              />
-            );
-          })}
-      </ScrollView>
+      {rooms.showRoom && (
+        <>
+          <ScrollView>
+            {rooms.rooms.buyers.map(value => {
+              return (
+                <Room
+                  other_user={value.seller}
+                  rooms={value}
+                  chats={chats}
+                  setRooms={setRooms}
+                  getChats={getChats}
+                  profile_picture={value.seller_profile_picture}
+                  display_image={value.image}
+                  product={value.product}
+                  id={value.id}
+                  seller={false}
+                  buyer={true}
+                />
+              );
+            })}
+            {rooms.showRoom &&
+              !chats.showChats &&
+              rooms.rooms.sellers.map(value => {
+                return (
+                  <Room
+                    other_user={value.buyer}
+                    rooms={value}
+                    chats={chats}
+                    setRooms={setRooms}
+                    getChats={getChats}
+                    profile_picture={value.buyer_profile_picture}
+                    display_image={value.image}
+                    product={value.product}
+                    id={value.id}
+                    seller={value.seller}
+                    buyer={value.buyer}
+                  />
+                );
+              })}
+          </ScrollView>
+        </>
+      )}
       {!rooms.showRoom && chats.showChats && (
         <>
           <View style={styles.post}>
@@ -310,48 +380,56 @@ function Chats(props): JSX.Element {
               />
             </View>
           </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            ref={scrollViewRef}
-            onContentSizeChange={async () =>
-              await scrollViewRef.current.scrollToEnd({animated: false})
-            }>
-            {chats.chats.map(value => {
-              var img =
-                value.username == props.profile.username
-                  ? 'http://10.0.2.2:8000' + props.profile.profile_picture
-                  : value.username == chats.buyer.username
-                  ? chats.buyer.profile_picture
-                  : chats.seller.profile_picture;
-              var buyer = value.username == chats.buyer.username;
-              return (
-                <Message
-                  data={value}
-                  profile_picture={img}
-                  buyer={buyer}
-                  seller={!buyer}
-                  current_user={props.profile.username}
-                />
-              );
-            })}
-          </ScrollView>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              onChangeText={value => setText(value)}
-              value={text}
-            />
-            <Button
-              title={'send'}
-              color={'rgb(185, 151, 91)'}
-              onPress={async () => {
-                await sendMessage(text, chats.id);
-                setText('');
-              }}
-            />
+          <View style={{height: '73%'}}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              ref={scrollViewRef}
+              onContentSizeChange={async () =>
+                await scrollViewRef.current.scrollToEnd({animated: false})
+              }>
+              {chats.chats.map(value => {
+                var img =
+                  value.username == props.profile.username
+                    ? 'http://10.0.2.2:8000' + props.profile.profile_picture
+                    : value.username == chats.buyer.username
+                    ? chats.buyer.profile_picture
+                    : chats.seller.profile_picture;
+                var buyer = value.username == chats.buyer.username;
+                return (
+                  <Message
+                    data={value}
+                    profile_picture={img}
+                    buyer={buyer}
+                    seller={!buyer}
+                    current_user={props.profile.username}
+                  />
+                );
+              })}
+            </ScrollView>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                onChangeText={value => setText(value)}
+                value={text}
+              />
+              <Button
+                title={'send'}
+                color={'rgb(185, 151, 91)'}
+                onPress={async () => {
+                  await sendMessage(text, chats.id);
+                  setText('');
+                }}
+              />
+            </View>
           </View>
         </>
       )}
+      <Footer
+        returnHome={returnHome}
+        viewProfile={viewProfile}
+        viewChats={viewChats}
+        type={'Chats'}
+      />
     </View>
   );
 }
@@ -429,7 +507,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   inputContainer: {
-    // backgroundColor: 'rgb(17, 87, 64)',
     display: 'flex',
     flexDirection: 'row',
     columnGap: 10,
@@ -438,12 +515,12 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#f6f7f5',
-    height: '70%',
     width: '65%',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: Colors.black,
     marginTop: 10,
+    marginBottom: 10,
   },
   send: {
     backgroundColor: 'rgb(185, 151, 91)',

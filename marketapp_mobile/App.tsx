@@ -31,6 +31,7 @@ import CreatePost from './Post';
 import Login from './Login';
 import Report from './Report';
 import Landing from './Landing';
+import Footer from './Footer';
 
 import vehicles from './media/categories/Vehicles-96.png';
 import food from './media/categories/Food-96.png';
@@ -47,69 +48,69 @@ import wm_logo from './media/categories/wm_logo.jpg';
 
 import {formatDistance} from 'date-fns';
 
-function Footer(props): JSX.Element {
-  //Footer component that is displayed on various screens
-  return (
-    <View style={styles.footerContainer}>
-      <View style={styles.goldBar} />
-      <View style={styles.footer}>
-        <View // eslint-disable-next-line react-native/no-inline-styles
-          style={{
-            width: 60,
-            height: 60,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            backgroundColor:
-              props.type === 'Home' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
-            borderRadius: 30,
-          }}>
-          <TouchableWithoutFeedback onPress={props.returnHome}>
-            <Image source={require('./media/home-05.png')} />
-          </TouchableWithoutFeedback>
-        </View>
-        <View // eslint-disable-next-line react-native/no-inline-styles
-          style={{
-            width: 60,
-            height: 60,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            backgroundColor:
-              props.type === 'Chats' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
-            borderRadius: 30,
-          }}>
-          <TouchableWithoutFeedback onPress={props.viewChats}>
-            <Image source={require('./media/message-chat-square.png')} />
-          </TouchableWithoutFeedback>
-        </View>
-        <View // eslint-disable-next-line react-native/no-inline-styles
-          style={{
-            width: 60,
-            height: 60,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            backgroundColor:
-              props.type === 'Profile'
-                ? 'rgb(185, 151, 91)'
-                : 'rgb(17, 87, 64)',
-            borderRadius: 30,
-          }}>
-          <TouchableWithoutFeedback onPress={props.viewProfile}>
-            <Image source={require('./media/user-01.png')} />
-          </TouchableWithoutFeedback>
-        </View>
-      </View>
-    </View>
-  );
-}
+// function Footer(props): JSX.Element {
+//   //Footer component that is displayed on various screens
+//   return (
+//     <View style={styles.footerContainer}>
+//       <View style={styles.goldBar} />
+//       <View style={styles.footer}>
+//         <View // eslint-disable-next-line react-native/no-inline-styles
+//           style={{
+//             width: 60,
+//             height: 60,
+//             display: 'flex',
+//             flexDirection: 'row',
+//             justifyContent: 'center',
+//             alignItems: 'center',
+//             overflow: 'hidden',
+//             backgroundColor:
+//               props.type === 'Home' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
+//             borderRadius: 30,
+//           }}>
+//           <TouchableWithoutFeedback onPress={props.returnHome}>
+//             <Image source={require('./media/home-05.png')} />
+//           </TouchableWithoutFeedback>
+//         </View>
+//         <View // eslint-disable-next-line react-native/no-inline-styles
+//           style={{
+//             width: 60,
+//             height: 60,
+//             display: 'flex',
+//             flexDirection: 'row',
+//             justifyContent: 'center',
+//             alignItems: 'center',
+//             overflow: 'hidden',
+//             backgroundColor:
+//               props.type === 'Chats' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
+//             borderRadius: 30,
+//           }}>
+//           <TouchableWithoutFeedback onPress={props.viewChats}>
+//             <Image source={require('./media/message-chat-square.png')} />
+//           </TouchableWithoutFeedback>
+//         </View>
+//         <View // eslint-disable-next-line react-native/no-inline-styles
+//           style={{
+//             width: 60,
+//             height: 60,
+//             display: 'flex',
+//             flexDirection: 'row',
+//             justifyContent: 'center',
+//             alignItems: 'center',
+//             overflow: 'hidden',
+//             backgroundColor:
+//               props.type === 'Profile'
+//                 ? 'rgb(185, 151, 91)'
+//                 : 'rgb(17, 87, 64)',
+//             borderRadius: 30,
+//           }}>
+//           <TouchableWithoutFeedback onPress={props.viewProfile}>
+//             <Image source={require('./media/user-01.png')} />
+//           </TouchableWithoutFeedback>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// }
 
 function NavBar(props): JSX.Element {
   //Navigation Bar component that is displayed on top of various screens
@@ -1007,29 +1008,54 @@ function App(): JSX.Element {
               category={category}
               setCategory={setCategory}
             />
-            <ScrollView
-              contentInsetAdjustmentBehavior="automatic"
-              scrollEventThrottle={3}
-              onScroll={event =>
-                handleScroll(event.nativeEvent.contentOffset.y)
-              }
-              onScrollEndDrag={event =>
-                refreshPage(event.nativeEvent.velocity?.y)
-              }
-              style={styles.scrollView}>
-              <View
-                style={{
-                  backgroundColor: Colors.white,
-                  opacity: !deletePost.deletePost ? 1.0 : 0.6,
-                }}>
-                {posts.showPosts &&
-                  posts.posts.map(post => {
-                    /* Only show posts not created by the user on the home page */
-                    if (
-                      post.username !== user.username &&
-                      post.status !== 'SOLD' &&
-                      !post.draft
-                    ) {
+            <>
+              <ScrollView
+                contentInsetAdjustmentBehavior="automatic"
+                scrollEventThrottle={3}
+                onScroll={event =>
+                  handleScroll(event.nativeEvent.contentOffset.y)
+                }
+                onScrollEndDrag={event =>
+                  refreshPage(event.nativeEvent.velocity?.y)
+                }
+                style={styles.scrollView}>
+                <View
+                  style={{
+                    backgroundColor: Colors.white,
+                    opacity: !deletePost.deletePost ? 1.0 : 0.6,
+                  }}>
+                  {posts.showPosts &&
+                    posts.posts.map(post => {
+                      /* Only show posts not created by the user on the home page */
+                      if (
+                        post.username !== user.username &&
+                        post.status !== 'SOLD' &&
+                        !post.draft
+                      ) {
+                        return (
+                          <Post
+                            data={post}
+                            setDesc={setDesc}
+                            user={user}
+                            setDelete={setDelete}
+                            countFlagPost={countFlagPost}
+                          />
+                        );
+                      } else if (
+                        post.username === user.username &&
+                        post.draft &&
+                        !errorMessage &&
+                        !hasSeenDraft
+                      ) {
+                        setErrorMessage(
+                          'You have a draft. Would you like to continue writing it?',
+                        );
+                        setHasSeenDraft(true);
+                      }
+                    })}
+                  {searchedPosts.showResults &&
+                    searchedPosts.posts.length > 0 &&
+                    searchedPosts.posts.map(post => {
                       return (
                         <Post
                           data={post}
@@ -1039,36 +1065,17 @@ function App(): JSX.Element {
                           countFlagPost={countFlagPost}
                         />
                       );
-                    } else if (
-                      post.username === user.username &&
-                      post.draft &&
-                      !errorMessage &&
-                      !hasSeenDraft
-                    ) {
-                      setErrorMessage(
-                        'You have a draft. Would you like to continue writing it?',
-                      );
-                      setHasSeenDraft(true);
-                    }
-                  })}
-                {searchedPosts.showResults &&
-                  searchedPosts.posts.length > 0 &&
-                  searchedPosts.posts.map(post => {
-                    return (
-                      <Post
-                        data={post}
-                        setDesc={setDesc}
-                        user={user}
-                        setDelete={setDelete}
-                        countFlagPost={countFlagPost}
+                    })}
+                  {searchedPosts.showSearchBar &&
+                    !searchedPosts.showResults && (
+                      <Categories
+                        category={category}
+                        setCategory={setCategory}
                       />
-                    );
-                  })}
-                {searchedPosts.showSearchBar && !searchedPosts.showResults && (
-                  <Categories category={category} setCategory={setCategory} />
-                )}
-              </View>
-            </ScrollView>
+                    )}
+                </View>
+              </ScrollView>
+            </>
             {!searchedPosts.showSearchBar && (
               <View>
                 <TouchableWithoutFeedback onPress={() => viewPost()}>
@@ -1197,20 +1204,15 @@ function App(): JSX.Element {
           />
           <Chats
             profile={profile.data}
-            viewChats={viewChats}
             current_user={user.username}
             rooms={rooms}
             showChats={showChats}
-          />
-          <Footer
             returnHome={returnHome}
             viewProfile={viewProfile}
             viewChats={viewChats}
-            type={'Chats'}
           />
         </>
       )}
-
       {/* Settings Page */}
 
       {settings.showSettings && (

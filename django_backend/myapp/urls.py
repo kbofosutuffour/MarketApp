@@ -35,6 +35,9 @@ urlpatterns = [
     path('profile/<str:user>', views.profile, name='profile'),
 ]
 
+# Information and code taken from Django Channel documentation:
+# https://channels.readthedocs.io/en/latest/tutorial/index.html
+
 websocket_urlpatterns = [
     re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
 ]
