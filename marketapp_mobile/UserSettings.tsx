@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
 import React, {useEffect, useState} from 'react';
 import {
@@ -12,6 +13,21 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {format} from 'date-fns';
+
+import {Dimensions, Platform, PixelRatio} from 'react-native';
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+export function normalize(size) {
+  const newSize = size * scale;
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
 
 function Profile(props): JSX.Element {
   const options = [
@@ -32,6 +48,15 @@ function Profile(props): JSX.Element {
 
   return (
     <View style={styles.userSettings}>
+      <View style={styles.blackArrow}>
+        <TouchableWithoutFeedback
+          onPress={() => props.setView({settings: true})}>
+          <Image
+            style={styles.blackArrow}
+            source={require('./media/black_left_arrow.png')}
+          />
+        </TouchableWithoutFeedback>
+      </View>
       <View style={styles.profileDescription}>
         <Image
           source={{
@@ -81,7 +106,7 @@ function Profile(props): JSX.Element {
   );
 }
 
-function ChangePassword(props): JSX.Element {
+function ChangePassword(props: any): JSX.Element {
   const [passwordState, setPasswordState] = useState({
     sendCode: false,
     createPassword: false,
@@ -172,6 +197,15 @@ function ChangePassword(props): JSX.Element {
       {!passwordState.createPassword && !passwordState.sendCode && (
         <>
           <View style={styles.userSettings}>
+            <View style={styles.blackArrow}>
+              <TouchableWithoutFeedback
+                onPress={() => props.setView({profile: true})}>
+                <Image
+                  style={styles.blackArrow}
+                  source={require('./media/black_left_arrow.png')}
+                />
+              </TouchableWithoutFeedback>
+            </View>
             <TouchableWithoutFeedback
               onPress={() =>
                 setPasswordState({
@@ -196,21 +230,16 @@ function ChangePassword(props): JSX.Element {
       )}
       {passwordState.sendCode && (
         <>
-          <TouchableWithoutFeedback
-            onPress={() =>
-              props.setLoginState({
-                login: true,
-                register: false,
-                forgotPassword: false,
-                verifyEmail: false,
-              })
-            }>
-            <Image
-              style={styles.blackArrow}
-              source={require('./media/black_left_arrow.png')}
-            />
-          </TouchableWithoutFeedback>
           <View style={styles.loginContainer}>
+            <View style={styles.blackArrow}>
+              <TouchableWithoutFeedback
+                onPress={() => props.setView({profile: true})}>
+                <Image
+                  style={styles.blackArrow}
+                  source={require('./media/black_left_arrow.png')}
+                />
+              </TouchableWithoutFeedback>
+            </View>
             <Image
               style={styles.wmLogo}
               source={require('./media/wm_logo_green.png')}
@@ -294,21 +323,16 @@ function ChangePassword(props): JSX.Element {
       )}
       {passwordState.createPassword && (
         <>
-          <TouchableWithoutFeedback
-            onPress={() =>
-              props.setLoginState({
-                login: true,
-                register: false,
-                forgotPassword: false,
-                verifyEmail: false,
-              })
-            }>
-            <Image
-              style={styles.blackArrow}
-              source={require('./media/black_left_arrow.png')}
-            />
-          </TouchableWithoutFeedback>
           <View style={styles.loginContainer}>
+            <View style={styles.blackArrow}>
+              <TouchableWithoutFeedback
+                onPress={() => props.setView({profile: true})}>
+                <Image
+                  style={styles.blackArrow}
+                  source={require('./media/black_left_arrow.png')}
+                />
+              </TouchableWithoutFeedback>
+            </View>
             <Image
               style={styles.wmLogo}
               source={{
@@ -423,6 +447,15 @@ function Notifications(props: any): JSX.Element {
 
   return (
     <View style={styles.userSettings}>
+      <View style={styles.blackArrow}>
+        <TouchableWithoutFeedback
+          onPress={() => props.setView({settings: true})}>
+          <Image
+            style={styles.blackArrow}
+            source={require('./media/black_left_arrow.png')}
+          />
+        </TouchableWithoutFeedback>
+      </View>
       <View style={styles.notificationSettingsContainer}>
         <View style={styles.notificationHeader}>
           <Text style={styles.settingsOption}>New Messages</Text>
@@ -525,9 +558,18 @@ function Notifications(props: any): JSX.Element {
   );
 }
 
-function Privacy(): JSX.Element {
+function Privacy(props: any): JSX.Element {
   return (
     <View style={styles.userSettings}>
+      <View style={styles.blackArrow}>
+        <TouchableWithoutFeedback
+          onPress={() => props.setView({settings: true})}>
+          <Image
+            style={styles.blackArrow}
+            source={require('./media/black_left_arrow.png')}
+          />
+        </TouchableWithoutFeedback>
+      </View>
       <View style={styles.notificationSettingsContainer}>
         <View style={styles.notificationHeader}>
           <Text style={styles.settingsOption}>Privacy Policy</Text>
@@ -597,6 +639,15 @@ function HelpOrFeedback(props: any): JSX.Element {
     <>
       {view.help && (
         <View style={styles.userSettings}>
+          <View style={styles.blackArrow}>
+            <TouchableWithoutFeedback
+              onPress={() => props.setView({support: true})}>
+              <Image
+                style={styles.blackArrow}
+                source={require('./media/black_left_arrow.png')}
+              />
+            </TouchableWithoutFeedback>
+          </View>
           <View style={styles.helpHeader}>
             <Text style={styles.settingsOption}>Contact Us</Text>
           </View>
@@ -665,6 +716,15 @@ function Support(props: any): JSX.Element {
   var options = ['Violations', 'Help'];
   return (
     <View style={styles.userSettings}>
+      <View style={styles.blackArrow}>
+        <TouchableWithoutFeedback
+          onPress={() => props.setView({settings: true})}>
+          <Image
+            style={styles.blackArrow}
+            source={require('./media/black_left_arrow.png')}
+          />
+        </TouchableWithoutFeedback>
+      </View>
       {options.map(value => {
         return (
           <TouchableWithoutFeedback
@@ -729,6 +789,15 @@ function Violations(props: any): JSX.Element {
 
   return (
     <View style={styles.userSettings}>
+      <View style={styles.blackArrow}>
+        <TouchableWithoutFeedback
+          onPress={() => props.setView({support: true})}>
+          <Image
+            style={styles.blackArrow}
+            source={require('./media/black_left_arrow.png')}
+          />
+        </TouchableWithoutFeedback>
+      </View>
       <View style={styles.notificationSettingsContainer}>
         <View style={styles.notificationHeader}>
           <Text style={styles.settingsOption}>Violations</Text>
@@ -806,7 +875,7 @@ function UserSettings(props: any): JSX.Element {
           // eslint-disable-next-line react-native/no-inline-styles
           style={{
             backgroundColor: '#f6f7f5',
-            height: '80%',
+            height: '76.5%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -874,11 +943,16 @@ function UserSettings(props: any): JSX.Element {
         <Notifications
           profile={props.profile.username}
           userSettings={props.userSettings.data}
+          setView={setView}
         />
       )}
-      {view.privacy && <Privacy userSettings={props.userSettings.data} />}
+      {view.privacy && (
+        <Privacy userSettings={props.userSettings.data} setView={setView} />
+      )}
       {view.support && <Support setView={setView} />}
-      {view.violations && <Violations userSettings={props.userSettings.data} />}
+      {view.violations && (
+        <Violations userSettings={props.userSettings.data} setView={setView} />
+      )}
       {view.changePassword && (
         <ChangePassword
           profile={props.profile}
@@ -913,9 +987,9 @@ const styles = StyleSheet.create({
   profilePictureContainer: {
     backgroundColor: Colors.white,
     display: 'flex',
-    width: 125,
-    height: 125,
-    borderRadius: 75,
+    width: normalize(90),
+    height: normalize(90),
+    borderRadius: normalize(45),
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
@@ -934,9 +1008,9 @@ const styles = StyleSheet.create({
     columnGap: 10,
   },
   profilePictureBorder: {
-    width: 125,
-    height: 125,
-    borderRadius: 75,
+    width: normalize(90),
+    height: normalize(90),
+    borderRadius: normalize(45),
     borderColor: Colors.black,
   },
   userSettings: {
@@ -949,7 +1023,7 @@ const styles = StyleSheet.create({
   settingsOptionContainer: {
     borderBottomWidth: 1,
     borderColor: 'gray',
-    height: 50,
+    height: normalize(40),
     width: '85%',
     display: 'flex',
     justifyContent: 'center',
@@ -1003,7 +1077,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.white,
     paddingLeft: 10,
-    marginTop: 80,
+    marginTop: normalize(30),
   },
   notificationSettingsContainer: {
     backgroundColor: Colors.white,
@@ -1013,7 +1087,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    marginTop: 30,
+    marginTop: 60,
     paddingBottom: 10,
   },
   helpHeader: {
@@ -1023,7 +1097,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    marginTop: 30,
+    marginTop: 60,
   },
   notificationHeader: {
     borderBottomWidth: 1,

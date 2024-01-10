@@ -7,6 +7,7 @@
  */
 
 import React, {useEffect, useState} from 'react';
+import {Dimensions, Platform, PixelRatio} from 'react-native';
 
 import {
   Image,
@@ -48,71 +49,21 @@ import wm_logo from './media/categories/wm_logo.jpg';
 
 import {formatDistance} from 'date-fns';
 
-// function Footer(props): JSX.Element {
-//   //Footer component that is displayed on various screens
-//   return (
-//     <View style={styles.footerContainer}>
-//       <View style={styles.goldBar} />
-//       <View style={styles.footer}>
-//         <View // eslint-disable-next-line react-native/no-inline-styles
-//           style={{
-//             width: 60,
-//             height: 60,
-//             display: 'flex',
-//             flexDirection: 'row',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             overflow: 'hidden',
-//             backgroundColor:
-//               props.type === 'Home' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
-//             borderRadius: 30,
-//           }}>
-//           <TouchableWithoutFeedback onPress={props.returnHome}>
-//             <Image source={require('./media/home-05.png')} />
-//           </TouchableWithoutFeedback>
-//         </View>
-//         <View // eslint-disable-next-line react-native/no-inline-styles
-//           style={{
-//             width: 60,
-//             height: 60,
-//             display: 'flex',
-//             flexDirection: 'row',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             overflow: 'hidden',
-//             backgroundColor:
-//               props.type === 'Chats' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
-//             borderRadius: 30,
-//           }}>
-//           <TouchableWithoutFeedback onPress={props.viewChats}>
-//             <Image source={require('./media/message-chat-square.png')} />
-//           </TouchableWithoutFeedback>
-//         </View>
-//         <View // eslint-disable-next-line react-native/no-inline-styles
-//           style={{
-//             width: 60,
-//             height: 60,
-//             display: 'flex',
-//             flexDirection: 'row',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             overflow: 'hidden',
-//             backgroundColor:
-//               props.type === 'Profile'
-//                 ? 'rgb(185, 151, 91)'
-//                 : 'rgb(17, 87, 64)',
-//             borderRadius: 30,
-//           }}>
-//           <TouchableWithoutFeedback onPress={props.viewProfile}>
-//             <Image source={require('./media/user-01.png')} />
-//           </TouchableWithoutFeedback>
-//         </View>
-//       </View>
-//     </View>
-//   );
-// }
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
-function NavBar(props): JSX.Element {
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+function normalize(size: any) {
+  const newSize = size * scale;
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
+
+function NavBar(props: any): JSX.Element {
   //Navigation Bar component that is displayed on top of various screens
 
   const [input, setInput] = useState('');
@@ -221,7 +172,7 @@ function NavBar(props): JSX.Element {
         )}
 
         {/* Show the settings icon if the user is on the home screen */}
-        {props.type === 'Profile' && (
+        {(props.type === 'Profile' || props.type === 'Settings') && (
           <TouchableWithoutFeedback
             onPress={() => {
               props.viewSettings();
@@ -376,13 +327,6 @@ function Categories(props): JSX.Element {
  * @returns Application that is displayed on the screen
  */
 function App(): JSX.Element {
-  //The main component that is displayed on the screen.
-
-  const backgroundStyle = {
-    backgroundColor: 'rgb(17, 87, 64)',
-    flex: 1,
-  };
-
   //These state variables dictate the what screen is currently being displayed
   //Some state variables hold data that is used in that screen state
   const [user, setUser] = useState({
@@ -971,7 +915,7 @@ function App(): JSX.Element {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={styles.backgroundStyle}>
       {/* SaveAreaView Components make it so that developers can safely view the styling layout on different device sizes */}
 
       {/* Many of the created components/functions hold a props parameter.  Here is where we define what information is stored in
@@ -979,7 +923,6 @@ function App(): JSX.Element {
 
       {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
           This produces the effect of changing what is seen on the screen */}
-
       {/* Landing Page */}
       {!hasloaded && <Landing showLogin={user.showLogin} />}
 
@@ -996,7 +939,7 @@ function App(): JSX.Element {
         !showPost.showPost &&
         !user.showLogin &&
         !reportUser.showReport && (
-          <View>
+          <View style={{height: '100%'}}>
             <NavBar
               searchedPosts={searchedPosts}
               posts={posts}
@@ -1008,7 +951,7 @@ function App(): JSX.Element {
               category={category}
               setCategory={setCategory}
             />
-            <>
+            <View style={styles.mainView}>
               <ScrollView
                 contentInsetAdjustmentBehavior="automatic"
                 scrollEventThrottle={3}
@@ -1030,7 +973,8 @@ function App(): JSX.Element {
                       if (
                         post.username !== user.username &&
                         post.status !== 'SOLD' &&
-                        !post.draft
+                        !post.draft &&
+                        !post.flag
                       ) {
                         return (
                           <Post
@@ -1075,7 +1019,7 @@ function App(): JSX.Element {
                     )}
                 </View>
               </ScrollView>
-            </>
+            </View>
             {!searchedPosts.showSearchBar && (
               <View>
                 <TouchableWithoutFeedback onPress={() => viewPost()}>
@@ -1298,12 +1242,21 @@ function App(): JSX.Element {
 // One major difference here is that components can really only have
 // two display styles: flex and none.
 const styles = StyleSheet.create({
+  backgroundStyle: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    flex: 1,
+  },
   navigationBar: {
     display: 'flex',
     flexDirection: 'row',
-    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
     width: '100%',
-    height: '10%',
+    position: 'relative',
+    top: 0,
+    paddingLeft: 10,
+    paddingRight: 10,
+    height: SCREEN_HEIGHT * 0.1,
   },
   navigationBarType: {
     display: 'flex',
@@ -1315,14 +1268,17 @@ const styles = StyleSheet.create({
   home: {
     textAlign: 'center',
     color: Colors.white,
-    fontSize: 30,
+    fontSize: normalize(22.5),
+  },
+  mainView: {
+    height: SCREEN_HEIGHT * 0.765,
   },
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
-    height: '1%',
+    // height: SCREEN_HEIGHT * 0.01,
   },
   scrollView: {
-    height: '82%',
+    // height: SCREEN_HEIGHT * 0.79,
   },
   highlight: {
     fontWeight: '700',
@@ -1341,7 +1297,7 @@ const styles = StyleSheet.create({
   post: {
     display: 'flex',
     flexDirection: 'row',
-    padding: 10,
+    padding: normalize(10),
     borderWidth: 1,
     borderColor: 'grey',
   },
@@ -1402,21 +1358,6 @@ const styles = StyleSheet.create({
     padding: 5,
     borderWidth: 5,
     borderColor: 'rgb(185, 151, 91)',
-  },
-  footerContainer: {
-    flex: 1,
-    backgroundColor: 'rgb(17, 87, 64)',
-    height: '10%',
-  },
-  footer: {
-    display: 'flex',
-    backgroundColor: 'rgb(17, 87, 64)',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    columnGap: 40,
-    paddingTop: 10,
-    paddingBottom: 10,
   },
   addPost: {
     width: 75,

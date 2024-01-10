@@ -15,8 +15,23 @@ import {
   View,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {JsxElement} from 'typescript';
 import Footer from './Footer';
+import {format, formatDistance} from 'date-fns';
+import {Dimensions, Platform, PixelRatio} from 'react-native';
+
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+function normalize(size: any) {
+  const newSize = size * scale;
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
 
 /**
  *
@@ -60,6 +75,26 @@ function Room(props): JSX.Element {
 }
 
 /**
+ * @param postDateTime the datetime of the post
+ * @returns the time stamp from the date string parameter
+ */
+const getTimePosted = (postDateTime: string) => {
+  if (postDateTime) {
+    let temp = postDateTime.split('T');
+    let [date, time] = [temp[0].split('-'), temp[1].split(':')];
+    let post = new Date(
+      Number(date[0]),
+      Number(date[1]) - 1,
+      Number(date[2]),
+      Number(time[0]),
+      Number(time[1]),
+      Number(time[2].split('.')[0]),
+    );
+    return format(post, 'eee p');
+  }
+};
+
+/**
  * @returns an individual message generated from data stored in the props object
  */
 function Message(props): JSX.Element {
@@ -78,7 +113,7 @@ function Message(props): JSX.Element {
               source={{uri: props.data.image}}
             />
           )}
-          <Text style={styles.date}>{props.data.date}</Text>
+          <Text style={styles.date}>{getTimePosted(props.data.date)}</Text>
         </View>
       </View>
     );
@@ -93,7 +128,7 @@ function Message(props): JSX.Element {
               source={{uri: props.data.image}}
             />
           )}
-          <Text style={styles.date}>{props.data.date}</Text>
+          <Text style={styles.date}>{getTimePosted(props.data.date)}</Text>
         </View>
         <Image
           style={styles.profilePicture}
@@ -222,8 +257,8 @@ function Chats(props): JSX.Element {
       },
       image: '',
       product: '',
-    })
-  }
+    });
+  };
 
   // After the page is rendered, retrieve all of the chatrooms the user is in
   // from the database

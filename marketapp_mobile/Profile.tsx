@@ -20,15 +20,7 @@ import {format} from 'date-fns';
  * @param props
  * @returns A post created by the user
  */
-function Post(props: {
-  data: {
-    display_image: any;
-    product: string;
-    username: string;
-    price: string;
-  };
-  setDesc: any;
-}): JSX.Element {
+function Post(props: any): JSX.Element {
   const [options, showOptions] = useState(false);
   const [status, setStatus] = useState('');
   const [statusOptions, showStatusOptions] = useState(false);
@@ -45,7 +37,7 @@ function Post(props: {
     };
     axios
       .patch('http://10.0.2.2:8000/edit_post/status/' + username + '/', data)
-      .then(res => {
+      .then(() => {
         setStatus(status.toUpperCase());
       })
       .catch((err: any) => console.log(err));
@@ -166,7 +158,7 @@ function Post(props: {
 /**
  * Navigation Bar if viewing a different user's screen
  */
-function NavBar(props): JSX.Element {
+function NavBar(): JSX.Element {
   return (
     <>
       <View style={styles.navigationBar}>
@@ -182,14 +174,14 @@ function NavBar(props): JSX.Element {
  * @param props
  * @returns Edit Profile Screen
  */
-function EditProfile(props): JSX.Element {
+function EditProfile(props: any): JSX.Element {
   const [showDate, setShowDate] = useState(false);
 
   useEffect(() => {
     setShowDate(props.userSettings.data.show_joined_date);
   }, [props.userSettings.data.show_joined_date]);
 
-  const changeDateSettings = async value => {
+  const changeDateSettings = async (value: boolean) => {
     axios.patch(
       'http://10.0.2.2:8000/user_settings/show_joined_date/' +
         props.profile_id +
@@ -287,7 +279,7 @@ function EditProfile(props): JSX.Element {
  * @param props
  * @returns The profile page
  */
-function Profile(props): JSX.Element {
+function Profile(props: any): JSX.Element {
   const [posts, setPosts] = useState([]); // Will hold all of the post created by the user
 
   // State variables that allows the user to switch between
@@ -300,7 +292,7 @@ function Profile(props): JSX.Element {
     changeProfilePicture: false,
     otherProfile: !props.onMain,
   });
-  const [deletePostData, setDelete] = useState(null);
+  const [deletePostData, setDelete]: [any, Function] = useState(null);
   const [changedPic, setChangedPic] = useState(null);
   const [otherProfileShowOptions, setOtherProfileShowOptions] = useState(false);
 
@@ -313,6 +305,7 @@ function Profile(props): JSX.Element {
   const [likedPosts, setLikedPosts] = useState([]);
   const [buyHistory, setBuyHistory] = useState([]);
 
+  const [test, setTest] = useState({})
   /**
    * Function to delete the post in the database
    * @param id The id of the selected post
@@ -347,7 +340,7 @@ function Profile(props): JSX.Element {
 
   return (
     <>
-      {view.otherProfile && <NavBar type={'User Profile'} />}
+      {view.otherProfile && <NavBar />}
       {(view.main || view.otherProfile) && (
         <View style={styles.profilePage}>
           <View style={styles.profileView}>
@@ -702,7 +695,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '79%',
+    height: '76.5%',
   },
   profilePicture: {
     width: 100,

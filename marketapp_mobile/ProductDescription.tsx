@@ -20,6 +20,28 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+
+import Svg, {
+  Circle,
+  Ellipse,
+  G,
+  TSpan,
+  TextPath,
+  Path,
+  Polygon,
+  Polyline,
+  Line,
+  Rect,
+  Use,
+  Symbol,
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Stop,
+  ClipPath,
+  Pattern,
+  Mask,
+} from 'react-native-svg';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 /**
@@ -288,7 +310,7 @@ function ProductDescription(props): JSX.Element {
           {mainScreen && (
             <TouchableWithoutFeedback
               onPress={() => like_viewed_post(props.post.id, profile)}>
-              <View
+              {/* <View
                 style={{
                   width: 30,
                   height: 30,
@@ -297,7 +319,14 @@ function ProductDescription(props): JSX.Element {
                   borderRadius: 15,
                   backgroundColor: liked ? 'red' : 'rgb(17, 87, 64)',
                 }}
-              />
+              /> */}
+              <Svg width="24" height="24" fill="none">
+                <Path
+                  d="M2 9.1371C2 14 6.01943 16.5914 8.96173 18.9109C10 19.7294 11 20.5 12 20.5C13 20.5 14 19.7294 15.0383 18.9109C17.9806 16.5914 22 14 22 9.1371C22 4.27416 16.4998 0.825464 12 5.50063C7.50016 0.825464 2 4.27416 2 9.1371Z"
+                  fill={liked ? 'red' : 'rgb(17, 87, 64)'}
+                  stroke={'black'}
+                />
+              </Svg>
             </TouchableWithoutFeedback>
           )}
           {mainScreen && (

@@ -1,6 +1,21 @@
 import React from 'react';
 
 import {Image, StyleSheet, TouchableWithoutFeedback, View} from 'react-native';
+import {Dimensions, Platform, PixelRatio} from 'react-native';
+
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+function normalize(size: any) {
+  const newSize = size * scale;
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
 
 function Footer(props: any): JSX.Element {
   //Footer component that is displayed on various screens
@@ -72,11 +87,6 @@ function Footer(props: any): JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  footerContainer: {
-    flex: 1,
-    backgroundColor: 'rgb(17, 87, 64)',
-    height: '10%',
-  },
   chatFooterContainer: {
     flex: 1,
     backgroundColor: 'rgb(17, 87, 64)',
@@ -89,8 +99,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     columnGap: 40,
-    paddingTop: 10,
-    paddingBottom: 10,
+    position: 'absolute',
+    width: '100%',
+    height: SCREEN_HEIGHT * 0.1,
   },
   chatFooter: {
     display: 'flex',
