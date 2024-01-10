@@ -829,6 +829,7 @@ function Violations(props: any): JSX.Element {
         </View>
         <View style={styles.toggleContainer}>
           {props.violations.map((type: any) => {
+            console.log(violations, 'test')
             return (
               violations.includes(type.toLowerCase()) && (
                 <View style={styles.violationsToggle}>

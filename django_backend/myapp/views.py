@@ -503,7 +503,7 @@ class ViolationViewSet(viewsets.ModelViewSet):
         try:
             violations = Violation.objects.filter(username=username)
             for val in violations:
-                types.append(val)
+                types.append(val.type)
         finally:
             return Response({'types': types})
 #----------------------------
