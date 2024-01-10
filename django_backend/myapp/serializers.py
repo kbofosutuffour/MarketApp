@@ -103,3 +103,9 @@ class FlaggedPostSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = FlaggedPost
 		fields = '__all__'
+
+class ViolationSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = Violation
+		fields = '__all__'

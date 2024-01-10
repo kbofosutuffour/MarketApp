@@ -17,6 +17,22 @@ function normalize(size: any) {
   }
 }
 
+/**
+ * An attempt to make the height of each page
+ * consistent.
+ * @param height the screen height of the phone
+ * @returns the height needed for the phone screens
+ */
+function filterHeight(height: number) {
+  if (height < 600) {
+    return SCREEN_HEIGHT * 0.75;
+  } else if (height < 716) {
+    return SCREEN_HEIGHT * 0.765;
+  } else if (height < 780) {
+    return SCREEN_HEIGHT * 0.8;
+  }
+}
+
 function Footer(props: any): JSX.Element {
   //Footer component that is displayed on various screens
   return (
@@ -101,7 +117,7 @@ const styles = StyleSheet.create({
     columnGap: 40,
     position: 'absolute',
     width: '100%',
-    height: SCREEN_HEIGHT * 0.1,
+    padding: 10,
   },
   chatFooter: {
     display: 'flex',

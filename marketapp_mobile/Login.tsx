@@ -16,6 +16,41 @@ import {
   View,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {Dimensions, Platform, PixelRatio} from 'react-native';
+
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+/**
+ * Function to make font sizes, margin sizes,
+ * and other related sizing consistent
+ * @param size the desired size
+ * @returns a consistent size to match across different phones
+ */
+function normalize(size: any) {
+  const newSize = size * scale;
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
+
+/**
+ * An attempt to make the height of each page
+ * consistent.
+ * @param height the screen height of the phone
+ * @returns the height needed for the phone screens
+ */
+function filterHeight(height: number) {
+  if (height < 716) {
+    return SCREEN_HEIGHT * 0.765;
+  } else if (height < 780) {
+    return SCREEN_HEIGHT * 0.8;
+  }
+}
 
 function ForgotPassword(props): JSX.Element {
   const [passwordState, setPasswordState] = useState({
@@ -512,14 +547,15 @@ function Register(props): JSX.Element {
                 />
               </View>
             </TouchableWithoutFeedback>
-            <Text>I have read and agreed to the </Text>
-            <Text style={styles.termsAndConditionsBold}>
-              Terms and Conditions
+            <Text style={{width: '80%', textAlign: 'center'}}>
+              I have read and agreed to the
+              <Text style={styles.termsAndConditionsBold}>
+                {/* eslint-disable-next-line prettier/prettier */}
+                Terms and Conditions </Text>
+                and
+              {/* eslint-disable-next-line prettier/prettier */}
+              <Text style={styles.termsAndConditionsBold}> Privacy Policy </Text>
             </Text>
-          </View>
-          <View style={styles.termsAndConditionsContainer}>
-            <Text> and </Text>
-            <Text style={styles.termsAndConditionsBold}>Privacy Policy</Text>
           </View>
 
           <TouchableWithoutFeedback onPress={() => createAccount()}>
@@ -847,7 +883,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    rowGap: 20,
+    rowGap: normalize(15),
   },
   loginText: {
     display: 'flex',
@@ -896,9 +932,9 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   wmLogo: {
-    width: 200,
-    height: 200,
-    borderRadius: 25,
+    width: normalize(150),
+    height: normalize(150),
+    borderRadius: normalize(25),
     overflow: 'hidden',
   },
   profilePicture: {
@@ -906,9 +942,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: normalize(100),
+    height: normalize(100),
+    borderRadius: normalize(75),
     borderWidth: 2,
     borderColor: Colors.black,
     overflow: 'hidden',
@@ -922,8 +958,8 @@ const styles = StyleSheet.create({
   input: {
     borderBottomWidth: 2,
     borderBottomColor: 'gray',
-    width: 300,
-    height: 50,
+    width: normalize(250),
+    height: normalize(40),
     color: Colors.black,
     paddingLeft: 10,
     margin: 0,
@@ -931,7 +967,7 @@ const styles = StyleSheet.create({
   inputSmall: {
     borderBottomWidth: 2,
     borderBottomColor: 'gray',
-    width: 225,
+    width: normalize(200),
     height: 50,
     color: Colors.black,
     paddingLeft: 10,
@@ -947,6 +983,8 @@ const styles = StyleSheet.create({
   termsAndConditionsContainer: {
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     rowGap: 0,
   },
   termsAndConditionsBold: {
@@ -954,7 +992,7 @@ const styles = StyleSheet.create({
   },
   usernameWarning: {
     marginTop: 10,
-    marginBottom: 30,
+    marginBottom: normalize(20),
   },
   errorMessageContainer: {
     position: 'absolute',

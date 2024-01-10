@@ -149,17 +149,6 @@ class UserSettings(models.Model):
     blocked_users = models.ManyToManyField(Profile, blank=True, related_name="blocked_users")
     show_joined_date = models.BooleanField(blank=True, default=False)
 
-    # Violations
-    scamming = models.BooleanField(blank=True, default=False)
-    harassment = models.BooleanField(blank=True, default=False)
-    illegal_goods = models.BooleanField(blank=True, default=False)
-    nickname = models.BooleanField(blank=True, default=False)
-    language = models.BooleanField(blank=True, default=False)
-    noShow = models.BooleanField(blank=True, default=False)
-    postName = models.BooleanField(blank=True, default=False)
-    damaged_product = models.BooleanField(blank=True, default=False)
-    already_sold = models.BooleanField(blank=True, default=False)
-
 class Violations(models.TextChoices):
     SCAMMING = "SCAMMING", _("SCAMMING")
     HARASSMENT = "HARASSMENT", _("HARASSMENT")
@@ -217,6 +206,7 @@ class Rating(models.Model):
     """
     Table to record users ratings between one another
     """
+    
     username = models.ForeignKey(
         Profile,
         on_delete=models.CASCADE,
@@ -242,4 +232,19 @@ class FlaggedPost(models.Model):
         Profile,
         on_delete=models.CASCADE,
         related_name="flagged_by",
+    )
+
+class Violation(models.Model):
+    """
+    Table to record any incidents of user violations
+    """
+    username = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="violation_username",
+    )
+    
+    type = models.CharField(
+        choices = Violations.choices,
+        max_length=15
     )

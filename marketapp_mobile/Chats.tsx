@@ -18,18 +18,36 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Footer from './Footer';
 import {format, formatDistance} from 'date-fns';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
-
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 // based on iphone 5s's scale
 const scale = SCREEN_WIDTH / 320;
 
-function normalize(size: any) {
+export function normalize(size) {
   const newSize = size * scale;
   if (Platform.OS === 'ios') {
     return Math.round(PixelRatio.roundToNearestPixel(newSize));
   } else {
     return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
+
+/**
+ * An attempt to make the height of each page
+ * consistent.
+ * @param height the screen height of the phone
+ * @returns the height needed for the phone screens
+ */
+function filterHeight(height: number) {
+  if (height < 600) {
+    return SCREEN_HEIGHT * 0.7;
+  }
+  if (height < 716) {
+    return SCREEN_HEIGHT * 0.765;
+  } else if (height < 780) {
+    return SCREEN_HEIGHT * 0.8;
+  } else {
+    return SCREEN_HEIGHT * 0.82;
   }
 }
 
@@ -206,15 +224,15 @@ function Chats(props): JSX.Element {
 
       ws.current.onerror = e => {
         // an error occurred
-        console.log(e.message);
       };
 
       ws.current.onclose = e => {
         // connection closed
-        console.log(e);
-        console.log(e.code, e.reason);
+        if (e.code !== 1006) {
+          console.log(e.code, e.reason);
+        }
       };
-    }
+    } 
   }, [chats.id]);
 
   /**
@@ -343,14 +361,13 @@ function Chats(props): JSX.Element {
     ws.current?.send(JSON.stringify(data));
   };
   return (
-    <View
-      // eslint-disable-next-line react-native/no-inline-styles
-      style={{
-        backgroundColor: Colors.white,
-        height: '106%',
-      }}>
+    <>
       {rooms.showRoom && (
-        <>
+        <View
+          style={{
+            backgroundColor: Colors.white,
+            height: filterHeight(SCREEN_HEIGHT),
+          }}>
           <ScrollView>
             {rooms.rooms.buyers.map(value => {
               return (
@@ -389,10 +406,14 @@ function Chats(props): JSX.Element {
                 );
               })}
           </ScrollView>
-        </>
+        </View>
       )}
       {!rooms.showRoom && chats.showChats && (
-        <>
+        <View
+          style={{
+            backgroundColor: Colors.white,
+            height: filterHeight(SCREEN_HEIGHT),
+          }}>
           <View style={styles.post}>
             <View style={styles.postImageContainer}>
               <Image
@@ -415,7 +436,7 @@ function Chats(props): JSX.Element {
               />
             </View>
           </View>
-          <View style={{height: '73%'}}>
+          <View style={{height: '100%'}}>
             <ScrollView
               showsVerticalScrollIndicator={false}
               ref={scrollViewRef}
@@ -457,7 +478,7 @@ function Chats(props): JSX.Element {
               />
             </View>
           </View>
-        </>
+        </View>
       )}
       <Footer
         returnHome={returnHome}
@@ -465,7 +486,7 @@ function Chats(props): JSX.Element {
         viewChats={viewChats}
         type={'Chats'}
       />
-    </View>
+    </>
   );
 }
 
@@ -501,23 +522,23 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   roomImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: normalize(60),
+    height: normalize(60),
+    borderRadius: normalize(35),
     backgroundColor: Colors.black,
   },
   productImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: normalize(60),
+    height: normalize(60),
+    borderRadius: normalize(35),
     backgroundColor: Colors.black,
     position: 'absolute',
     right: 30,
   },
   profilePicture: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: normalize(50),
+    height: normalize(50),
+    borderRadius: normalize(25),
     backgroundColor: Colors.black,
   },
   messagePicture: {
@@ -575,19 +596,20 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   postImageContainer: {
-    width: 75,
-    height: 75,
+    width: normalize(60),
+    height: normalize(60),
+    borderRadius: normalize(15),
     display: 'flex',
     marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   postImage: {
-    width: 75,
-    height: 75,
+    width: normalize(60),
+    height: normalize(60),
+    borderRadius: normalize(15),
     display: 'flex',
     backgroundColor: 'black',
-    borderRadius: 10,
     overflow: 'hidden',
   },
   postText: {

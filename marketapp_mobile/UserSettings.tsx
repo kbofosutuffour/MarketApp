@@ -29,6 +29,22 @@ export function normalize(size) {
   }
 }
 
+/**
+ * An attempt to make the height of each page
+ * consistent.
+ * @param height the screen height of the phone
+ * @returns the height needed for the phone screens
+ */
+function filterHeight(height: number) {
+  if (height < 600) {
+    return SCREEN_HEIGHT * 0.725;
+  } else if (height < 716) {
+    return SCREEN_HEIGHT * 0.765;
+  } else if (height < 780) {
+    return SCREEN_HEIGHT * 0.8;
+  }
+}
+
 function Profile(props): JSX.Element {
   const options = [
     'Change Password',
@@ -677,6 +693,15 @@ function HelpOrFeedback(props: any): JSX.Element {
       )}
       {view.feedback && (
         <View style={styles.userSettings}>
+          <View style={styles.blackArrow}>
+            <TouchableWithoutFeedback
+              onPress={() => props.setView({support: true})}>
+              <Image
+                style={styles.blackArrow}
+                source={require('./media/black_left_arrow.png')}
+              />
+            </TouchableWithoutFeedback>
+          </View>
           <View style={styles.userFeedbackSettings}>
             <View style={styles.feedbackContainer}>
               <Text>Tell us how we can improve!</Text>
@@ -698,11 +723,11 @@ function HelpOrFeedback(props: any): JSX.Element {
             <Text
               style={{
                 color: Colors.black,
-                fontSize: 17.5,
+                fontSize: normalize(15),
                 textAlign: 'center',
                 width: '70%',
               }}>
-              If reached max. limit or for more concerns /issues, please contact
+              If reached max. limit or for more concerns/issues, please contact
               us at marketappwm@gmail.com
             </Text>
           </View>
@@ -803,30 +828,29 @@ function Violations(props: any): JSX.Element {
           <Text style={styles.settingsOption}>Violations</Text>
         </View>
         <View style={styles.toggleContainer}>
-          {Object.keys(props.userSettings).map(value => {
+          {props.violations.map((type: any) => {
             return (
-              violations.includes(value) &&
-              props.userSettings[value] && (
+              violations.includes(type.toLowerCase()) && (
                 <View style={styles.violationsToggle}>
                   <View>
                     <Text style={{width: 100}}>
-                      {value.toUpperCase().split('_').join(' ')}
+                      {type.toUpperCase().split('_').join(' ')}
                     </Text>
                   </View>
                   <TouchableWithoutFeedback
                     onPress={() => {
                       setSettings({
                         ...settings,
-                        [value]: !settings[value as keyof template],
+                        [type]: !settings[type as keyof template],
                       });
                     }}>
                     <Text
                       // eslint-disable-next-line react-native/no-inline-styles
                       style={{
-                        backgroundColor: settings[value as keyof template]
+                        backgroundColor: settings[type as keyof template]
                           ? 'rgb(17, 87, 64)'
                           : '#D7D7D7',
-                        color: settings[value as keyof template]
+                        color: settings[type as keyof template]
                           ? Colors.white
                           : Colors.black,
                         position: 'absolute',
@@ -875,7 +899,7 @@ function UserSettings(props: any): JSX.Element {
           // eslint-disable-next-line react-native/no-inline-styles
           style={{
             backgroundColor: '#f6f7f5',
-            height: '76.5%',
+            height: filterHeight(SCREEN_HEIGHT),
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -918,7 +942,10 @@ function UserSettings(props: any): JSX.Element {
               )
             );
           })}
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setView({helpOrFeedback: true});
+            }}>
             <View style={styles.settingsOptionSendFeedback}>
               <Text style={styles.settingsOption}>Send Feedback</Text>
             </View>
@@ -951,7 +978,11 @@ function UserSettings(props: any): JSX.Element {
       )}
       {view.support && <Support setView={setView} />}
       {view.violations && (
-        <Violations userSettings={props.userSettings.data} setView={setView} />
+        <Violations
+          userSettings={props.userSettings.data}
+          setView={setView}
+          violations={props.violations}
+        />
       )}
       {view.changePassword && (
         <ChangePassword
@@ -993,8 +1024,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
+    marginTop: normalize(30),
+    marginBottom: normalize(15),
   },
   profileDescription: {
     display: 'flex',
@@ -1003,8 +1034,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
+    marginTop: normalize(30),
+    marginBottom: normalize(15),
     columnGap: 10,
   },
   profilePictureBorder: {
@@ -1015,7 +1046,7 @@ const styles = StyleSheet.create({
   },
   userSettings: {
     backgroundColor: '#f6f7f5',
-    height: '80%',
+    height: filterHeight(SCREEN_HEIGHT),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -1036,7 +1067,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderColor: 'gray',
-    height: 50,
+    height: normalize(40),
     width: '85%',
     display: 'flex',
     justifyContent: 'center',
@@ -1048,7 +1079,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    height: 50,
+    height: normalize(40),
     width: '85%',
     display: 'flex',
     justifyContent: 'center',
@@ -1058,7 +1089,7 @@ const styles = StyleSheet.create({
   },
   settingsOptionSendFeedback: {
     borderRadius: 20,
-    height: 50,
+    height: normalize(40),
     width: '85%',
     display: 'flex',
     justifyContent: 'center',
@@ -1070,7 +1101,7 @@ const styles = StyleSheet.create({
   settingsOptionLogOut: {
     borderColor: 'gray',
     borderRadius: 20,
-    height: 50,
+    height: normalize(40),
     width: '85%',
     display: 'flex',
     justifyContent: 'center',
@@ -1102,7 +1133,7 @@ const styles = StyleSheet.create({
   notificationHeader: {
     borderBottomWidth: 1,
     borderColor: 'gray',
-    height: 50,
+    height: normalize(40),
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
@@ -1111,7 +1142,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   settingsOption: {
-    fontSize: 20,
+    fontSize: normalize(15),
   },
   outerCircle: {
     position: 'absolute',
@@ -1172,8 +1203,8 @@ const styles = StyleSheet.create({
   },
   blackArrow: {
     position: 'absolute',
-    left: 10,
-    top: 10,
+    left: normalize(7.5),
+    top: normalize(7.5),
     width: 20,
     height: 20,
   },
@@ -1289,7 +1320,7 @@ const styles = StyleSheet.create({
   feedbackContainer: {
     backgroundColor: Colors.white,
     width: '100%',
-    height: '80%',
+    height: normalize(225),
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

@@ -491,6 +491,21 @@ class FlaggedPostViewSet(viewsets.ModelViewSet):
         flags = FlaggedPost.objects.filter(post=request.data['post'])
         print(len(flags), "number of flags")
         return Response({"number_of_flags": len(flags)})
+    
+class ViolationViewSet(viewsets.ModelViewSet):
+
+    queryset = Violation.objects.all()
+    serializer_class = ViolationSerializer
+
+    @action(methods=['get'], detail=False, url_path=r'get_violations/(?P<username>\w+)')
+    def get_violations(self, request, username):
+        types = []
+        try:
+            violations = Violation.objects.filter(username=username)
+            for val in violations:
+                types.append(val)
+        finally:
+            return Response({'types': types})
 #----------------------------
 
 def home(request):

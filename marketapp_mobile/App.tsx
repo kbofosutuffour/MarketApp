@@ -54,12 +54,34 @@ const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 // based on iphone 5s's scale
 const scale = SCREEN_WIDTH / 320;
 
+/**
+ * Function to make font sizes, margin sizes,
+ * and other related sizing consistent
+ * @param size the desired size
+ * @returns a consistent size to match across different phones
+ */
 function normalize(size: any) {
   const newSize = size * scale;
   if (Platform.OS === 'ios') {
     return Math.round(PixelRatio.roundToNearestPixel(newSize));
   } else {
     return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
+
+/**
+ * An attempt to make the height of each page
+ * consistent.
+ * @param height the screen height of the phone
+ * @returns the height needed for the phone screens
+ */
+function filterHeight(height: number) {
+  if (height < 600) {
+    return SCREEN_HEIGHT * 0.725;
+  } else if (height < 716) {
+    return SCREEN_HEIGHT * 0.765;
+  } else if (height < 780) {
+    return SCREEN_HEIGHT * 0.8;
   }
 }
 
@@ -88,9 +110,9 @@ function NavBar(props: any): JSX.Element {
               <View style={styles.searchContainer}>
                 <View style={styles.searchBar}>
                   <TouchableWithoutFeedback>
-                    <View
+                    <Image
                       style={styles.searchButton}
-                      // source={require('./media/user-01.png')}
+                      source={require('./media/search-gray.png')}
                     />
                   </TouchableWithoutFeedback>
                   <TextInput
@@ -116,9 +138,9 @@ function NavBar(props: any): JSX.Element {
                       });
                       setInput('');
                     }}>
-                    <View
+                    <Image
                       style={styles.searchButton}
-                      // source={require('./media/user-01.png')}
+                      source={require('./media/cancel-gray.jpg')}
                     />
                   </TouchableWithoutFeedback>
                 </View>
@@ -164,7 +186,10 @@ function NavBar(props: any): JSX.Element {
                   props.setPosts({...props.posts, showPosts: false});
                 }}>
                 <View style={styles.searchButtonContainer}>
-                  <Image source={require('./media/search.png')} />
+                  <Image
+                    source={require('./media/search.png')}
+                    style={{width: normalize(40), height: normalize(40)}}
+                  />
                 </View>
               </TouchableWithoutFeedback>
             )}
@@ -179,8 +204,8 @@ function NavBar(props: any): JSX.Element {
             }}>
             <View style={styles.searchButtonContainer}>
               <Image
-                source={require('./media/settings.png')}
-                style={{width: 50, height: 50}}
+                source={require('./media/settings-white.png')}
+                style={{width: normalize(40), height: normalize(40)}}
               />
             </View>
           </TouchableWithoutFeedback>
@@ -218,6 +243,7 @@ function Post(props: any): JSX.Element {
   return (
     <TouchableWithoutFeedback //Makes the post component react to a tap
       onPress={() => {
+        props.setHasLoaded(false);
         props.setDesc({
           showDesc: true,
           post: props.data,
@@ -236,7 +262,7 @@ function Post(props: any): JSX.Element {
           </Text>
           <Text>{props.data.username}</Text>
           <Text>${props.data.price}</Text>
-          <Text style={{position: 'relative', top: 20, fontStyle: 'italic'}}>
+          <Text style={styles.postedDate}>
             {'Posted ' + getDifference(props.data.date) + ' ago'}
           </Text>
         </View>
@@ -284,7 +310,7 @@ function Post(props: any): JSX.Element {
  * Shown when the user is performing a search
  * @returns All possible categories for a post
  */
-function Categories(props): JSX.Element {
+function Categories(props: any): JSX.Element {
   const categories = {
     Furniture: furniture,
     Clothing: clothes,
@@ -367,6 +393,8 @@ function App(): JSX.Element {
     title: 'Settings',
     data: {},
   });
+
+  const [violations, setViolations] = useState([]);
 
   const [showPost, setPost] = useState({
     showPost: false,
@@ -469,6 +497,11 @@ function App(): JSX.Element {
         .then(res => {
           data.settings = res.data;
           setUserSettings({...settings, data: res.data});
+        });
+      await axios
+        .get('http://10.0.2.2:8000/violation/get_violations/' + profile_id)
+        .then(res => {
+          setViolations(res.data.types);
         });
       setProfile(data);
     }
@@ -983,6 +1016,7 @@ function App(): JSX.Element {
                             user={user}
                             setDelete={setDelete}
                             countFlagPost={countFlagPost}
+                            setHasLoaded={setHasLoaded}
                           />
                         );
                       } else if (
@@ -1007,6 +1041,7 @@ function App(): JSX.Element {
                           user={user}
                           setDelete={setDelete}
                           countFlagPost={countFlagPost}
+                          setHasLoaded={setHasLoaded}
                         />
                       );
                     })}
@@ -1094,6 +1129,7 @@ function App(): JSX.Element {
             current_user_pfp={profile.data.profile_picture}
             viewReport={viewReport}
             rateProfile={rateProfile}
+            setHasLoaded={setHasLoaded}
           />
         </>
       )}
@@ -1178,6 +1214,7 @@ function App(): JSX.Element {
             profile={profile.data}
             date={profile.date}
             viewProfile={viewProfile}
+            violations={violations}
           />
           <Footer
             returnHome={returnHome}
@@ -1271,7 +1308,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(22.5),
   },
   mainView: {
-    height: SCREEN_HEIGHT * 0.765,
+    height: filterHeight(SCREEN_HEIGHT),
   },
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
@@ -1284,7 +1321,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   searchButtonContainer: {
-    // flex: 1,
     display: 'flex',
     flexDirection: 'row',
   },
@@ -1292,11 +1328,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: 20,
     width: '70%',
-    height: '80%',
+    height: normalize(40),
   },
   post: {
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: normalize(10),
     borderWidth: 1,
     borderColor: 'grey',
@@ -1308,8 +1346,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   postImage: {
-    width: 100,
-    height: 100,
+    width: normalize(75),
+    height: normalize(75),
     display: 'flex',
     backgroundColor: 'black',
     borderRadius: 10,
@@ -1318,7 +1356,11 @@ const styles = StyleSheet.create({
   postText: {
     display: 'flex',
     flexDirection: 'column',
-    width: '60%',
+    width: SCREEN_WIDTH > 350 ? '60%' : '55%',
+  },
+  postedDate: {
+    position: 'relative',
+    fontStyle: 'italic',
   },
   product: {
     fontWeight: 'bold',
@@ -1360,12 +1402,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgb(185, 151, 91)',
   },
   addPost: {
-    width: 75,
-    height: 75,
+    width: normalize(65),
+    height: normalize(65),
     position: 'absolute',
     bottom: 20,
     right: 20,
-    borderRadius: 35,
+    borderRadius: normalize(35),
   },
   searchContainer: {
     display: 'flex',
@@ -1385,10 +1427,9 @@ const styles = StyleSheet.create({
     columnGap: 10,
   },
   searchButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 20,
-    backgroundColor: Colors.black,
+    width: normalize(20),
+    height: normalize(20),
+    borderRadius: normalize(20),
   },
   cancelButton: {
     display: 'flex',

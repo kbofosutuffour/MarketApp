@@ -27,6 +27,7 @@ router.register(r'images', ImageViewSet, basename="images")
 router.register(r'feedback', FeedbackViewSet, basename="feedback")
 router.register(r'ratings', RatingViewSet, basename="ratings")
 router.register(r'flag', FlaggedPostViewSet, basename="flag")
+router.register(r'violation', ViolationViewSet, basename="violation")
 
 urlpatterns = [
     path('', include(router.urls)),

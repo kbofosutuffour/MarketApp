@@ -16,6 +16,37 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import DocumentPicker from 'react-native-document-picker';
 import {format} from 'date-fns';
 
+import {Dimensions, Platform, PixelRatio} from 'react-native';
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+export function normalize(size: any) {
+  const newSize = size * scale;
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
+
+/**
+ * An attempt to make the height of each page
+ * consistent.
+ * @param height the screen height of the phone
+ * @returns the height needed for the phone screens
+ */
+function filterHeight(height: number) {
+  if (height < 600) {
+    return SCREEN_HEIGHT * 0.725;
+  } else if (height < 716) {
+    return SCREEN_HEIGHT * 0.765;
+  } else if (height < 780) {
+    return SCREEN_HEIGHT * 0.8;
+  }
+}
+
 /**
  * @param props
  * @returns A post created by the user
@@ -195,7 +226,7 @@ function EditProfile(props: any): JSX.Element {
   };
 
   return (
-    <View style={{height: '80%'}}>
+    <View style={{height: filterHeight(SCREEN_HEIGHT)}}>
       <Button
         title="Return"
         onPress={() =>
@@ -227,7 +258,7 @@ function EditProfile(props: any): JSX.Element {
             </View>
           </TouchableOpacity>
           <View>
-            <Text style={{color: 'black', fontSize: 22.5}}>
+            <Text style={{color: 'black', fontSize: normalize(22.5)}}>
               {props.profile.data.username}
             </Text>
             <Text style={{textDecorationLine: 'underline'}}>
@@ -352,7 +383,7 @@ function Profile(props: any): JSX.Element {
               }}
             />
             <View style={styles.profileDescription}>
-              <Text style={{fontSize: 25, color: Colors.black}}>
+              <Text style={{fontSize: normalize(20), color: Colors.black}}>
                 {props.profile.data.username}
               </Text>
               {props.onMain && (
@@ -431,7 +462,7 @@ function Profile(props: any): JSX.Element {
                   justifyContent: 'center',
                   borderColor: 'gray',
                   borderTopWidth: 0.5,
-                  padding: 20,
+                  padding: normalize(15),
                   width: '33.33%',
                   backgroundColor: type.sell_history ? Colors.white : '#D7D7D7',
                 }}>
@@ -462,7 +493,7 @@ function Profile(props: any): JSX.Element {
                     justifyContent: 'center',
                     borderColor: 'gray',
                     borderTopWidth: 0.5,
-                    padding: 20,
+                    padding: normalize(15),
                     width: '33.33%',
                     backgroundColor: type.buy_history
                       ? Colors.white
@@ -496,7 +527,7 @@ function Profile(props: any): JSX.Element {
                     justifyContent: 'center',
                     borderColor: 'gray',
                     borderTopWidth: 0.5,
-                    padding: 20,
+                    padding: normalize(15),
                     width: '33.33%',
                     backgroundColor: type.liked_posts
                       ? Colors.white
@@ -598,7 +629,9 @@ function Profile(props: any): JSX.Element {
             rowGap: 20,
             padding: 20,
           }}>
-          <Text style={{fontSize: 20, color: 'black', textAlign: 'center'}}>Are you sure you want to delete this post?</Text>
+          <Text style={{fontSize: 20, color: 'black', textAlign: 'center'}}>
+            Are you sure you want to delete this post?
+          </Text>
           <Post data={deletePostData} />
           <View style={{display: 'flex', flexDirection: 'row', columnGap: 10}}>
             <TouchableWithoutFeedback
@@ -695,19 +728,19 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '76.5%',
+    height: filterHeight(SCREEN_HEIGHT),
   },
   profilePicture: {
-    width: 100,
-    height: 100,
+    width: normalize(80),
+    height: normalize(80),
     borderRadius: 50,
-    marginLeft: 25,
+    marginLeft: normalize(25),
     borderWidth: 1,
     borderColor: Colors.black,
   },
   profilePictureBorder: {
-    width: 100,
-    height: 100,
+    width: normalize(80),
+    height: normalize(80),
     borderRadius: 50,
     borderWidth: 1,
     borderColor: Colors.black,
@@ -748,19 +781,19 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    padding: 15,
+    padding: normalize(15),
     borderWidth: 0.8,
     borderColor: 'grey',
   },
   postImageContainer: {
-    width: 125,
+    width: normalize(70),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
   },
   postImage: {
-    width: 100,
-    height: 100,
+    width: normalize(60),
+    height: normalize(60),
     display: 'flex',
     backgroundColor: 'black',
     borderRadius: 25,
@@ -769,7 +802,7 @@ const styles = StyleSheet.create({
   postText: {
     display: 'flex',
     flexDirection: 'column',
-    width: '55%',
+    width: '65%',
     marginLeft: 20,
   },
   postOptions: {
