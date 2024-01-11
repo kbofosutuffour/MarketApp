@@ -11,6 +11,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { normalize } from './Profile';
 
 function Landing(props): JSX.Element {
   return (
@@ -54,8 +55,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 5,
     borderColor: 'rgb(185, 151, 91)',
-    width: 200,
-    height: 200,
+    width: normalize(150),
+    height: normalize(150),
   },
 });
 

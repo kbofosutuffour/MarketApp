@@ -81,7 +81,7 @@ function Room(props): JSX.Element {
           }}
         />
         <View>
-          <Text style={{color: 'black', fontSize: 18.5}}>
+          <Text style={{color: 'black', fontSize: normalize(17.5)}}>
             {props.other_user}
           </Text>
         </View>

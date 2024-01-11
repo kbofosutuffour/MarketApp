@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
 import React, {useEffect, useState} from 'react';
 
@@ -103,113 +104,127 @@ function EditPost(props): JSX.Element {
   };
 
   return (
-    <>
-      <View style={styles.postItem}>
-        <Button
-          title="Select your display image"
-          onPress={chooseImage}
-          color={'rgb(17, 87, 64)'}
-        />
-        <ScrollView style={styles.imagesContainer} horizontal={true}>
-          {display && (
-            <Image source={{uri: display}} style={{width: 200, height: 200}} />
-          )}
-          {images.map(image => {
-            return (
-              image && (
-                <Image
-                  source={{uri: image}}
-                  style={{width: 200, height: 200}}
-                />
-              )
-            ); 
-          })}
-        </ScrollView>
-      </View>
-      <View style={styles.postItem}>
-        <TextInput
-          placeholder="Product"
-          onChangeText={value => props.setPost({...props.post, product: value})}
-          style={styles.input}
-          value={props.post.product}
-        />
-      </View>
-      <View style={styles.postItemPrice}>
-        <Text style={styles.dollarSign}>$</Text>
-        <TextInput
-          placeholder="Enter Price"
-          onChangeText={value => {
-            if (Number(value)) {
-              props.setPost({...props.post, price: Number(value)});
+    <View
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        width: '100%',
+        height: '90%',
+      }}>
+      <ScrollView>
+        <View style={styles.postItem}>
+          <Button
+            title="Select your display image"
+            onPress={chooseImage}
+            color={'rgb(17, 87, 64)'}
+          />
+          <ScrollView style={styles.imagesContainer} horizontal={true}>
+            {display && (
+              <Image
+                source={{uri: display}}
+                style={{width: 200, height: 200}}
+              />
+            )}
+            {images.map(image => {
+              return (
+                image && (
+                  <Image
+                    source={{uri: image}}
+                    style={{width: 200, height: 200}}
+                  />
+                )
+              );
+            })}
+          </ScrollView>
+        </View>
+        <View style={styles.postItem}>
+          <TextInput
+            placeholder="Product"
+            onChangeText={value =>
+              props.setPost({...props.post, product: value})
             }
-          }}
-          style={styles.input}
-          value={props.post.price}
-        />
-      </View>
-      <View style={styles.postItemCategory}>
-        <Text>Category: {props.post.category}</Text>
-        <Picker
-          selectedValue={props.post.category}
-          onValueChange={itemValue => {
-            if (props.categories.includes(itemValue)) {
-              props.setPost({...props.post, category: itemValue});
+            style={styles.input}
+            value={props.post.product}
+          />
+        </View>
+        <View style={styles.postItemPrice}>
+          <Text style={styles.dollarSign}>$</Text>
+          <TextInput
+            placeholder="Enter Price"
+            onChangeText={value => {
+              if (Number(value)) {
+                props.setPost({...props.post, price: Number(value)});
+              }
+            }}
+            style={styles.input}
+            value={props.post.price}
+          />
+        </View>
+        <View style={styles.postItemCategory}>
+          <Text>Category: {props.post.category}</Text>
+          <Picker
+            selectedValue={props.post.category}
+            onValueChange={itemValue => {
+              if (props.categories.includes(itemValue)) {
+                props.setPost({...props.post, category: itemValue});
+              }
+            }}
+            style={styles.pickerItem}>
+            {props.categories.map((value: string) => {
+              return <Picker.Item label={value} value={value} />;
+            })}
+            <Picker.Item label={'test'} value={'test'} />
+          </Picker>
+        </View>
+        <View style={styles.postItemDraft}>
+          <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
+          <Switch
+            trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
+            value={props.post.draft}
+            onValueChange={() =>
+              props.setPost({...props.post, draft: !props.post.draft})
             }
-          }}
-          style={styles.pickerItem}>
-          {props.categories.map((value: string) => {
-            return <Picker.Item label={value} value={value} />;
-          })}
-          <Picker.Item label={'test'} value={'test'} />
-        </Picker>
-      </View>
-      <View style={styles.postItemDraft}>
-        <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
-        <Switch
-          trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-          value={props.post.draft}
-          onValueChange={() =>
-            props.setPost({...props.post, draft: !props.post.draft})
-          }
-        />
-      </View>
-      <View style={styles.postItemStatus}>
-        <Button
-          title="SELLING"
-          color={
-            props.post.status === 'SELLING'
-              ? 'rgb(185, 151, 91)'
-              : 'rgb(17, 87, 64)'
-          }
-          onPress={() => {
-            props.setPost({...props.post, status: 'SELLING'});
-          }}
-        />
-        <Button
-          title="PENDING"
-          color={
-            props.post.status === 'PENDING'
-              ? 'rgb(185, 151, 91)'
-              : 'rgb(17, 87, 64)'
-          }
-          onPress={() => {
-            props.setPost({...props.post, status: 'PENDING'});
-          }}
-        />
-      </View>
-      <View style={styles.postItemDescription}>
-        <TextInput
-          placeholder="Write a description for your product here:"
-          multiline={true}
-          numberOfLines={4}
-          style={styles.descriptionInput}
-          textAlignVertical={'top'}
-          onChangeText={value =>
-            props.setPost({...props.post, description: value})
-          }
-          value={props.post.description}
-        />
-      </View>
+          />
+        </View>
+        <View style={styles.postItemStatus}>
+          <Button
+            title="SELLING"
+            color={
+              props.post.status === 'SELLING'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)'
+            }
+            onPress={() => {
+              props.setPost({...props.post, status: 'SELLING'});
+            }}
+          />
+          <Button
+            title="PENDING"
+            color={
+              props.post.status === 'PENDING'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)'
+            }
+            onPress={() => {
+              props.setPost({...props.post, status: 'PENDING'});
+            }}
+          />
+        </View>
+        <View style={styles.postItemDescription}>
+          <TextInput
+            placeholder="Write a description for your product here:"
+            multiline={true}
+            numberOfLines={4}
+            style={styles.descriptionInput}
+            textAlignVertical={'top'}
+            onChangeText={value =>
+              props.setPost({...props.post, description: value})
+            }
+            value={props.post.description}
+          />
+        </View>
+      </ScrollView>
 
       <TouchableOpacity
         onPress={() => {
@@ -221,7 +236,7 @@ function EditPost(props): JSX.Element {
           <Text style={{color: Colors.white, fontSize: 30}}>EDIT POST</Text>
         </View>
       </TouchableOpacity>
-    </>
+    </View>
   );
 }
 
@@ -309,121 +324,142 @@ function NewPost(props): JSX.Element {
   };
 
   return (
-    <>
-      <View style={styles.postItem}>
-        <Button
-          title="Select your image(s)"
-          onPress={chooseImage}
-          color={'rgb(17, 87, 64)'}
-        />
-        <ScrollView style={styles.imagesContainer} horizontal={true}>
-          {display && (
-            <Image source={{uri: display}} style={{width: 200, height: 200}} />
-          )}
-          {images.map(image => {
-            return (
-              image && (
-                <Image
-                  source={{uri: image.uri}}
-                  style={{width: 200, height: 200}}
-                />
-              )
-            );
-          })}
-        </ScrollView>
-      </View>
-      <View style={styles.postItem}>
-        <TextInput
-          placeholder="Product"
-          onChangeText={value => props.setPost({...props.post, product: value})}
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.postItemPrice}>
-        <Text style={styles.dollarSign}>$</Text>
-        <TextInput
-          placeholder="Enter Price"
-          onChangeText={value => {
-            if (Number(value)) {
-              props.setPost({...props.post, price: Number(value)});
-            }
-          }}
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.postItemCategory}>
-        <Text>Category: {props.post.category}</Text>
-        <Picker
-          selectedValue={props.post.category}
-          onValueChange={itemValue => {
-            if (props.categories.includes(itemValue)) {
-              props.setPost({...props.post, category: itemValue});
-            }
-          }}
-          style={styles.pickerItem}>
-          {props.categories.map((value: string) => {
-            return <Picker.Item label={value} value={value} />;
-          })}
-          <Picker.Item label={'test'} value={'test'} />
-        </Picker>
-      </View>
-      <View style={styles.postItemDraft}>
-        <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
-        <Switch
-          trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-          value={props.post.draft}
-          onValueChange={() =>
-            props.setPost({...props.post, draft: !props.post.draft})
-          }
-        />
-      </View>
-      <View style={styles.postItemStatus}>
-        <Button
-          title="SELLING"
-          color={
-            props.post.status === 'SELLING'
-              ? 'rgb(185, 151, 91)'
-              : 'rgb(17, 87, 64)'
-          }
-          onPress={() => {
-            props.setPost({...props.post, status: 'SELLING'});
-          }}
-        />
-        <Button
-          title="PENDING"
-          color={
-            props.post.status === 'PENDING'
-              ? 'rgb(185, 151, 91)'
-              : 'rgb(17, 87, 64)'
-          }
-          onPress={() => {
-            props.setPost({...props.post, status: 'PENDING'});
-          }}
-        />
-      </View>
-      <View style={styles.postItemDescription}>
-        <TextInput
-          placeholder="Write a description for your product here:"
-          multiline={true}
-          numberOfLines={4}
-          style={styles.descriptionInput}
-          textAlignVertical={'top'}
-          onChangeText={value =>
-            props.setPost({...props.post, description: value})
-          }
-        />
-      </View>
-
-      <TouchableOpacity
-        onPress={async () => {
-          await postData();
-        }}
-        style={styles.submit}>
-        <View>
-          <Text style={{color: Colors.white, fontSize: 30}}>PUBLISH</Text>
+    <View
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        width: '100%',
+        height: '90%',
+      }}>
+      <ScrollView>
+        <View style={styles.postItem}>
+          <Button
+            title="Select your image(s)"
+            onPress={chooseImage}
+            color={'rgb(17, 87, 64)'}
+          />
+          <ScrollView style={styles.imagesContainer} horizontal={true}>
+            {display && (
+              <Image
+                source={{uri: display}}
+                style={{width: 200, height: 200}}
+              />
+            )}
+            {images.map(image => {
+              return (
+                image && (
+                  <Image
+                    source={{uri: image.uri}}
+                    style={{width: 200, height: 200}}
+                  />
+                )
+              );
+            })}
+          </ScrollView>
         </View>
-      </TouchableOpacity>
-    </>
+        <View style={styles.postItem}>
+          <TextInput
+            placeholder="Product"
+            onChangeText={value =>
+              props.setPost({...props.post, product: value})
+            }
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.postItemPrice}>
+          <Text style={styles.dollarSign}>$</Text>
+          <TextInput
+            placeholder="Enter Price"
+            onChangeText={value => {
+              if (Number(value)) {
+                props.setPost({...props.post, price: Number(value)});
+              }
+            }}
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.postItemCategory}>
+          <Text>Category: {props.post.category}</Text>
+          <Picker
+            selectedValue={props.post.category}
+            onValueChange={itemValue => {
+              if (props.categories.includes(itemValue)) {
+                props.setPost({...props.post, category: itemValue});
+              }
+            }}
+            style={styles.pickerItem}>
+            {props.categories.map((value: string) => {
+              return <Picker.Item label={value} value={value} />;
+            })}
+            <Picker.Item label={'test'} value={'test'} />
+          </Picker>
+        </View>
+        <View style={styles.postItemDraft}>
+          <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
+          <Switch
+            trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
+            value={props.post.draft}
+            onValueChange={() =>
+              props.setPost({...props.post, draft: !props.post.draft})
+            }
+          />
+        </View>
+        <View style={styles.postItemStatus}>
+          <Button
+            title="SELLING"
+            color={
+              props.post.status === 'SELLING'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)'
+            }
+            onPress={() => {
+              props.setPost({...props.post, status: 'SELLING'});
+            }}
+          />
+          <Button
+            title="PENDING"
+            color={
+              props.post.status === 'PENDING'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)'
+            }
+            onPress={() => {
+              props.setPost({...props.post, status: 'PENDING'});
+            }}
+          />
+        </View>
+        <View style={styles.postItemDescription}>
+          <TextInput
+            placeholder="Write a description for your product here:"
+            multiline={true}
+            numberOfLines={4}
+            style={styles.descriptionInput}
+            textAlignVertical={'top'}
+            onChangeText={value =>
+              props.setPost({...props.post, description: value})
+            }
+          />
+        </View>
+      </ScrollView>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <TouchableOpacity
+          onPress={async () => {
+            await postData();
+          }}
+          style={styles.submit}>
+          <View>
+            <Text style={{color: Colors.white, fontSize: 30}}>PUBLISH</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
@@ -572,7 +608,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 0.5,
     width: '100%',
-    height: '20%',
+    height: '40%',
     padding: 5,
   },
   imagesContainer: {
