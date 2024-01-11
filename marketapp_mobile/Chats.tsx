@@ -18,6 +18,8 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Footer from './Footer';
 import {format, formatDistance} from 'date-fns';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
+import uuid from 'react-native-uuid';
+
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 // based on iphone 5s's scale
@@ -383,6 +385,7 @@ function Chats(props): JSX.Element {
                   id={value.id}
                   seller={false}
                   buyer={true}
+                  key={uuid.v4()}
                 />
               );
             })}
@@ -402,6 +405,7 @@ function Chats(props): JSX.Element {
                     id={value.id}
                     seller={value.seller}
                     buyer={value.buyer}
+                    key={uuid.v4()}
                   />
                 );
               })}
@@ -458,6 +462,7 @@ function Chats(props): JSX.Element {
                     buyer={buyer}
                     seller={!buyer}
                     current_user={props.profile.username}
+                    key={uuid.v4()}
                   />
                 );
               })}

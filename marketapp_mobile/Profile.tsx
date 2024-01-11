@@ -15,6 +15,7 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import DocumentPicker from 'react-native-document-picker';
 import {format} from 'date-fns';
+import uuid from 'react-native-uuid';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -570,6 +571,7 @@ function Profile(props: any): JSX.Element {
                         setDelete={setDelete}
                         current_user={props.current_user}
                         main={view.main}
+                        key={uuid.v4()}
                       />
                     );
                   }
@@ -587,6 +589,7 @@ function Profile(props: any): JSX.Element {
                           setView={setView}
                           current_user={props.current_user}
                           main={view.main}
+                          key={uuid.v4()}
                         />
                       );
                     }

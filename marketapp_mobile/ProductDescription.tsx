@@ -417,8 +417,8 @@ const styles = StyleSheet.create({
   },
   returnHome: {
     position: 'absolute',
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     backgroundColor: 'rgb(185, 151, 91)',
     borderRadius: 10,
     left: 30,

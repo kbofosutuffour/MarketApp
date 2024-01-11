@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {format} from 'date-fns';
+import uuid from 'react-native-uuid';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -104,7 +105,8 @@ function Profile(props): JSX.Element {
               } else if (value === 'Edit Profile') {
                 props.viewProfile();
               }
-            }}>
+            }}
+            key={uuid.v4()}>
             <View
               style={
                 value === 'Change Password'
@@ -112,8 +114,11 @@ function Profile(props): JSX.Element {
                   : value === 'Blocked Users'
                   ? styles.settingsOptionContainerBottom
                   : styles.settingsOptionContainer
-              }>
-              <Text style={styles.settingsOption}>{value}</Text>
+              }
+              key={uuid.v4()}>
+              <Text style={styles.settingsOption} key={uuid.v4()}>
+                {value}
+              </Text>
             </View>
           </TouchableWithoutFeedback>
         );
@@ -759,14 +764,18 @@ function Support(props: any): JSX.Element {
               } else if (value === 'Help') {
                 props.setView({helpOrFeedback: true});
               }
-            }}>
+            }}
+            key={uuid.v4()}>
             <View
               style={
                 value === 'Violations'
                   ? styles.supportOptionContainerTop
                   : styles.settingsOptionContainerBottom
-              }>
-              <Text style={styles.settingsOption}>{value}</Text>
+              }
+              key={uuid.v4()}>
+              <Text style={styles.settingsOption} key={uuid.v4()}>
+                {value}
+              </Text>
             </View>
           </TouchableWithoutFeedback>
         );
@@ -776,41 +785,42 @@ function Support(props: any): JSX.Element {
 }
 
 function Violations(props: any): JSX.Element {
-  interface template {
-    scamming: boolean;
-    harassment: boolean;
-    illegal_goods: boolean;
-    nickname: boolean;
-    language: boolean;
-    no_show: boolean;
-    post_name: boolean;
-    damaged_product: boolean;
-    already_sold: boolean;
-  }
-
-  const [settings, setSettings]: [template, Function] = useState({
-    scamming: false,
-    harassment: false,
-    illegal_goods: false,
-    nickname: false,
-    language: false,
-    no_show: false,
-    post_name: false,
-    damaged_product: false,
-    already_sold: false,
-  });
+  const [settings, setSettings]: [any, Function] = useState({});
 
   const violations = [
     'scamming',
     'harassment',
-    'illegal_goods',
+    'illegal goods',
     'nickname',
     'language',
-    'no_show',
+    'no show',
     'post_name',
-    'damaged_product',
-    'already_sold',
+    'damaged product',
+    'already sold',
   ];
+
+  useEffect(() => {
+    let newSettings: any = {};
+    Object.values(props.violations).forEach((violation: any) => {
+      if (violation.appeal) {
+        newSettings[violation.type.toLowerCase()] = true;
+      }
+    });
+    setSettings(newSettings);
+  }, [props.violations]);
+
+  /**
+   * Saves the appeal in the database
+   * @param id the id of the violation in the database
+   */
+  const sendAppeal = async (id: string | number) => {
+    await axios.patch(`http://10.0.2.2:8000/violation/${id}/`, {
+      id: id,
+      appeal: true,
+    });
+    props.setHasLoaded(false);
+    await props.fetchData();
+  };
 
   return (
     <View style={styles.userSettings}>
@@ -828,30 +838,33 @@ function Violations(props: any): JSX.Element {
           <Text style={styles.settingsOption}>Violations</Text>
         </View>
         <View style={styles.toggleContainer}>
-          {props.violations.map((type: any) => {
-            console.log(violations, 'test')
+          {console.log(props.violations)}
+          {Object.values(props.violations).map((violation: any) => {
             return (
-              violations.includes(type.toLowerCase()) && (
-                <View style={styles.violationsToggle}>
-                  <View>
-                    <Text style={{width: 100}}>
-                      {type.toUpperCase().split('_').join(' ')}
+              violations.includes(violation.type.toLowerCase()) && (
+                <View style={styles.violationsToggle} key={uuid.v4()}>
+                  <View key={uuid.v4()}>
+                    <Text style={{width: 100}} key={uuid.v4()}>
+                      {violation.type.toUpperCase().split('_').join(' ')}
                     </Text>
                   </View>
                   <TouchableWithoutFeedback
-                    onPress={() => {
-                      setSettings({
-                        ...settings,
-                        [type]: !settings[type as keyof template],
-                      });
-                    }}>
+                    onPress={async () => {
+                      console.log(violation.type.toLowerCase());
+                      // Only send an appeal if there isn't already one
+                      if (!settings[violation.type.toLowerCase()]) {
+                        await sendAppeal(violation.id);
+                        props.setHasLoaded(true);
+                      } 
+                    }}
+                    key={uuid.v4()}>
                     <Text
                       // eslint-disable-next-line react-native/no-inline-styles
                       style={{
-                        backgroundColor: settings[type as keyof template]
+                        backgroundColor: settings[violation.type.toLowerCase()]
                           ? 'rgb(17, 87, 64)'
                           : '#D7D7D7',
-                        color: settings[type as keyof template]
+                        color: settings[violation.type.toLowerCase()]
                           ? Colors.white
                           : Colors.black,
                         position: 'absolute',
@@ -864,7 +877,8 @@ function Violations(props: any): JSX.Element {
                         lineHeight: 25,
                         borderRadius: 10,
                         textAlign: 'center',
-                      }}>
+                      }}
+                      key={uuid.v4()}>
                       Appeal
                     </Text>
                   </TouchableWithoutFeedback>
@@ -927,7 +941,8 @@ function UserSettings(props: any): JSX.Element {
                         ...props.userSettings,
                         title: value,
                       });
-                    }}>
+                    }}
+                    key={uuid.v4()}>
                     <View
                       style={
                         value === 'Profile'
@@ -935,8 +950,11 @@ function UserSettings(props: any): JSX.Element {
                           : value === 'Support'
                           ? styles.settingsOptionContainerBottom
                           : styles.settingsOptionContainer
-                      }>
-                      <Text style={styles.settingsOption}>{value}</Text>
+                      }
+                      key={uuid.v4()}>
+                      <Text style={styles.settingsOption} key={uuid.v4()}>
+                        {value}
+                      </Text>
                     </View>
                   </TouchableWithoutFeedback>
                 </>
@@ -983,6 +1001,8 @@ function UserSettings(props: any): JSX.Element {
           userSettings={props.userSettings.data}
           setView={setView}
           violations={props.violations}
+          fetchData={props.fetchData}
+          setHasLoaded={props.setHasLoaded}
         />
       )}
       {view.changePassword && (

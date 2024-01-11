@@ -48,6 +48,7 @@ import misc from './media/categories/Misc-96.png';
 import wm_logo from './media/categories/wm_logo.jpg';
 
 import {formatDistance} from 'date-fns';
+import uuid from 'react-native-uuid';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -501,7 +502,7 @@ function App(): JSX.Element {
       await axios
         .get('http://10.0.2.2:8000/violation/get_violations/' + profile_id)
         .then(res => {
-          setViolations(res.data.types);
+          setViolations(res.data.violations);
         });
       setProfile(data);
     }
@@ -1017,6 +1018,7 @@ function App(): JSX.Element {
                             setDelete={setDelete}
                             countFlagPost={countFlagPost}
                             setHasLoaded={setHasLoaded}
+                            key={uuid.v4()}
                           />
                         );
                       } else if (
@@ -1042,6 +1044,7 @@ function App(): JSX.Element {
                           setDelete={setDelete}
                           countFlagPost={countFlagPost}
                           setHasLoaded={setHasLoaded}
+                          key={uuid.v4()}
                         />
                       );
                     })}
@@ -1215,6 +1218,8 @@ function App(): JSX.Element {
             date={profile.date}
             viewProfile={viewProfile}
             violations={violations}
+            fetchData={fetchData}
+            setHasLoaded={setHasLoaded}
           />
           <Footer
             returnHome={returnHome}

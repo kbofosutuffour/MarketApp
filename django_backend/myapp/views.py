@@ -499,13 +499,24 @@ class ViolationViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path=r'get_violations/(?P<username>\w+)')
     def get_violations(self, request, username):
-        types = []
+        violations = []
         try:
-            violations = Violation.objects.filter(username=username)
-            for val in violations:
-                types.append(val.type)
+            violation_list = Violation.objects.filter(username=username)
+            for val in violation_list:
+                data = {}
+                data['id'] = val.id
+                data['username'] = val.username.id
+                data['type'] = val.type
+                data['appeal'] = val.appeal
+                violations.append(data)
         finally:
-            return Response({'types': types})
+            return Response({'violations': violations})
+    
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        self.update(request, *args, **kwargs)
+        send_appeal(request.data)
+        return Response({'message': 'Appeal sent'})
 #----------------------------
 
 def home(request):
@@ -596,7 +607,61 @@ def send_feedback_email(feedback):
         recipient_list=['marketappwm@gmail.com']
     )
 
+def send_appeal(appeal):
+    """
+    Function used whenever a user appeals a violation.
+    Sends the appeal information to the marketapp email
+    """
+    violation = Violation.objects.get(id=appeal['id'])
+    profile = Profile.objects.get(username=violation.username)
+    number = len(Violation.objects.all())
+    date = datetime.datetime.now()
+    date = date.strftime("%B %d, %Y")
 
+    # Getting all reports from the user relating
+    # to the given violation
+    reports = Report.objects.filter(
+        profile=violation.username,
+        violation=violation.type
+    )
+
+    # creating a list of reports to make printable 
+    # in the outgoing email
+    list_of_reports = []
+    for report in reports:
+        data = {}
+        data['Profile'] = report.profile.username
+        data['Post'] = str(Post.objects.get(id=report.post.id))
+        data['Date'] = str(report.datetime)
+        data['Reported By'] = report.reported_by.username
+        list_of_reports.append(data)
+
+    # An attempt at formatting
+    reports = ''
+    for item in list_of_reports:
+        reports = reports + str(item) + '\n'
+
+    message = f"""
+    Title: Violation Appeal #{number}
+
+    Date: {datetime.datetime.now()}
+    From: {profile.first_name} {profile.last_name}
+    Username: {profile.username}
+    Email: {profile.email}
+
+    The user {profile.username} has appealed the following violation: 
+        {violation.type}
+
+    Here is a list of reports relating to this violation:
+    {reports}
+    """
+
+    send_mail(
+        subject="Violation Appeal #" + str(number),
+        message=message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=['marketappwm@gmail.com']
+    )
 
 class EditPostView(FormView):
     """

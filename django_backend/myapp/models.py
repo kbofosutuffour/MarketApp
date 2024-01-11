@@ -248,3 +248,4 @@ class Violation(models.Model):
         choices = Violations.choices,
         max_length=15
     )
+    appeal = models.BooleanField(default=False, blank=True)
