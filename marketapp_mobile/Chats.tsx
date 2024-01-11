@@ -1,6 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {MutableRefObject, useEffect, useRef, useState} from 'react';
+import React, {
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   Button,
@@ -19,6 +25,7 @@ import Footer from './Footer';
 import {format, formatDistance} from 'date-fns';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 import uuid from 'react-native-uuid';
+import {UserContext} from './App';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -186,6 +193,14 @@ function Chats(props): JSX.Element {
   const [text, setText] = useState('');
 
   /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
+  /**
    * Holds a reference to the scroll view used
    * to display the chat; necessary for automatically
    * scrolling to the bottom immediately after this component
@@ -207,9 +222,7 @@ function Chats(props): JSX.Element {
   */
   useEffect(() => {
     if (chats.id) {
-      ws.current = new WebSocket(
-        'ws://10.0.2.2:8000/ws/chat/' + chats.id + '/',
-      );
+      ws.current = new WebSocket(`ws://10.0.2.2:8000/ws/chat/${chats.id}`);
       ws.current.onopen = () => {
         // connection opened
         // ws.current?.send('connection opened'); // send a message
@@ -234,7 +247,7 @@ function Chats(props): JSX.Element {
           console.log(e.code, e.reason);
         }
       };
-    } 
+    }
   }, [chats.id]);
 
   /**
@@ -307,7 +320,7 @@ function Chats(props): JSX.Element {
     image = null,
     product = null,
   ) => {
-    var chat_request = 'http://10.0.2.2:8000/messages/get_messages/' + id;
+    var chat_request = `${baseUrl}:8000/messages/get_messages/${id}`;
     axios
       .get(chat_request)
       .then(res => {
@@ -351,7 +364,7 @@ function Chats(props): JSX.Element {
       image: null,
     };
     await axios
-      .post('http://10.0.2.2:8000/messages/', data)
+      .post(`${baseUrl}:8000/messages/`, data)
       .then(() => {
         // If there isn't a webserver running,
         // show the new message on the sender side
@@ -450,7 +463,7 @@ function Chats(props): JSX.Element {
               {chats.chats.map(value => {
                 var img =
                   value.username == props.profile.username
-                    ? 'http://10.0.2.2:8000' + props.profile.profile_picture
+                    ? `${baseUrl}:8000${props.profile.profile_picture}`
                     : value.username == chats.buyer.username
                     ? chats.buyer.profile_picture
                     : chats.seller.profile_picture;

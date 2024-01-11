@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import CheckBox from '@react-native-community/checkbox';
 import DocumentPicker from 'react-native-document-picker';
 import camera from './media/camera_1.png';
@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
+import {UserContext} from './App';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -71,6 +72,14 @@ function ForgotPassword(props): JSX.Element {
   });
   const [inputCode, setInputCode] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const verify = async (inputEmail: string = '', inputCode: string = '') => {
     // Making sure the inputEmail is from a W&M email domain
@@ -79,7 +88,7 @@ function ForgotPassword(props): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .post(`${baseUrl}:8000/users/verify/`, {email: email})
         .then(response => {
           setCode({
             code: response.data.code,
@@ -109,7 +118,7 @@ function ForgotPassword(props): JSX.Element {
       newPassword.username.length
     ) {
       await axios
-        .post('http://10.0.2.2:8000/users/change_password/', newPassword)
+        .post(`${baseUrl}:8000/users/change_password/`, newPassword)
         .then(response => {
           props.setLoginState({
             login: true,
@@ -323,6 +332,14 @@ function Register(props): JSX.Element {
 
   const [profilePicture, setProfilePicture] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   const chooseImage = async () => {
     const res = await DocumentPicker.pick({
       type: [DocumentPicker.types.images],
@@ -361,7 +378,7 @@ function Register(props): JSX.Element {
       //TODO: Add logic for if user has a user set up, but NOT a password
       await axios
         .post(
-          'http://10.0.2.2:8000/users/',
+          `${baseUrl}:8000/users/`,
           {
             username: profile.username,
             password: profile.password,
@@ -386,7 +403,7 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post('http://10.0.2.2:8000/profiles/', data, {
+        .post(`${baseUrl}:8000/profiles/`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -403,13 +420,13 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post('http://127.0.0.1:8000/user_settings/', {
+        .post(`${baseUrl}:8000/user_settings/`, {
           username: profile.username,
         })
         .catch((err: any) => console.log(err));
 
       await axios
-        .post('http://127.0.0.1:8000/report/', {
+        .post(`${baseUrl}:8000/report/`, {
           username: profile.username,
         })
         .catch((err: any) => console.log(err));
@@ -552,7 +569,7 @@ function Register(props): JSX.Element {
               <Text style={styles.termsAndConditionsBold}>
                 {/* eslint-disable-next-line prettier/prettier */}
                 Terms and Conditions </Text>
-                and
+              and
               {/* eslint-disable-next-line prettier/prettier */}
               <Text style={styles.termsAndConditionsBold}> Privacy Policy </Text>
             </Text>
@@ -587,6 +604,14 @@ function Verify(props): JSX.Element {
   const [email, setEmail] = useState('');
   const [inputCode, setInputCode] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const verify = async (inputEmail: string = '', inputCode: string = '') => {
     // Making sure the inputEmail is from a W&M email domain
@@ -594,7 +619,7 @@ function Verify(props): JSX.Element {
 
     if (inputEmail && domain === 'wm.edu') {
       await axios
-        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .post(`${baseUrl}:8000/users/verify/`, {email: email})
         .then(response => {
           setCode({
             code: response.data.code,
@@ -733,6 +758,14 @@ function Login(props): JSX.Element {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // Redirect to Forgot Password screen immediately if desired from app
   useState(() => {
     if (props.redirect === 'Forgot Password') {
@@ -752,7 +785,7 @@ function Login(props): JSX.Element {
     };
     if (data.username && data.password) {
       await axios
-        .post('http://10.0.2.2:8000/users/login/', data)
+        .post(`${baseUrl}:8000/users/login/`, data)
         .then(response => {
           if (response.data.login) {
             if (response.data.register) {

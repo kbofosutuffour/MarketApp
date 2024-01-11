@@ -1,8 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import {
   Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import axios from 'axios';
+import {UserContext} from './App';
 
 function UserOptions(props): JSX.Element {
   const [selected, setSelected] = useState(false);
@@ -55,6 +57,14 @@ function Report(props): JSX.Element {
   const [selected, setSelected] = useState(new Set());
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   const user_options = {
     'Inappropriate nickname': 'NICKNAME',
     Scam: 'SCAMMING',
@@ -85,11 +95,7 @@ function Report(props): JSX.Element {
     // Getting the id of the user being reported
     if (user) {
       await axios
-        .get(
-          'http://10.0.2.2:8000/profiles/get_id/' +
-            props.profile.username +
-            '/',
-        )
+        .get(`${baseUrl}:8000/profiles/get_id/${props.profile.username}/`)
         .then(response => {
           profile_id = response.data.id;
         })
@@ -98,7 +104,7 @@ function Report(props): JSX.Element {
 
     // Getting the id of the user making the report (current user)
     await axios
-      .get('http://10.0.2.2:8000/profiles/get_id/' + props.current_user + '/')
+      .get(`${baseUrl}:8000/profiles/get_id/${props.current_user}/`)
       .then(response => {
         current_user_id = response.data.id;
       })
@@ -111,7 +117,7 @@ function Report(props): JSX.Element {
       reported_by: current_user_id,
     };
     await axios
-      .post('http://10.0.2.2:8000/report/', data)
+      .post(`${baseUrl}:8000/report/`, data)
       .catch((err: any) => console.log(err));
   };
 
@@ -145,7 +151,7 @@ function Report(props): JSX.Element {
             <View style={styles.profileContainer}>
               <Image
                 source={{
-                  uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                  uri: `${baseUrl}:8000${props.profile.profile_picture}`,
                 }}
                 style={styles.image}
               />

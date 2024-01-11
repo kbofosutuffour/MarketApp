@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Button,
   Image,
@@ -16,6 +16,7 @@ import {format} from 'date-fns';
 import uuid from 'react-native-uuid';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
+import {UserContext} from './App';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 // based on iphone 5s's scale
@@ -58,6 +59,14 @@ function Profile(props): JSX.Element {
   const [showDate, setShowDate] = useState(false);
   const [userSettings, setUserSettings] = useState({});
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   useEffect(() => {
     setUserSettings(props.userSettings);
     setDateCreated(props.date);
@@ -77,7 +86,7 @@ function Profile(props): JSX.Element {
       <View style={styles.profileDescription}>
         <Image
           source={{
-            uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+            uri: `${baseUrl}:8000${props.profile.profile_picture}`,
           }}
           style={styles.profilePictureBorder}
         />
@@ -148,6 +157,15 @@ function ChangePassword(props: any): JSX.Element {
     codeSent: false,
   });
   const [inputCode, setInputCode] = useState('');
+
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // Add username as soon as the component renders
   useEffect(() => {
     setNewPassword({...newPassword, username: props.profile.username});
@@ -161,7 +179,7 @@ function ChangePassword(props: any): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .post(`${baseUrl}:8000/users/verify/`, {email: email})
         .then(response => {
           setCode({
             code: response.data.code,
@@ -191,7 +209,7 @@ function ChangePassword(props: any): JSX.Element {
       newPassword.username.length
     ) {
       await axios
-        .post('http://10.0.2.2:8000/users/change_password/', newPassword)
+        .post(`${baseUrl}:8000/users/change_password/`, newPassword)
         .then(response => {
           setPasswordState({
             sendCode: false,
@@ -357,7 +375,7 @@ function ChangePassword(props: any): JSX.Element {
             <Image
               style={styles.wmLogo}
               source={{
-                uri: 'http://10.0.2.2:8000/' + props.profile.profile_picture,
+                uri: `${baseUrl}:8000/${props.profile.profile_picture}`,
               }}
             />
             <View style={styles.loginText}>
@@ -415,6 +433,14 @@ function Notifications(props: any): JSX.Element {
   const [userSettings, setUserSettings] = useState({});
   const [profileID, setProfileID] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   useEffect(() => {
     showNotifications();
   }, []);
@@ -422,31 +448,29 @@ function Notifications(props: any): JSX.Element {
   const showNotifications = async () => {
     let profile_id;
     await axios
-      .get('http://10.0.2.2:8000/profiles/get_id/' + props.profile + '/')
+      .get(`${baseUrl}:8000/profiles/get_id/${props.profile}/`)
       .then(response => {
         setProfileID(response.data.id);
         profile_id = response.data.id;
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get('http://10.0.2.2:8000/user_settings/' + profile_id)
+      .get(`${baseUrl}:8000/user_settings/${profile_id}`)
       .then(response => {
         setNewMessages(response.data.new_messages);
         setLikedPostUpdates(response.data.liked_posts_updates);
         setUserSettings(response.data);
       })
       .catch(error => console.log(error));
+    props.setHasLoaded(true);
   };
 
   const changedNewMessages = async choice => {
     let data = userSettings;
     data.new_messages = choice;
     await axios
-      .patch(
-        'http://10.0.2.2:8000/user_settings/new_messages/' + profileID + '/',
-        data,
-      )
-      .then(response => {
+      .patch(`${baseUrl}:8000/user_settings/new_messages/${profileID}`, data)
+      .then(() => {
         setNewMessages(choice);
       })
       .catch(error => console.log(error));
@@ -456,11 +480,8 @@ function Notifications(props: any): JSX.Element {
     let data = userSettings;
     data.liked_post_updates = choice;
     await axios
-      .patch(
-        'http://10.0.2.2:8000/user_settings/liked_posts/' + profileID + '/',
-        data,
-      )
-      .then(response => {
+      .patch(`${baseUrl}:8000/user_settings/liked_posts/${profileID}/`, data)
+      .then(() => {
         setLikedPostUpdates(choice);
       })
       .catch(error => console.log(error));
@@ -638,10 +659,18 @@ function HelpOrFeedback(props: any): JSX.Element {
     feedback: false,
   });
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   const [content, setContent] = useState('');
 
   const sendFeedback = async () => {
-    axios.post('http://10.0.2.2:8000/feedback/', {
+    axios.post(`${baseUrl}:8000/feedback/`, {
       username: props.profile.id,
       email: props.profile.email,
       first_name: props.profile.first_name,
@@ -787,6 +816,14 @@ function Support(props: any): JSX.Element {
 function Violations(props: any): JSX.Element {
   const [settings, setSettings]: [any, Function] = useState({});
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   const violations = [
     'scamming',
     'harassment',
@@ -814,7 +851,7 @@ function Violations(props: any): JSX.Element {
    * @param id the id of the violation in the database
    */
   const sendAppeal = async (id: string | number) => {
-    await axios.patch(`http://10.0.2.2:8000/violation/${id}/`, {
+    await axios.patch(`${baseUrl}:8000/violation/${id}/`, {
       id: id,
       appeal: true,
     });
@@ -855,7 +892,7 @@ function Violations(props: any): JSX.Element {
                       if (!settings[violation.type.toLowerCase()]) {
                         await sendAppeal(violation.id);
                         props.setHasLoaded(true);
-                      } 
+                      }
                     }}
                     key={uuid.v4()}>
                     <Text
@@ -897,6 +934,14 @@ function UserSettings(props: any): JSX.Element {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   const options = [
     'Settings',
     'Profile',
@@ -923,7 +968,7 @@ function UserSettings(props: any): JSX.Element {
           <View style={styles.profilePictureContainer}>
             <Image
               source={{
-                uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                uri: `${baseUrl}:8000${props.profile.profile_picture}`,
               }}
               style={styles.profilePictureBorder}
             />
@@ -936,6 +981,9 @@ function UserSettings(props: any): JSX.Element {
                 <>
                   <TouchableWithoutFeedback
                     onPress={() => {
+                      if (value === 'Notifications') {
+                        props.setHasLoaded(false);
+                      }
                       setView({[value.toLowerCase()]: true});
                       props.setUserSettings({
                         ...props.userSettings,
@@ -990,6 +1038,8 @@ function UserSettings(props: any): JSX.Element {
           profile={props.profile.username}
           userSettings={props.userSettings.data}
           setView={setView}
+          fetchData={props.fetchData}
+          setHasLoaded={props.setHasLoaded}
         />
       )}
       {view.privacy && (

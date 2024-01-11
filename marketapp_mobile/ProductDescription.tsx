@@ -7,12 +7,13 @@
  */
 
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import Profile from './Profile';
 
 import {
   Image,
   ImageSourcePropType,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -21,28 +22,9 @@ import {
   View,
 } from 'react-native';
 
-import Svg, {
-  Circle,
-  Ellipse,
-  G,
-  TSpan,
-  TextPath,
-  Path,
-  Polygon,
-  Polyline,
-  Line,
-  Rect,
-  Use,
-  Symbol,
-  Defs,
-  LinearGradient,
-  RadialGradient,
-  Stop,
-  ClipPath,
-  Pattern,
-  Mask,
-} from 'react-native-svg';
+import Svg, {Path} from 'react-native-svg';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {UserContext} from './App';
 
 /**
  * @returns Screen that shows a description of a post passed through the props object
@@ -58,6 +40,15 @@ function ProductDescription(props): JSX.Element {
   const [rating, setRating] = useState('');
 
   const [photos, setPhotos] = useState([]);
+
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // After the page renders, retrieve information on the user
   // who created the post from the database, stored in the preceeding
   // state variable
@@ -72,7 +63,7 @@ function ProductDescription(props): JSX.Element {
    * page
    */
   const getData = async () => {
-    let request = 'http://10.0.2.2:8000/profile/' + props.post.username;
+    let request = `${baseUrl}:8000/profile/${props.post.username}`;
     let data = {
       data: {},
       userSettings: {},
@@ -86,9 +77,7 @@ function ProductDescription(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get(
-        'http://10.0.2.2:8000/profiles/get_liked_posts/' + props.current_user,
-      )
+      .get(`${baseUrl}:8000/profiles/get_liked_posts/${props.current_user}`)
       .then(res => {
         likePost(
           res.data.liked_posts && res.data.liked_posts.includes(props.post.id)
@@ -98,22 +87,18 @@ function ProductDescription(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get(
-        'http://10.0.2.2:8000/profiles/get_date_created/' + props.post.username,
-      )
+      .get(`${baseUrl}:8000/profiles/get_date_created/${props.post.username}`)
       .then(res => {
         data.date = res.data.date.split('-');
       });
     await axios
-      .get('http://10.0.2.2:8000/profiles/get_id/' + props.post.username)
+      .get(`${baseUrl}:8000/profiles/get_id/${props.post.username}`)
       .then(res => {
         data.id = res.data.id;
       });
-    await axios
-      .get('http://10.0.2.2:8000/user_settings/' + data.id)
-      .then(res => {
-        data.userSettings = res.data;
-      });
+    await axios.get(`${baseUrl}:8000/user_settings/${data.id}`).then(res => {
+      data.userSettings = res.data;
+    });
     setProfile(data);
     addAllImages();
     props.setHasLoaded(true);
@@ -126,7 +111,7 @@ function ProductDescription(props): JSX.Element {
     let new_photos = [];
     new_photos.push(props.post.display_image);
     await axios
-      .get('http://10.0.2.2:8000/images/' + props.post.id)
+      .get(`${baseUrl}:8000/images/${props.post.id}`)
       .then(res => {
         let indexes = Object.keys(res.data);
         for (let i = 0; i < Object.keys(res.data).length; i++) {
@@ -159,7 +144,7 @@ function ProductDescription(props): JSX.Element {
     data.append('image', image);
 
     await axios
-      .post('http://10.0.2.2:8000/rooms/', data, {
+      .post(`${baseUrl}:8000/rooms/`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -182,19 +167,13 @@ function ProductDescription(props): JSX.Element {
     };
     axios
       .patch(
-        'http://10.0.2.2:8000/edit_profile/like_post/' +
-          props.current_user +
-          '/',
+        `${baseUrl}:8000/edit_profile/like_post/${props.current_user}/`,
         data,
       )
       .then(res => {
         likePost(!liked);
       })
       .catch((err: any) => console.log(err));
-  };
-
-  const backgroundStyle = {
-    backgroundColor: 'rgb(17, 87, 64)',
   };
 
   return (
@@ -249,8 +228,7 @@ function ProductDescription(props): JSX.Element {
                 <TouchableWithoutFeedback onPress={() => showMain(false)}>
                   <Image
                     source={{
-                      uri:
-                        'http://10.0.2.2:8000' + profile.data.profile_picture,
+                      uri: `${baseUrl}:8000${profile.data.profile_picture}`,
                     }}
                     style={styles.profilePicture}
                   />
@@ -346,13 +324,13 @@ function ProductDescription(props): JSX.Element {
               getChats(
                 props.current_user,
                 {
-                  uri: 'http://10.0.2.2:8000' + props.current_user_pfp,
+                  uri: `${baseUrl}:8000${props.current_user_pfp}`,
                   type: 'image/' + props.current_user_pfp.split('.').pop(),
                   name: 'image.png',
                 },
                 props.post.username,
                 {
-                  uri: 'http://10.0.2.2:8000' + profile.data.profile_picture,
+                  uri: `${baseUrl}:8000${profile.data.profile_picture}`,
                   type:
                     'image/' + profile.data.profile_picture.split('.').pop(),
                   name: 'image.png',

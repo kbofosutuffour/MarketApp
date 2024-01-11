@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {
   Button,
   Image,
@@ -16,6 +16,7 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import DocumentPicker from 'react-native-document-picker';
 import {format} from 'date-fns';
 import uuid from 'react-native-uuid';
+import {UserContext} from './App';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -57,6 +58,14 @@ function Post(props: any): JSX.Element {
   const [status, setStatus] = useState('');
   const [statusOptions, showStatusOptions] = useState(false);
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   useEffect(() => {
     setStatus(props.data.status);
   }, []);
@@ -68,7 +77,7 @@ function Post(props: any): JSX.Element {
       status: status.toUpperCase(),
     };
     axios
-      .patch('http://10.0.2.2:8000/edit_post/status/' + username + '/', data)
+      .patch(`${baseUrl}:8000/edit_post/status/${username}/`, data)
       .then(() => {
         setStatus(status.toUpperCase());
       })
@@ -209,15 +218,21 @@ function NavBar(): JSX.Element {
 function EditProfile(props: any): JSX.Element {
   const [showDate, setShowDate] = useState(false);
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   useEffect(() => {
     setShowDate(props.userSettings.data.show_joined_date);
   }, [props.userSettings.data.show_joined_date]);
 
   const changeDateSettings = async (value: boolean) => {
     axios.patch(
-      'http://10.0.2.2:8000/user_settings/show_joined_date/' +
-        props.profile_id +
-        '/',
+      `${baseUrl}:8000/user_settings/show_joined_date/${props.profile_id}/`,
       {
         username: props.profile_id,
         show_joined_date: value,
@@ -251,8 +266,7 @@ function EditProfile(props: any): JSX.Element {
             <View>
               <Image
                 source={{
-                  uri:
-                    'http://10.0.2.2:8000' + props.profile.data.profile_picture,
+                  uri: `${baseUrl}:8000${props.profile.data.profile_picture}`,
                 }}
                 style={styles.profilePictureBorder}
               />
@@ -314,6 +328,14 @@ function EditProfile(props: any): JSX.Element {
 function Profile(props: any): JSX.Element {
   const [posts, setPosts] = useState([]); // Will hold all of the post created by the user
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // State variables that allows the user to switch between
   // The profile page, editing their profile, deleting a post,
   // and changing their profile picture
@@ -337,7 +359,7 @@ function Profile(props: any): JSX.Element {
   const [likedPosts, setLikedPosts] = useState([]);
   const [buyHistory, setBuyHistory] = useState([]);
 
-  const [test, setTest] = useState({})
+  const [test, setTest] = useState({});
   /**
    * Function to delete the post in the database
    * @param id The id of the selected post
@@ -346,10 +368,10 @@ function Profile(props: any): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete('http://10.0.2.2:8000/images/' + id + '/')
+      .delete(`${baseUrl}:8000/images/${id}/`)
       .catch((err: any) => console.log(err));
     await axios
-      .delete('http://10.0.2.2:8000/posts/' + id + '/')
+      .delete(`${baseUrl}:8000/posts/${id}/`)
       .catch((err: any) => console.log(err));
     setView({
       main: true,
@@ -379,8 +401,7 @@ function Profile(props: any): JSX.Element {
             <Image
               style={styles.profilePicture}
               source={{
-                uri:
-                  'http://10.0.2.2:8000' + props.profile.data.profile_picture,
+                uri: `${baseUrl}:8000${props.profile.data.profile_picture}`,
               }}
             />
             <View style={styles.profileDescription}>
@@ -676,8 +697,7 @@ function Profile(props: any): JSX.Element {
                   source={{
                     uri: changedPic
                       ? changedPic.uri
-                      : 'http://10.0.2.2:8000' +
-                        props.profile.data.profile_picture,
+                      : `${baseUrl}:8000${props.profile.data.profile_picture}`,
                   }}
                 />
               </View>
@@ -693,19 +713,14 @@ function Profile(props: any): JSX.Element {
                 let profile_id;
                 await axios
                   .get(
-                    'http://10.0.2.2:8000/profiles/get_id/' +
-                      props.profile.username +
-                      '/',
+                    `${baseUrl}:8000/profiles/get_id/${props.profile.username}/`,
                   )
                   .then(response => {
                     profile_id = response.data.id;
                   })
                   .catch((err: any) => console.log(err));
                 await axios
-                  .patch(
-                    'http://10.0.2.2:8000/edit_profile/' + profile_id + '/',
-                    data,
-                  )
+                  .patch(`${baseUrl}:8000/edit_profile/${profile_id}/`, data)
                   .catch((err: any) => console.log(err));
                 setView({
                   main: false,

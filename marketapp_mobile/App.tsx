@@ -6,7 +6,7 @@
  * @format
  */
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 
 import {
@@ -49,6 +49,8 @@ import wm_logo from './media/categories/wm_logo.jpg';
 
 import {formatDistance} from 'date-fns';
 import uuid from 'react-native-uuid';
+
+export const UserContext = React.createContext(null);
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -438,6 +440,13 @@ function App(): JSX.Element {
     }
   }, [profile]);
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   // The axios is a JavaScript library that is used to perform
   // various HTTP requests from existing API's.  Common HTTP requests
   // include get, post, put, and delete
@@ -464,7 +473,7 @@ function App(): JSX.Element {
 
     if (user.username) {
       await axios
-        .get('http://10.0.2.2:8000/profile/' + user.username)
+        .get(`${baseUrl}:8000/profile/${user.username}`)
         .then(res => {
           data.showProfile = false;
           data.data = res.data;
@@ -473,34 +482,34 @@ function App(): JSX.Element {
       await getRooms();
       let profile_id;
       await axios
-        .get('http://10.0.2.2:8000/profiles/get_date_created/' + user.username)
+        .get(`${baseUrl}:8000/profiles/get_date_created/${user.username}`)
         .then(res => {
           data.date = res.data.date.split('-');
         });
       await axios
-        .get('http://10.0.2.2:8000/profiles/get_id/' + user.username)
+        .get(`${baseUrl}:8000/profiles/get_id/${user.username}`)
         .then(res => {
           profile_id = res.data.id;
           data.id = res.data.id;
         });
       await axios
-        .get('http://10.0.2.2:8000/posts/get_posts/' + user.username)
+        .get(`${baseUrl}:8000/posts/get_posts/${user.username}`)
         .then(res => {
           data.posts = res.data;
         });
       await axios
-        .get('http://10.0.2.2:8000/profiles/get_liked_posts/' + user.username)
+        .get(`${baseUrl}:8000/profiles/get_liked_posts/${user.username}`)
         .then(res => {
           data.liked_posts = res.data.liked_posts;
         });
       await axios
-        .get('http://10.0.2.2:8000/user_settings/' + profile_id)
+        .get(`${baseUrl}:8000/user_settings/${profile_id}`)
         .then(res => {
           data.settings = res.data;
           setUserSettings({...settings, data: res.data});
         });
       await axios
-        .get('http://10.0.2.2:8000/violation/get_violations/' + profile_id)
+        .get(`${baseUrl}:8000/violation/get_violations/${profile_id}`)
         .then(res => {
           setViolations(res.data.violations);
         });
@@ -513,7 +522,7 @@ function App(): JSX.Element {
    */
   const getPosts = async () => {
     await axios
-      .get('http://10.0.2.2:8000/posts')
+      .get(`${baseUrl}:8000/posts`)
       .then(res => {
         if (res.data.length === 0) {
           setErrorMessage(
@@ -532,7 +541,7 @@ function App(): JSX.Element {
 
   const getUserSettings = async () => {
     await axios
-      .get('http://10.0.2.2:8000/user_settings/' + profile.data.id)
+      .get(`${baseUrl}:8000/user_settings/${profile.data.id}`)
       .then(res => {
         setProfile({...profile, settings: res.data});
         setUserSettings({...settings, data: res.data});
@@ -543,13 +552,13 @@ function App(): JSX.Element {
     let data = {};
     let posts = [];
     await axios
-      .get('http://10.0.2.2:8000/profile/' + user.username)
+      .get(`${baseUrl}:8000/profile/${user.username}`)
       .then(res => {
         data = res.data;
       })
       .catch((err: any) => console.log(err));
     // await axios
-    //   .get('http://10.0.2.2:8000/posts/get_posts/' + user.username)
+    //   .get('${baseUrl}:8000/posts/get_posts/' + user.username)
     //   .then(res => {
     //     posts = res.data;
     //     console.log(res.data);
@@ -560,7 +569,7 @@ function App(): JSX.Element {
 
   const getRooms = async () => {
     await axios
-      .get('http://10.0.2.2:8000/rooms/get_rooms/' + user.username)
+      .get(`${baseUrl}:8000/rooms/get_rooms/${user.username}`)
       .then(res => {
         setRooms(res.data);
       })
@@ -885,10 +894,10 @@ function App(): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete('http://10.0.2.2:8000/images/' + id + '/')
+      .delete(`${baseUrl}:8000/images/${id}/`)
       .catch((err: any) => console.log(err));
     await axios
-      .delete('http://10.0.2.2:8000/posts/' + id + '/')
+      .delete(`${baseUrl}:8000/posts/${id}/`)
       .catch((err: any) => console.log(err));
     setDelete({
       data: {},
@@ -907,7 +916,7 @@ function App(): JSX.Element {
    */
   const countFlagPost = async (post_id: number | string) => {
     await axios
-      .post('http://10.0.2.2:8000/flag/', {
+      .post(`${baseUrl}:8000/flag/`, {
         post: post_id,
         flagged_by: profile.data.id,
       })
@@ -926,7 +935,7 @@ function App(): JSX.Element {
    */
   const flagPost = async (id: number | string) => {
     await axios
-      .patch('http://10.0.2.2:8000/posts/' + id + '/', {flag: true})
+      .patch(`${baseUrl}:8000/posts/${id}/`, {flag: true})
       .catch((err: any) => console.log(err));
   };
 
@@ -940,7 +949,7 @@ function App(): JSX.Element {
     score: number | string,
   ) => {
     await axios
-      .post('http://10.0.2.2:8000/ratings/', {
+      .post(`${baseUrl}:8000/ratings/`, {
         username: profile_id,
         rated_by: profile.data.id,
         score: score,
@@ -953,63 +962,94 @@ function App(): JSX.Element {
       {/* SaveAreaView Components make it so that developers can safely view the styling layout on different device sizes */}
 
       {/* Many of the created components/functions hold a props parameter.  Here is where we define what information is stored in
-      that props parameter, which can then be accessed inside of the component via props.{attribute} */}
+          that props parameter, which can then be accessed inside of the component via props.{attribute} */}
 
       {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
           This produces the effect of changing what is seen on the screen */}
-      {/* Landing Page */}
-      {!hasloaded && <Landing showLogin={user.showLogin} />}
 
-      {/* Login/Register Page */}
-      {user.showLogin && (
-        <Login returnHome={returnHome} redirect={user.redirect} />
-      )}
+      <UserContext.Provider value={{baseUrl: baseUrl}}>
+        {/* useContext serves as a 'global state' data access for all child components of App.jsx.
+            Each file will be able to access the data in the value parameter */}
 
-      {/* Home Page */}
-      {!prodDesc.showDesc &&
-        !profile.showProfile &&
-        !showChats &&
-        !settings.showSettings &&
-        !showPost.showPost &&
-        !user.showLogin &&
-        !reportUser.showReport && (
-          <View style={{height: '100%'}}>
-            <NavBar
-              searchedPosts={searchedPosts}
-              posts={posts}
-              searchPosts={searchPosts}
-              setPosts={setPosts}
-              setSearch={setSearch}
-              type={'Home'}
-              viewSettings={viewSettings}
-              category={category}
-              setCategory={setCategory}
-            />
-            <View style={styles.mainView}>
-              <ScrollView
-                contentInsetAdjustmentBehavior="automatic"
-                scrollEventThrottle={3}
-                onScroll={event =>
-                  handleScroll(event.nativeEvent.contentOffset.y)
-                }
-                onScrollEndDrag={event =>
-                  refreshPage(event.nativeEvent.velocity?.y)
-                }
-                style={styles.scrollView}>
-                <View
-                  style={{
-                    backgroundColor: Colors.white,
-                    opacity: !deletePost.deletePost ? 1.0 : 0.6,
-                  }}>
-                  {posts.showPosts &&
-                    posts.posts.map(post => {
-                      /* Only show posts not created by the user on the home page */
-                      if (
-                        post.username !== user.username &&
-                        post.status !== 'SOLD' &&
-                        !post.draft &&
-                        !post.flag
-                      ) {
+        {/* Landing Page */}
+        {!hasloaded && <Landing showLogin={user.showLogin} />}
+
+        {/* Login/Register Page */}
+        {user.showLogin && (
+          <Login returnHome={returnHome} redirect={user.redirect} />
+        )}
+
+        {/* Home Page */}
+        {!prodDesc.showDesc &&
+          !profile.showProfile &&
+          !showChats &&
+          !settings.showSettings &&
+          !showPost.showPost &&
+          !user.showLogin &&
+          !reportUser.showReport && (
+            <View style={{height: '100%'}}>
+              <NavBar
+                searchedPosts={searchedPosts}
+                posts={posts}
+                searchPosts={searchPosts}
+                setPosts={setPosts}
+                setSearch={setSearch}
+                type={'Home'}
+                viewSettings={viewSettings}
+                category={category}
+                setCategory={setCategory}
+              />
+              <View style={styles.mainView}>
+                <ScrollView
+                  contentInsetAdjustmentBehavior="automatic"
+                  scrollEventThrottle={3}
+                  onScroll={event =>
+                    handleScroll(event.nativeEvent.contentOffset.y)
+                  }
+                  onScrollEndDrag={event =>
+                    refreshPage(event.nativeEvent.velocity?.y)
+                  }
+                  style={styles.scrollView}>
+                  <View
+                    style={{
+                      backgroundColor: Colors.white,
+                      opacity: !deletePost.deletePost ? 1.0 : 0.6,
+                    }}>
+                    {posts.showPosts &&
+                      posts.posts.map(post => {
+                        /* Only show posts not created by the user on the home page */
+                        if (
+                          post.username !== user.username &&
+                          post.status !== 'SOLD' &&
+                          !post.draft &&
+                          !post.flag
+                        ) {
+                          return (
+                            <Post
+                              data={post}
+                              setDesc={setDesc}
+                              user={user}
+                              setDelete={setDelete}
+                              countFlagPost={countFlagPost}
+                              setHasLoaded={setHasLoaded}
+                              key={uuid.v4()}
+                            />
+                          );
+                        } else if (
+                          post.username === user.username &&
+                          post.draft &&
+                          !errorMessage &&
+                          !hasSeenDraft
+                        ) {
+                          setErrorMessage(
+                            'You have a draft. Would you like to continue writing it?',
+                          );
+                          setHasSeenDraft(true);
+                        }
+                      })}
+                    {searchedPosts.showResults &&
+                      searchedPosts.posts.length > 0 &&
+                      searchedPosts.posts.map(post => {
                         return (
                           <Post
                             data={post}
@@ -1021,260 +1061,235 @@ function App(): JSX.Element {
                             key={uuid.v4()}
                           />
                         );
-                      } else if (
-                        post.username === user.username &&
-                        post.draft &&
-                        !errorMessage &&
-                        !hasSeenDraft
-                      ) {
-                        setErrorMessage(
-                          'You have a draft. Would you like to continue writing it?',
-                        );
-                        setHasSeenDraft(true);
-                      }
-                    })}
-                  {searchedPosts.showResults &&
-                    searchedPosts.posts.length > 0 &&
-                    searchedPosts.posts.map(post => {
-                      return (
-                        <Post
-                          data={post}
-                          setDesc={setDesc}
-                          user={user}
-                          setDelete={setDelete}
-                          countFlagPost={countFlagPost}
-                          setHasLoaded={setHasLoaded}
-                          key={uuid.v4()}
+                      })}
+                    {searchedPosts.showSearchBar &&
+                      !searchedPosts.showResults && (
+                        <Categories
+                          category={category}
+                          setCategory={setCategory}
                         />
-                      );
-                    })}
-                  {searchedPosts.showSearchBar &&
-                    !searchedPosts.showResults && (
-                      <Categories
-                        category={category}
-                        setCategory={setCategory}
-                      />
-                    )}
-                </View>
-              </ScrollView>
-            </View>
-            {!searchedPosts.showSearchBar && (
-              <View>
-                <TouchableWithoutFeedback onPress={() => viewPost()}>
-                  <Image
-                    source={require('./media/plus_sign.png')}
-                    style={styles.addPost}
-                  />
-                </TouchableWithoutFeedback>
+                      )}
+                  </View>
+                </ScrollView>
               </View>
-            )}
+              {!searchedPosts.showSearchBar && (
+                <View>
+                  <TouchableWithoutFeedback onPress={() => viewPost()}>
+                    <Image
+                      source={require('./media/plus_sign.png')}
+                      style={styles.addPost}
+                    />
+                  </TouchableWithoutFeedback>
+                </View>
+              )}
+              <Footer
+                returnHome={returnHome}
+                viewProfile={viewProfile}
+                viewChats={viewChats}
+                type={'Home'}
+              />
+              {deletePost.deletePost && (
+                <View
+                  style={{
+                    backgroundColor: Colors.white,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'absolute',
+                    top: '30%',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    width: '100%',
+                    height: '40%',
+                    rowGap: 20,
+                    padding: 20,
+                  }}>
+                  <Text
+                    style={{fontSize: 20, color: 'black', textAlign: 'center'}}>
+                    Are you sure you want to delete this post?
+                  </Text>
+                  <Post data={deletePost.data} />
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      columnGap: 10,
+                    }}>
+                    <TouchableWithoutFeedback
+                      onPress={() => removePost(deletePost.data.id)}>
+                      <Text style={styles.deleteYes}>YES</Text>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback
+                      onPress={() =>
+                        setDelete({
+                          deletePost: false,
+                          data: {},
+                        })
+                      }>
+                      <Text style={styles.deleteNo}>NO</Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+        {/* Product Description Page */}
+
+        {prodDesc.showDesc && (
+          <>
+            <ProductDescription
+              post={prodDesc.post}
+              all_posts={posts.posts}
+              returnHome={returnHome}
+              viewChats={viewChats}
+              current_user={profile.data.username}
+              current_user_pfp={profile.data.profile_picture}
+              viewReport={viewReport}
+              rateProfile={rateProfile}
+              setHasLoaded={setHasLoaded}
+            />
+          </>
+        )}
+
+        {/* Profile Page */}
+
+        {profile.showProfile && (
+          <>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'Profile'}
+              viewSettings={viewSettings}
+            />
+            <Profile
+              profile={profile}
+              returnHome={returnHome}
+              all_posts={posts.posts}
+              viewSettings={viewSettings}
+              viewPost={viewPost}
+              current_user={user.username}
+              onMain={true}
+              viewReport={viewReport}
+              userSettings={settings}
+              getProfile={getProfile}
+              setHasLoaded={setHasLoaded}
+            />
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
-              type={'Home'}
+              type={'Profile'}
             />
-            {deletePost.deletePost && (
-              <View
-                style={{
-                  backgroundColor: Colors.white,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'absolute',
-                  top: '30%',
-                  justifyContent: 'flex-start',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: '40%',
-                  rowGap: 20,
-                  padding: 20,
-                }}>
-                <Text
-                  style={{fontSize: 20, color: 'black', textAlign: 'center'}}>
-                  Are you sure you want to delete this post?
-                </Text>
-                <Post data={deletePost.data} />
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    columnGap: 10,
-                  }}>
-                  <TouchableWithoutFeedback
-                    onPress={() => removePost(deletePost.data.id)}>
-                    <Text style={styles.deleteYes}>YES</Text>
-                  </TouchableWithoutFeedback>
-                  <TouchableWithoutFeedback
-                    onPress={() =>
-                      setDelete({
-                        deletePost: false,
-                        data: {},
-                      })
-                    }>
-                    <Text style={styles.deleteNo}>NO</Text>
-                  </TouchableWithoutFeedback>
-                </View>
-              </View>
-            )}
-          </View>
+          </>
         )}
 
-      {/* Product Description Page */}
+        {/* Chat Rooms */}
 
-      {prodDesc.showDesc && (
-        <>
-          <ProductDescription
-            post={prodDesc.post}
-            all_posts={posts.posts}
+        {showChats && (
+          <>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'My Chats'}
+              viewSettings={viewSettings}
+            />
+            <Chats
+              profile={profile.data}
+              current_user={user.username}
+              rooms={rooms}
+              showChats={showChats}
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+            />
+          </>
+        )}
+        {/* Settings Page */}
+
+        {settings.showSettings && (
+          <>
+            <NavBar
+              searchedPosts={searchedPosts}
+              posts={posts}
+              searchPosts={searchPosts}
+              setPosts={setPosts}
+              setSearch={setSearch}
+              type={'Settings'}
+              viewSettings={viewSettings}
+            />
+            <UserSettings
+              viewSettings={viewSettings}
+              userSettings={settings}
+              setUserSettings={setUserSettings}
+              login={login}
+              profile={profile.data}
+              date={profile.date}
+              viewProfile={viewProfile}
+              violations={violations}
+              fetchData={fetchData}
+              setHasLoaded={setHasLoaded}
+            />
+            <Footer
+              returnHome={returnHome}
+              viewProfile={viewProfile}
+              viewChats={viewChats}
+              type={'Profile'}
+            />
+          </>
+        )}
+
+        {/* Create & Edit Post Page */}
+
+        {showPost.showPost && (
+          <>
+            <CreatePost
+              username={user.username}
+              returnHome={returnHome}
+              showPost={showPost}
+              getProfile={getProfile}
+              setHasLoaded={setHasLoaded}
+            />
+          </>
+        )}
+        {reportUser.showReport && (
+          <Report
+            user={Object.keys(reportUser.profile).length > 0}
+            isPost={Object.keys(reportUser.post).length > 0}
+            post={reportUser.post}
+            profile={reportUser.profile}
             returnHome={returnHome}
-            viewChats={viewChats}
-            current_user={profile.data.username}
-            current_user_pfp={profile.data.profile_picture}
-            viewReport={viewReport}
-            rateProfile={rateProfile}
-            setHasLoaded={setHasLoaded}
-          />
-        </>
-      )}
-
-      {/* Profile Page */}
-
-      {profile.showProfile && (
-        <>
-          <NavBar
-            searchedPosts={searchedPosts}
-            posts={posts}
-            searchPosts={searchPosts}
-            setPosts={setPosts}
-            setSearch={setSearch}
-            type={'Profile'}
-            viewSettings={viewSettings}
-          />
-          <Profile
-            profile={profile}
-            returnHome={returnHome}
-            all_posts={posts.posts}
-            viewSettings={viewSettings}
-            viewPost={viewPost}
             current_user={user.username}
-            onMain={true}
-            viewReport={viewReport}
-            userSettings={settings}
-            getProfile={getProfile}
-            setHasLoaded={setHasLoaded}
           />
-          <Footer
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-            type={'Profile'}
-          />
-        </>
-      )}
-
-      {/* Chat Rooms */}
-
-      {showChats && (
-        <>
-          <NavBar
-            searchedPosts={searchedPosts}
-            posts={posts}
-            searchPosts={searchPosts}
-            setPosts={setPosts}
-            setSearch={setSearch}
-            type={'My Chats'}
-            viewSettings={viewSettings}
-          />
-          <Chats
-            profile={profile.data}
-            current_user={user.username}
-            rooms={rooms}
-            showChats={showChats}
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-          />
-        </>
-      )}
-      {/* Settings Page */}
-
-      {settings.showSettings && (
-        <>
-          <NavBar
-            searchedPosts={searchedPosts}
-            posts={posts}
-            searchPosts={searchPosts}
-            setPosts={setPosts}
-            setSearch={setSearch}
-            type={'Settings'}
-            viewSettings={viewSettings}
-          />
-          <UserSettings
-            viewSettings={viewSettings}
-            userSettings={settings}
-            setUserSettings={setUserSettings}
-            login={login}
-            profile={profile.data}
-            date={profile.date}
-            viewProfile={viewProfile}
-            violations={violations}
-            fetchData={fetchData}
-            setHasLoaded={setHasLoaded}
-          />
-          <Footer
-            returnHome={returnHome}
-            viewProfile={viewProfile}
-            viewChats={viewChats}
-            type={'Profile'}
-          />
-        </>
-      )}
-
-      {/* Create & Edit Post Page */}
-
-      {showPost.showPost && (
-        <>
-          <CreatePost
-            username={user.username}
-            returnHome={returnHome}
-            showPost={showPost}
-            getProfile={getProfile}
-            setHasLoaded={setHasLoaded}
-          />
-        </>
-      )}
-      {reportUser.showReport && (
-        <Report
-          user={Object.keys(reportUser.profile).length > 0}
-          isPost={Object.keys(reportUser.post).length > 0}
-          post={reportUser.post}
-          profile={reportUser.profile}
-          returnHome={returnHome}
-          current_user={user.username}
-        />
-      )}
-      {errorMessage && user.username && (
-        <View style={styles.errorMessageContainer}>
-          <View style={styles.errorMessageBanner}>
+        )}
+        {errorMessage && user.username && (
+          <View style={styles.errorMessageContainer}>
+            <View style={styles.errorMessageBanner}>
+              <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+                <Text style={styles.exitErrorMessage}>Exit</Text>
+              </TouchableWithoutFeedback>
+            </View>
+            <View style={styles.errorMessageTextContainer}>
+              <Text style={styles.errorMessage}>{errorMessage}</Text>
+            </View>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setErrorMessage('');
+                viewProfile();
+              }}>
+              <Text style={styles.draftMessage}>Yes</Text>
+            </TouchableWithoutFeedback>
             <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
-              <Text style={styles.exitErrorMessage}>Exit</Text>
+              <Text style={styles.draftMessage}>No</Text>
             </TouchableWithoutFeedback>
           </View>
-          <View style={styles.errorMessageTextContainer}>
-            <Text style={styles.errorMessage}>{errorMessage}</Text>
-          </View>
-          <TouchableWithoutFeedback
-            onPress={() => {
-              setErrorMessage('');
-              viewProfile();
-            }}>
-            <Text style={styles.draftMessage}>Yes</Text>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
-            <Text style={styles.draftMessage}>No</Text>
-          </TouchableWithoutFeedback>
-        </View>
-      )}
+        )}
+      </UserContext.Provider>
     </SafeAreaView>
   );
 }

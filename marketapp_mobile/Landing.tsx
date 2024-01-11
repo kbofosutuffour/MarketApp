@@ -1,19 +1,11 @@
-import React, {useEffect, useState} from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React from 'react';
 
-import {
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableWithoutFeedback,
-  useColorScheme,
-  View,
-} from 'react-native';
-import { normalize } from './Profile';
+import {Image, StyleSheet, View} from 'react-native';
+import {normalize} from './Profile';
 
 function Landing(props): JSX.Element {
+
   return (
     <View
       style={{

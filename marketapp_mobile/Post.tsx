@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import {
   Button,
@@ -16,11 +16,13 @@ import {
   View,
   Alert,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import * as ImagePicker from 'expo-image-picker';
 import DocumentPicker from 'react-native-document-picker';
 import {Picker} from '@react-native-picker/picker';
+import {UserContext} from './App';
 
 function EditPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
@@ -35,7 +37,7 @@ function EditPost(props): JSX.Element {
 
   const fetchData = async () => {
     await axios
-      .get('http://10.0.2.2:8000/posts/' + props.id)
+      .get(`${baseUrl}:8000/posts/${props.id}`)
       .then(response => {
         props.setPost(response.data);
         setDisplay(response.data.display_image);
@@ -43,7 +45,7 @@ function EditPost(props): JSX.Element {
       .catch((err: any) => console.log(err));
 
     await axios
-      .get('http://10.0.2.2:8000/images/' + props.id)
+      .get(`${baseUrl}:8000/images/${props.id}`)
       .then(response => {
         let response_images = Object.values(response.data);
         let newList = [];
@@ -74,7 +76,7 @@ function EditPost(props): JSX.Element {
     }
 
     await axios
-      .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data, {
+      .patch(`${baseUrl}:8000/edit_post/${props.id}/`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -246,6 +248,14 @@ function NewPost(props): JSX.Element {
   const [display, setDisplay] = useState('');
   const [images, setImages] = useState([]);
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const baseUrl =
+    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+
   const MAX_NUMBER_OF_IMAGES = 5;
 
   /**
@@ -260,7 +270,7 @@ function NewPost(props): JSX.Element {
 
     let post_id;
     await axios
-      .post('http://10.0.2.2:8000/posts/', post, {
+      .post(`${baseUrl}:8000/posts/`, post, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -278,7 +288,7 @@ function NewPost(props): JSX.Element {
     }
 
     await axios
-      .post('http://10.0.2.2:8000/images/', additional_images, {
+      .post(`${baseUrl}:8000/images/`, additional_images, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
