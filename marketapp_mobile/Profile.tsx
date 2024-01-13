@@ -13,10 +13,11 @@ import {
   View,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import DocumentPicker from 'react-native-document-picker';
+// import DocumentPicker from 'react-native-document-picker';
 import {format} from 'date-fns';
 import uuid from 'react-native-uuid';
 import {UserContext} from './App';
+import * as ImagePicker from 'expo-image-picker';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -63,8 +64,12 @@ function Post(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
   const baseUrl =
-    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
     setStatus(props.data.status);
@@ -77,7 +82,10 @@ function Post(props: any): JSX.Element {
       status: status.toUpperCase(),
     };
     axios
-      .patch(`${baseUrl}:8000/edit_post/status/${username}/`, data)
+      .patch(
+        `${emulator ? baseUrl : ngrok}/edit_post/status/${username}/`,
+        data,
+      )
       .then(() => {
         setStatus(status.toUpperCase());
       })
@@ -223,8 +231,12 @@ function EditProfile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
   const baseUrl =
-    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
     setShowDate(props.userSettings.data.show_joined_date);
@@ -232,7 +244,9 @@ function EditProfile(props: any): JSX.Element {
 
   const changeDateSettings = async (value: boolean) => {
     axios.patch(
-      `${baseUrl}:8000/user_settings/show_joined_date/${props.profile_id}/`,
+      `${emulator ? baseUrl : ngrok}/user_settings/show_joined_date/${
+        props.profile_id
+      }/`,
       {
         username: props.profile_id,
         show_joined_date: value,
@@ -242,7 +256,7 @@ function EditProfile(props: any): JSX.Element {
   };
 
   return (
-    <View style={{height: filterHeight(SCREEN_HEIGHT)}}>
+    <View>
       <Button
         title="Return"
         onPress={() =>
@@ -266,7 +280,9 @@ function EditProfile(props: any): JSX.Element {
             <View>
               <Image
                 source={{
-                  uri: `${baseUrl}:8000${props.profile.data.profile_picture}`,
+                  uri: `${emulator ? baseUrl : ngrok}${
+                    props.profile.data.profile_picture
+                  }`,
                 }}
                 style={styles.profilePictureBorder}
               />
@@ -310,6 +326,7 @@ function EditProfile(props: any): JSX.Element {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    overflow: 'hidden',
                   }}
                 />
               </View>
@@ -333,8 +350,12 @@ function Profile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
   const baseUrl =
-    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // State variables that allows the user to switch between
   // The profile page, editing their profile, deleting a post,
@@ -368,10 +389,10 @@ function Profile(props: any): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete(`${baseUrl}:8000/images/${id}/`)
+      .delete(`${emulator ? baseUrl : ngrok}/images/${id}/`)
       .catch((err: any) => console.log(err));
     await axios
-      .delete(`${baseUrl}:8000/posts/${id}/`)
+      .delete(`${emulator ? baseUrl : ngrok}/posts/${id}/`)
       .catch((err: any) => console.log(err));
     setView({
       main: true,
@@ -401,7 +422,9 @@ function Profile(props: any): JSX.Element {
             <Image
               style={styles.profilePicture}
               source={{
-                uri: `${baseUrl}:8000${props.profile.data.profile_picture}`,
+                uri: `${emulator ? baseUrl : ngrok}${
+                  props.profile.data.profile_picture
+                }`,
               }}
             />
             <View style={styles.profileDescription}>
@@ -678,63 +701,66 @@ function Profile(props: any): JSX.Element {
         </View>
       )}
       {view.changeProfilePicture && (
-        <View>
-          <View style={styles.changeProfileContainer}>
-            <TouchableWithoutFeedback
-              onPress={async () => {
-                const res = await DocumentPicker.pick({
-                  type: [DocumentPicker.types.images],
-                });
+        <View style={styles.changeProfileContainer}>
+          <TouchableWithoutFeedback
+            onPress={async () => {
+              const res = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.All,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 1,
+              });
+              if (!res.canceled) {
                 setChangedPic({
-                  uri: res[0].uri,
-                  type: res[0].type,
+                  uri: res.assets[0].uri,
+                  type: res.assets[0].type,
                   name: 'image.png',
                 });
-              }}>
-              <View style={styles.changeProfilePictureBorder}>
-                <Image
-                  style={styles.changeProfilePicture}
-                  source={{
-                    uri: changedPic
-                      ? changedPic.uri
-                      : `${baseUrl}:8000${props.profile.data.profile_picture}`,
-                  }}
-                />
-              </View>
-            </TouchableWithoutFeedback>
+              }
+            }}>
+            <View style={styles.changeProfilePictureBorder}>
+              <Image
+                style={styles.changeProfilePicture}
+                source={{
+                  uri: changedPic
+                    ? changedPic.uri
+                    : `${emulator ? baseUrl : ngrok}${
+                        props.profile.data.profile_picture
+                      }`,
+                }}
+              />
+            </View>
+          </TouchableWithoutFeedback>
 
-            {/* Saves the new profile picture in the database */}
-            <TouchableWithoutFeedback
-              onPress={async () => {
-                let data = new FormData();
-                data.append('profile_picture', changedPic);
-                data.append('username', props.profile.data.username);
+          {/* Saves the new profile picture in the database */}
+          <TouchableWithoutFeedback
+            onPress={async () => {
+              let data = new FormData();
+              data.append('profile_picture', changedPic);
+              data.append('username', props.profile.data.username);
 
-                let profile_id;
-                await axios
-                  .get(
-                    `${baseUrl}:8000/profiles/get_id/${props.profile.username}/`,
-                  )
-                  .then(response => {
-                    profile_id = response.data.id;
-                  })
-                  .catch((err: any) => console.log(err));
-                await axios
-                  .patch(`${baseUrl}:8000/edit_profile/${profile_id}/`, data)
-                  .catch((err: any) => console.log(err));
-                setView({
-                  main: false,
-                  editProfile: true,
-                  deletePost: false,
-                  changeProfilePicture: false,
-                  otherProfile: false,
-                });
-              }}>
-              <View style={styles.change}>
-                <Text style={{color: Colors.white}}>Change</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
+              await axios
+                .patch(
+                  `${emulator ? baseUrl : ngrok}/edit_profile/${
+                    props.profile.data.username
+                  }/`,
+                  data,
+                )
+                .catch((err: any) => console.log(err));
+              props.getProfile();
+              props.setHasLoaded(false);
+              setView({
+                main: true,
+                editProfile: false,
+                deletePost: false,
+                changeProfilePicture: false,
+                otherProfile: false,
+              });
+            }}>
+            <View style={styles.change}>
+              <Text style={{color: Colors.white}}>Change</Text>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
       )}
     </>
@@ -745,13 +771,15 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: filterHeight(SCREEN_HEIGHT),
+    justifyContent: 'flex-start',
+    height: '100%',
+    flex: 1,
   },
   profilePicture: {
     width: normalize(80),
     height: normalize(80),
     borderRadius: 50,
+    overflow: 'hidden',
     marginLeft: normalize(25),
     borderWidth: 1,
     borderColor: Colors.black,
@@ -760,6 +788,7 @@ const styles = StyleSheet.create({
     width: normalize(80),
     height: normalize(80),
     borderRadius: 50,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: Colors.black,
   },
@@ -790,7 +819,6 @@ const styles = StyleSheet.create({
     width: '33.33%',
   },
   scrollView: {
-    height: '75%',
     backgroundColor: Colors.white,
     width: '100%',
   },
@@ -832,6 +860,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.black,
+    overflow: 'hidden',
     backgroundColor: Colors.white,
     rowGap: 5,
     position: 'relative',
@@ -846,6 +875,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.black,
+    overflow: 'hidden',
     backgroundColor: Colors.white,
     rowGap: 5,
     position: 'relative',
@@ -901,16 +931,18 @@ const styles = StyleSheet.create({
   changeProfileContainer: {
     backgroundColor: Colors.white,
     display: 'flex',
-    height: 600,
+    height: '100%',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
     rowGap: 20,
     padding: 20,
   },
   change: {
     width: 200,
     borderRadius: 20,
+    overflow: 'hidden',
     padding: 10,
     backgroundColor: 'rgb(17, 87, 64)',
     display: 'flex',
@@ -923,6 +955,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 2,
     borderColor: Colors.black,
+    overflow: 'hidden',
   },
   changeProfilePictureBorder: {
     width: 200,
@@ -930,6 +963,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 1,
     borderColor: Colors.black,
+    overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -948,6 +982,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D7D7D7',
     padding: 5,
     borderRadius: 10,
+    overflow: 'hidden',
     textAlign: 'center',
     height: 25,
     lineHeight: 17.5,
@@ -963,6 +998,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: Colors.black,
     borderWidth: 1,
+    overflow: 'hidden',
   },
   toggleContainer: {
     display: 'flex',
@@ -997,6 +1033,7 @@ const styles = StyleSheet.create({
   deleteYes: {
     padding: 10,
     borderRadius: 10,
+    overflow: 'hidden',
     width: 100,
     backgroundColor: 'red',
     color: 'white',
@@ -1005,6 +1042,7 @@ const styles = StyleSheet.create({
   deleteNo: {
     padding: 10,
     borderRadius: 10,
+    overflow: 'hidden',
     width: 100,
     backgroundColor: 'rgb(17, 87, 64)',
     color: 'white',

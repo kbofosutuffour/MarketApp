@@ -34,21 +34,9 @@ import Report from './Report';
 import Landing from './Landing';
 import Footer from './Footer';
 
-import vehicles from './media/categories/Vehicles-96.png';
-import food from './media/categories/Food-96.png';
-import clothes from './media/categories/Clothes-96.png';
-import entertainment from './media/categories/Entertainments-96.png';
-import free_stuff from './media/categories/Free_stuff-96.png';
-import furniture from './media/categories/Furniture-96.png';
-import hobbies from './media/categories/Hobbies-96.png';
-import book from './media/categories/Book-96.png';
-import dorm_goods from './media/categories/Dorm_goods-96.png';
-import supplies from './media/categories/Office_Supplies-96.png';
-import misc from './media/categories/Misc-96.png';
-import wm_logo from './media/categories/wm_logo.jpg';
-
 import {formatDistance} from 'date-fns';
 import uuid from 'react-native-uuid';
+import {Categories} from './Categories';
 
 export const UserContext = React.createContext(null);
 
@@ -309,50 +297,6 @@ function Post(props: any): JSX.Element {
 }
 
 /**
- * Component that displays all of the possible categories for a post.
- * Shown when the user is performing a search
- * @returns All possible categories for a post
- */
-function Categories(props: any): JSX.Element {
-  const categories = {
-    Furniture: furniture,
-    Clothing: clothes,
-    'Free Stuff': free_stuff,
-    Vehicles: vehicles,
-    'W&M Merch': wm_logo,
-    Hobbies: hobbies,
-    'Office Supplies': supplies,
-    'Dorm Goods': dorm_goods,
-    Food: food,
-    Entertainment: entertainment,
-    'Books/Textbooks': book,
-    'Misc.': misc,
-  };
-
-  return (
-    <View style={styles.category}>
-      {Object.keys(categories).map(value => {
-        return (
-          <>
-            <TouchableWithoutFeedback onPress={() => props.setCategory(value)}>
-              <View
-                style={
-                  props.category === value
-                    ? styles.categoryItemSelected
-                    : styles.categoryItem
-                }>
-                <Image source={categories[value]} />
-                <Text>{value}</Text>
-              </View>
-            </TouchableWithoutFeedback>
-          </>
-        );
-      })}
-    </View>
-  );
-}
-
-/**
  * @returns Application that is displayed on the screen
  */
 function App(): JSX.Element {
@@ -444,8 +388,12 @@ function App(): JSX.Element {
    * The base url used to access images and other data within the app directory.
    * Different between Android and iOS
    */
+  const emulator = false;
   const baseUrl =
-    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // The axios is a JavaScript library that is used to perform
   // various HTTP requests from existing API's.  Common HTTP requests
@@ -473,7 +421,7 @@ function App(): JSX.Element {
 
     if (user.username) {
       await axios
-        .get(`${baseUrl}:8000/profile/${user.username}`)
+        .get(`${emulator ? baseUrl : ngrok}/profile/${user.username}`)
         .then(res => {
           data.showProfile = false;
           data.data = res.data;
@@ -482,37 +430,54 @@ function App(): JSX.Element {
       await getRooms();
       let profile_id;
       await axios
-        .get(`${baseUrl}:8000/profiles/get_date_created/${user.username}`)
+        .get(
+          `${emulator ? baseUrl : ngrok}/profiles/get_date_created/${
+            user.username
+          }`,
+        )
         .then(res => {
           data.date = res.data.date.split('-');
         });
       await axios
-        .get(`${baseUrl}:8000/profiles/get_id/${user.username}`)
+        .get(`${emulator ? baseUrl : ngrok}/profiles/get_id/${user.username}`)
         .then(res => {
           profile_id = res.data.id;
           data.id = res.data.id;
-        });
+        })
+        .catch((err: any) => console.log(err));
       await axios
-        .get(`${baseUrl}:8000/posts/get_posts/${user.username}`)
+        .get(`${emulator ? baseUrl : ngrok}/posts/get_posts/${user.username}`)
         .then(res => {
           data.posts = res.data;
-        });
+        })
+        .catch((err: any) => console.log(err));
       await axios
-        .get(`${baseUrl}:8000/profiles/get_liked_posts/${user.username}`)
+        .get(
+          `${emulator ? baseUrl : ngrok}/profiles/get_liked_posts/${
+            user.username
+          }`,
+        )
         .then(res => {
           data.liked_posts = res.data.liked_posts;
-        });
+        })
+        .catch((err: any) => console.log(err));
       await axios
-        .get(`${baseUrl}:8000/user_settings/${profile_id}`)
+        .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile_id}`)
         .then(res => {
           data.settings = res.data;
           setUserSettings({...settings, data: res.data});
-        });
+        })
+        .catch((err: any) => console.log(err));
       await axios
-        .get(`${baseUrl}:8000/violation/get_violations/${profile_id}`)
+        .get(
+          `${
+            emulator ? baseUrl : ngrok
+          }/violation/get_violations/${profile_id}`,
+        )
         .then(res => {
           setViolations(res.data.violations);
-        });
+        })
+        .catch((err: any) => console.log(err));
       setProfile(data);
     }
   };
@@ -522,7 +487,7 @@ function App(): JSX.Element {
    */
   const getPosts = async () => {
     await axios
-      .get(`${baseUrl}:8000/posts`)
+      .get(`${emulator ? baseUrl : ngrok}/posts`)
       .then(res => {
         if (res.data.length === 0) {
           setErrorMessage(
@@ -541,7 +506,7 @@ function App(): JSX.Element {
 
   const getUserSettings = async () => {
     await axios
-      .get(`${baseUrl}:8000/user_settings/${profile.data.id}`)
+      .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile.data.id}`)
       .then(res => {
         setProfile({...profile, settings: res.data});
         setUserSettings({...settings, data: res.data});
@@ -550,26 +515,19 @@ function App(): JSX.Element {
 
   const getProfile = async () => {
     let data = {};
-    let posts = [];
     await axios
-      .get(`${baseUrl}:8000/profile/${user.username}`)
+      .get(`${emulator ? baseUrl : ngrok}/profile/${user.username}`)
       .then(res => {
         data = res.data;
       })
       .catch((err: any) => console.log(err));
-    // await axios
-    //   .get('${baseUrl}:8000/posts/get_posts/' + user.username)
-    //   .then(res => {
-    //     posts = res.data;
-    //     console.log(res.data);
-    //   });
-    setProfile({...profile, data: data, posts: posts});
+    setProfile({...profile, data: data});
     await getPosts();
   };
 
   const getRooms = async () => {
     await axios
-      .get(`${baseUrl}:8000/rooms/get_rooms/${user.username}`)
+      .get(`${emulator ? baseUrl : ngrok}/rooms/get_rooms/${user.username}`)
       .then(res => {
         setRooms(res.data);
       })
@@ -871,7 +829,7 @@ function App(): JSX.Element {
    * Maximum vertical speed considered before
    * the page will refresh
    */
-  const MAX_VELOCITY = 3.75;
+  const MAX_VELOCITY = 2;
 
   /**
    * Function responsible for reloading the page.
@@ -894,10 +852,10 @@ function App(): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete(`${baseUrl}:8000/images/${id}/`)
+      .delete(`${emulator ? baseUrl : ngrok}/images/${id}/`)
       .catch((err: any) => console.log(err));
     await axios
-      .delete(`${baseUrl}:8000/posts/${id}/`)
+      .delete(`${emulator ? baseUrl : ngrok}/posts/${id}/`)
       .catch((err: any) => console.log(err));
     setDelete({
       data: {},
@@ -916,7 +874,7 @@ function App(): JSX.Element {
    */
   const countFlagPost = async (post_id: number | string) => {
     await axios
-      .post(`${baseUrl}:8000/flag/`, {
+      .post(`${emulator ? baseUrl : ngrok}/flag/`, {
         post: post_id,
         flagged_by: profile.data.id,
       })
@@ -935,7 +893,7 @@ function App(): JSX.Element {
    */
   const flagPost = async (id: number | string) => {
     await axios
-      .patch(`${baseUrl}:8000/posts/${id}/`, {flag: true})
+      .patch(`${emulator ? baseUrl : ngrok}/posts/${id}/`, {flag: true})
       .catch((err: any) => console.log(err));
   };
 
@@ -949,7 +907,7 @@ function App(): JSX.Element {
     score: number | string,
   ) => {
     await axios
-      .post(`${baseUrl}:8000/ratings/`, {
+      .post(`${emulator ? baseUrl : ngrok}/ratings/`, {
         username: profile_id,
         rated_by: profile.data.id,
         score: score,
@@ -957,8 +915,13 @@ function App(): JSX.Element {
       .catch((err: any) => console.log(err));
   };
 
+  const backgroundStyle = {
+    backgroundColor: !user.showLogin ? 'rgb(17, 87, 64)' : 'white',
+    flex: 1,
+  };
+
   return (
-    <SafeAreaView style={styles.backgroundStyle}>
+    <SafeAreaView style={backgroundStyle}>
       {/* SaveAreaView Components make it so that developers can safely view the styling layout on different device sizes */}
 
       {/* Many of the created components/functions hold a props parameter.  Here is where we define what information is stored in
@@ -987,7 +950,7 @@ function App(): JSX.Element {
           !showPost.showPost &&
           !user.showLogin &&
           !reportUser.showReport && (
-            <View style={{height: '100%'}}>
+            <View style={styles.container}>
               <NavBar
                 searchedPosts={searchedPosts}
                 posts={posts}
@@ -1082,12 +1045,6 @@ function App(): JSX.Element {
                   </TouchableWithoutFeedback>
                 </View>
               )}
-              <Footer
-                returnHome={returnHome}
-                viewProfile={viewProfile}
-                viewChats={viewChats}
-                type={'Home'}
-              />
               {deletePost.deletePost && (
                 <View
                   style={{
@@ -1104,7 +1061,11 @@ function App(): JSX.Element {
                     padding: 20,
                   }}>
                   <Text
-                    style={{fontSize: 20, color: 'black', textAlign: 'center'}}>
+                    style={{
+                      fontSize: 20,
+                      color: 'black',
+                      textAlign: 'center',
+                    }}>
                     Are you sure you want to delete this post?
                   </Text>
                   <Post data={deletePost.data} />
@@ -1130,6 +1091,13 @@ function App(): JSX.Element {
                   </View>
                 </View>
               )}
+              <Footer
+                returnHome={returnHome}
+                viewProfile={viewProfile}
+                viewChats={viewChats}
+                type={'Home'}
+                hasloaded={hasloaded}
+              />
             </View>
           )}
 
@@ -1154,7 +1122,7 @@ function App(): JSX.Element {
         {/* Profile Page */}
 
         {profile.showProfile && (
-          <>
+          <View style={styles.container}>
             <NavBar
               searchedPosts={searchedPosts}
               posts={posts}
@@ -1182,14 +1150,21 @@ function App(): JSX.Element {
               viewProfile={viewProfile}
               viewChats={viewChats}
               type={'Profile'}
+              hasloaded={hasloaded}
             />
-          </>
+          </View>
         )}
 
         {/* Chat Rooms */}
 
         {showChats && (
-          <>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              flex: 1,
+            }}>
             <NavBar
               searchedPosts={searchedPosts}
               posts={posts}
@@ -1208,12 +1183,12 @@ function App(): JSX.Element {
               viewProfile={viewProfile}
               viewChats={viewChats}
             />
-          </>
+          </View>
         )}
         {/* Settings Page */}
 
         {settings.showSettings && (
-          <>
+          <View style={styles.container}>
             <NavBar
               searchedPosts={searchedPosts}
               posts={posts}
@@ -1240,8 +1215,9 @@ function App(): JSX.Element {
               viewProfile={viewProfile}
               viewChats={viewChats}
               type={'Profile'}
+              hasloaded={hasloaded}
             />
-          </>
+          </View>
         )}
 
         {/* Create & Edit Post Page */}
@@ -1299,9 +1275,11 @@ function App(): JSX.Element {
 // One major difference here is that components can really only have
 // two display styles: flex and none.
 const styles = StyleSheet.create({
-  backgroundStyle: {
-    backgroundColor: 'rgb(17, 87, 64)',
+  container: {
+    display: 'flex',
     flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   navigationBar: {
     display: 'flex',
@@ -1311,9 +1289,7 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
     top: 0,
-    paddingLeft: 10,
-    paddingRight: 10,
-    height: SCREEN_HEIGHT * 0.1,
+    padding: 20,
   },
   navigationBarType: {
     display: 'flex',
@@ -1328,14 +1304,20 @@ const styles = StyleSheet.create({
     fontSize: normalize(22.5),
   },
   mainView: {
-    height: filterHeight(SCREEN_HEIGHT),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    height: '100%',
+    width: '100%',
+    flex: 1,
   },
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
     // height: SCREEN_HEIGHT * 0.01,
   },
   scrollView: {
-    // height: SCREEN_HEIGHT * 0.79,
+    width: '100%',
   },
   highlight: {
     fontWeight: '700',
@@ -1347,6 +1329,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.white,
     borderRadius: 20,
+    overflow: 'hidden',
     width: '70%',
     height: normalize(40),
   },
@@ -1391,43 +1374,14 @@ const styles = StyleSheet.create({
   username: {
     fontWeight: '200',
   },
-  category: {
-    backgroundColor: 'white',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: 10,
-    rowGap: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 10,
-  },
-  categoryItem: {
-    backgroundColor: Colors.white,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-    padding: 10,
-  },
-  categoryItemSelected: {
-    backgroundColor: Colors.white,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-    padding: 5,
-    borderWidth: 5,
-    borderColor: 'rgb(185, 151, 91)',
-  },
   addPost: {
-    width: normalize(65),
-    height: normalize(65),
+    width: normalize(50),
+    height: normalize(50),
     position: 'absolute',
-    bottom: 20,
-    right: 20,
+    bottom: 80,
+    right: 30,
     borderRadius: normalize(35),
+    overflow: 'hidden',
   },
   searchContainer: {
     display: 'flex',
@@ -1445,11 +1399,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: '80%',
     columnGap: 10,
+    overflow: 'hidden',
   },
   searchButton: {
     width: normalize(20),
     height: normalize(20),
     borderRadius: normalize(20),
+    overflow: 'hidden',
   },
   cancelButton: {
     display: 'flex',
@@ -1469,6 +1425,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D7D7D7',
     borderRadius: 10,
     padding: 15,
+    overflow: 'hidden',
   },
   errorMessageBanner: {
     display: 'flex',
@@ -1483,6 +1440,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     borderRadius: 5,
+    overflow: 'hidden',
   },
   errorMessageTextContainer: {
     display: 'flex',
@@ -1502,6 +1460,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 10,
     borderRadius: 20,
+    overflow: 'hidden',
   },
   editPost: {
     backgroundColor: 'white',
@@ -1522,6 +1481,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.black,
+    overflow: 'hidden',
     backgroundColor: Colors.white,
     rowGap: 5,
     position: 'relative',
@@ -1530,6 +1490,7 @@ const styles = StyleSheet.create({
   deleteYes: {
     padding: 10,
     borderRadius: 10,
+    overflow: 'hidden',
     width: 100,
     backgroundColor: 'red',
     color: 'white',
@@ -1538,10 +1499,16 @@ const styles = StyleSheet.create({
   deleteNo: {
     padding: 10,
     borderRadius: 10,
+    overflow: 'hidden',
     width: 100,
     backgroundColor: 'rgb(17, 87, 64)',
     color: 'white',
     textAlign: 'center',
+  },
+  topPortion: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
   },
 });
 

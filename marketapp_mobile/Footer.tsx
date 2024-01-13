@@ -36,14 +36,9 @@ function filterHeight(height: number) {
 function Footer(props: any): JSX.Element {
   //Footer component that is displayed on various screens
   return (
-    <View
-      style={
-        props.type !== 'Chats'
-          ? styles.footerContainer
-          : styles.chatFooterContainer
-      }>
+    <View style={{display: 'flex', flexDirection: 'column'}}>
       <View style={styles.goldBar} />
-      <View style={props.type !== 'Chats' ? styles.footer : styles.chatFooter}>
+      <View style={styles.footer}>
         <View // eslint-disable-next-line react-native/no-inline-styles
           style={{
             width: 60,
@@ -103,11 +98,6 @@ function Footer(props: any): JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  chatFooterContainer: {
-    flex: 1,
-    backgroundColor: 'rgb(17, 87, 64)',
-    height: '2.5%',
-  },
   footer: {
     display: 'flex',
     backgroundColor: 'rgb(17, 87, 64)',
@@ -116,21 +106,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     columnGap: 40,
     position: 'absolute',
+    bottom: 0,
     width: '100%',
     padding: 10,
   },
-  chatFooter: {
-    display: 'flex',
-    width: '100%',
-    zIndex: 3,
-    backgroundColor: 'rgb(17, 87, 64)',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    columnGap: 40,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
+
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
     height: '1%',

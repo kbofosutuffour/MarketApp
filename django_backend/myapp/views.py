@@ -216,8 +216,8 @@ class Profiles(viewsets.ModelViewSet):
             exists = False
         if serializer.is_valid() and not exists:
             #create the profile
-            serializer.save()
-            return Response({'message': 'You have successfully created a profile'})
+            profile = serializer.save()
+            return Response({'message': 'You have successfully created a profile', 'id': profile.id})
         elif exists:
             return Response({'error': 'Profile for this username already exists'})
         else:

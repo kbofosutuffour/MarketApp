@@ -44,6 +44,7 @@ function UserOptions(props): JSX.Element {
           textAlign: 'center',
           padding: 10,
           borderRadius: 15,
+          overflow: 'hidden',
           width: 250,
         }}>
         {props.reason}
@@ -62,8 +63,12 @@ function Report(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
   const baseUrl =
-    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const user_options = {
     'Inappropriate nickname': 'NICKNAME',
@@ -88,23 +93,37 @@ function Report(props): JSX.Element {
    * @param post whether the report involves a post
    * @param violation the type of violation
    */
-  const submitReport = async (user = false, post = false, violation) => {
+  const submitReport = async (
+    user = false,
+    post = false,
+    violation: string,
+  ) => {
     let profile_id = null;
     let current_user_id = null;
 
     // Getting the id of the user being reported
     if (user) {
       await axios
-        .get(`${baseUrl}:8000/profiles/get_id/${props.profile.username}/`)
+        .get(
+          `${emulator ? baseUrl : ngrok}/profiles/get_id/${
+            props.profile.username
+          }/`,
+        )
         .then(response => {
           profile_id = response.data.id;
         })
         .catch((err: any) => console.log(err));
     }
 
+    if (post) {
+      console.log('placeholder');
+    }
+
     // Getting the id of the user making the report (current user)
     await axios
-      .get(`${baseUrl}:8000/profiles/get_id/${props.current_user}/`)
+      .get(
+        `${emulator ? baseUrl : ngrok}/profiles/get_id/${props.current_user}/`,
+      )
       .then(response => {
         current_user_id = response.data.id;
       })
@@ -117,7 +136,7 @@ function Report(props): JSX.Element {
       reported_by: current_user_id,
     };
     await axios
-      .post(`${baseUrl}:8000/report/`, data)
+      .post(`${emulator ? baseUrl : ngrok}/report/`, data)
       .catch((err: any) => console.log(err));
   };
 
@@ -151,7 +170,9 @@ function Report(props): JSX.Element {
             <View style={styles.profileContainer}>
               <Image
                 source={{
-                  uri: `${baseUrl}:8000${props.profile.profile_picture}`,
+                  uri: `${emulator ? baseUrl : ngrok}${
+                    props.profile.profile_picture
+                  }`,
                 }}
                 style={styles.image}
               />
@@ -170,6 +191,7 @@ function Report(props): JSX.Element {
                     : 'rgba(208,211,212, 1)',
                   color: confirmed ? 'white' : 'black',
                   borderRadius: 15,
+                  overflow: 'hidden',
                   fontSize: 17.5,
                   textAlign: 'center',
                 }}>
@@ -214,6 +236,7 @@ function Report(props): JSX.Element {
                     backgroundColor: 'rgb(17, 87, 64)',
                     color: 'white',
                     borderRadius: 15,
+                    overflow: 'hidden',
                     fontSize: 17.5,
                     textAlign: 'center',
                   }}>
@@ -246,6 +269,7 @@ function Report(props): JSX.Element {
                       : 'rgba(208,211,212, 1)',
                     color: confirmed ? 'white' : 'black',
                     borderRadius: 15,
+                    overflow: 'hidden',
                     fontSize: 17.5,
                     textAlign: 'center',
                   }}>
@@ -305,6 +329,7 @@ function Report(props): JSX.Element {
                     : 'rgba(208,211,212, 1)',
                   color: confirmed ? 'white' : 'black',
                   borderRadius: 15,
+                  overflow: 'hidden',
                   fontSize: 17.5,
                   textAlign: 'center',
                 }}>
@@ -348,6 +373,7 @@ function Report(props): JSX.Element {
                     backgroundColor: 'rgb(17, 87, 64)',
                     color: 'white',
                     borderRadius: 15,
+                    overflow: 'hidden',
                     fontSize: 17.5,
                     textAlign: 'center',
                     padding: 10,
@@ -381,6 +407,7 @@ function Report(props): JSX.Element {
                       : 'rgba(208,211,212, 1)',
                     color: confirmed ? 'white' : 'black',
                     borderRadius: 15,
+                    overflow: 'hidden',
                     fontSize: 17.5,
                     textAlign: 'center',
                   }}>
@@ -416,6 +443,7 @@ const styles = StyleSheet.create({
     columnGap: 10,
     backgroundColor: 'rgba(208,211,212, 0.5)',
     borderRadius: 15,
+    overflow: 'hidden',
     padding: 15,
     width: '70%',
   },
@@ -424,6 +452,7 @@ const styles = StyleSheet.create({
     color: 'white',
     width: '50%',
     borderRadius: 15,
+    overflow: 'hidden',
     textAlign: 'center',
     padding: 10,
   },
@@ -456,11 +485,13 @@ const styles = StyleSheet.create({
     width: 75,
     height: 75,
     borderRadius: 35,
+    overflow: 'hidden',
   },
   post: {
     width: 80,
     height: 80,
     borderRadius: 15,
+    overflow: 'hidden',
   },
   errorMessageContainer: {
     //TODO: Fix hard-coded numbers
@@ -473,6 +504,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     backgroundColor: '#D7D7D7',
     borderRadius: 10,
+    overflow: 'hidden',
     padding: 15,
   },
   errorMessageBanner: {
@@ -488,6 +520,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     borderRadius: 5,
+    overflow: 'hidden',
   },
   errorMessageTextContainer: {
     display: 'flex',

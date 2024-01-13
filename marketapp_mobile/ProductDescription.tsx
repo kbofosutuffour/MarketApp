@@ -46,8 +46,13 @@ function ProductDescription(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
   const baseUrl =
-    Platform.OS === 'android' ? 'http://10.0.2.2' : 'http://localhost';
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok =
+    'https://classic-pegasus-factual.ngrok-free.app';
 
   // After the page renders, retrieve information on the user
   // who created the post from the database, stored in the preceeding
@@ -63,7 +68,9 @@ function ProductDescription(props): JSX.Element {
    * page
    */
   const getData = async () => {
-    let request = `${baseUrl}:8000/profile/${props.post.username}`;
+    let request = `${emulator ? baseUrl : ngrok}/profile/${
+      props.post.username
+    }`;
     let data = {
       data: {},
       userSettings: {},
@@ -77,7 +84,11 @@ function ProductDescription(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get(`${baseUrl}:8000/profiles/get_liked_posts/${props.current_user}`)
+      .get(
+        `${emulator ? baseUrl : ngrok}/profiles/get_liked_posts/${
+          props.current_user
+        }`,
+      )
       .then(res => {
         likePost(
           res.data.liked_posts && res.data.liked_posts.includes(props.post.id)
@@ -87,18 +98,26 @@ function ProductDescription(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get(`${baseUrl}:8000/profiles/get_date_created/${props.post.username}`)
+      .get(
+        `${emulator ? baseUrl : ngrok}/profiles/get_date_created/${
+          props.post.username
+        }`,
+      )
       .then(res => {
         data.date = res.data.date.split('-');
       });
     await axios
-      .get(`${baseUrl}:8000/profiles/get_id/${props.post.username}`)
+      .get(
+        `${emulator ? baseUrl : ngrok}/profiles/get_id/${props.post.username}`,
+      )
       .then(res => {
         data.id = res.data.id;
       });
-    await axios.get(`${baseUrl}:8000/user_settings/${data.id}`).then(res => {
-      data.userSettings = res.data;
-    });
+    await axios
+      .get(`${emulator ? baseUrl : ngrok}/user_settings/${data.id}`)
+      .then(res => {
+        data.userSettings = res.data;
+      });
     setProfile(data);
     addAllImages();
     props.setHasLoaded(true);
@@ -111,7 +130,7 @@ function ProductDescription(props): JSX.Element {
     let new_photos = [];
     new_photos.push(props.post.display_image);
     await axios
-      .get(`${baseUrl}:8000/images/${props.post.id}`)
+      .get(`${emulator ? baseUrl : ngrok}/images/${props.post.id}`)
       .then(res => {
         let indexes = Object.keys(res.data);
         for (let i = 0; i < Object.keys(res.data).length; i++) {
@@ -144,7 +163,7 @@ function ProductDescription(props): JSX.Element {
     data.append('image', image);
 
     await axios
-      .post(`${baseUrl}:8000/rooms/`, data, {
+      .post(`${emulator ? baseUrl : ngrok}/rooms/`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -167,7 +186,9 @@ function ProductDescription(props): JSX.Element {
     };
     axios
       .patch(
-        `${baseUrl}:8000/edit_profile/like_post/${props.current_user}/`,
+        `${emulator ? baseUrl : ngrok}/edit_profile/like_post/${
+          props.current_user
+        }/`,
         data,
       )
       .then(res => {
@@ -188,6 +209,7 @@ function ProductDescription(props): JSX.Element {
                 width: 30,
                 height: 30,
                 borderRadius: 10,
+                overflow: 'hidden',
                 zIndex: 3,
                 backgroundColor: 'rgb(185, 151, 91)',
               }}
@@ -228,7 +250,9 @@ function ProductDescription(props): JSX.Element {
                 <TouchableWithoutFeedback onPress={() => showMain(false)}>
                   <Image
                     source={{
-                      uri: `${baseUrl}:8000${profile.data.profile_picture}`,
+                      uri: `${emulator ? baseUrl : ngrok}${
+                        profile.data.profile_picture
+                      }`,
                     }}
                     style={styles.profilePicture}
                   />
@@ -324,13 +348,15 @@ function ProductDescription(props): JSX.Element {
               getChats(
                 props.current_user,
                 {
-                  uri: `${baseUrl}:8000${props.current_user_pfp}`,
+                  uri: `${emulator ? baseUrl : ngrok}${props.current_user_pfp}`,
                   type: 'image/' + props.current_user_pfp.split('.').pop(),
                   name: 'image.png',
                 },
                 props.post.username,
                 {
-                  uri: `${baseUrl}:8000${profile.data.profile_picture}`,
+                  uri: `${emulator ? baseUrl : ngrok}${
+                    profile.data.profile_picture
+                  }`,
                   type:
                     'image/' + profile.data.profile_picture.split('.').pop(),
                   name: 'image.png',
@@ -392,6 +418,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 15,
+    overflow: 'hidden',
   },
   returnHome: {
     position: 'absolute',
@@ -399,6 +426,7 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: 'rgb(185, 151, 91)',
     borderRadius: 10,
+    overflow: 'hidden',
     left: 30,
     top: 30,
     zIndex: 2,
@@ -433,6 +461,7 @@ const styles = StyleSheet.create({
   message: {
     padding: 10,
     borderRadius: 5,
+    overflow: 'hidden',
     backgroundColor: '#D0D3D4',
     color: 'black',
   },
@@ -450,6 +479,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.black,
+    overflow: 'hidden',
     backgroundColor: Colors.white,
     rowGap: 5,
     position: 'relative',
