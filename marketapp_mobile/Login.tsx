@@ -1,7 +1,8 @@
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import CheckBox from '@react-native-community/checkbox';
-import DocumentPicker from 'react-native-document-picker';
+// import DocumentPicker from 'react-native-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import camera from './media/camera_1.png';
 
 import {
@@ -17,6 +18,7 @@ import {
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
+import {UserContext} from './App';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -71,6 +73,18 @@ function ForgotPassword(props): JSX.Element {
   });
   const [inputCode, setInputCode] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const verify = async (inputEmail: string = '', inputCode: string = '') => {
     // Making sure the inputEmail is from a W&M email domain
@@ -79,7 +93,7 @@ function ForgotPassword(props): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {email: email})
         .then(response => {
           setCode({
             code: response.data.code,
@@ -109,8 +123,11 @@ function ForgotPassword(props): JSX.Element {
       newPassword.username.length
     ) {
       await axios
-        .post('http://10.0.2.2:8000/users/change_password/', newPassword)
-        .then(response => {
+        .post(
+          `${emulator ? baseUrl : ngrok}/users/change_password/`,
+          newPassword,
+        )
+        .then(() => {
           props.setLoginState({
             login: true,
             register: false,
@@ -179,6 +196,7 @@ function ForgotPassword(props): JSX.Element {
                       color: 'black',
                       textAlign: 'center',
                       lineHeight: 35,
+                      overflow: 'hidden',
                     }}>
                     {code.codeSent ? 'Code Sent' : 'Send Code'}
                   </Text>
@@ -205,6 +223,7 @@ function ForgotPassword(props): JSX.Element {
                       color: 'black',
                       textAlign: 'center',
                       lineHeight: 30,
+                      overflow: 'hidden',
                     }}>
                     {inputCode === code.code && inputCode.length
                       ? 'Verified'
@@ -323,19 +342,37 @@ function Register(props): JSX.Element {
 
   const [profilePicture, setProfilePicture] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   const chooseImage = async () => {
-    const res = await DocumentPicker.pick({
-      type: [DocumentPicker.types.images],
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    setProfile({
-      ...profile,
-      profile_picture: {
-        uri: res[0].uri,
-        type: res[0].type,
-        name: 'image.png',
-      },
-    });
-    setProfilePicture(res[0].uri);
+
+    if (!res.canceled) {
+      setProfile({
+        ...profile,
+        profile_picture: {
+          uri: res.assets[0].uri,
+          type: res.assets[0].type,
+          name: 'image.png',
+        },
+      });
+      setProfilePicture(res.assets[0].uri);
+    }
   };
 
   const checkUsername = () => {
@@ -355,13 +392,14 @@ function Register(props): JSX.Element {
       Object.keys(profile.profile_picture).length;
 
     if (validInformation) {
+      let profile_id;
       for (const [key, value] of Object.entries(profile)) {
         data.append(key, value);
       }
       //TODO: Add logic for if user has a user set up, but NOT a password
       await axios
         .post(
-          'http://10.0.2.2:8000/users/',
+          `${emulator ? baseUrl : ngrok}/users/`,
           {
             username: profile.username,
             password: profile.password,
@@ -386,14 +424,14 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post('http://10.0.2.2:8000/profiles/', data, {
+        .post(`${emulator ? baseUrl : ngrok}/profiles/`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         })
         .then(response => {
           console.log(response);
-          props.returnHome(profile.username);
+          profile_id = response.data.id;
         })
         .catch((err: any) => {
           console.log(err);
@@ -403,16 +441,18 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post('http://127.0.0.1:8000/user_settings/', {
-          username: profile.username,
+        .post(`${emulator ? baseUrl : ngrok}/user_settings/`, {
+          username: profile_id,
         })
+        .then(() => props.returnHome(profile.username))
         .catch((err: any) => console.log(err));
 
-      await axios
-        .post('http://127.0.0.1:8000/report/', {
-          username: profile.username,
-        })
-        .catch((err: any) => console.log(err));
+      // await axios
+      //   .post(`${emulator ? baseUrl : ngrok}/report/`, {
+      //     username: profile_id,
+      //   })
+      //   .then(() => props.returnHome(profile.username))
+      //   .catch((err: any) => console.log(err));
     } else if (profile.password !== confirmPassword) {
       props.setErrorMessage('Passwords do not match.  Please try again.');
     } else if (profile.password.length < 8) {
@@ -504,6 +544,7 @@ function Register(props): JSX.Element {
                 borderRadius: 10,
                 textAlign: 'center',
                 lineHeight: 30,
+                overflow: 'hidden',
               }}>
               {!userSelect.hasUser
                 ? 'Check nickname'
@@ -543,6 +584,7 @@ function Register(props): JSX.Element {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    overflow: 'hidden',
                   }}
                 />
               </View>
@@ -552,7 +594,7 @@ function Register(props): JSX.Element {
               <Text style={styles.termsAndConditionsBold}>
                 {/* eslint-disable-next-line prettier/prettier */}
                 Terms and Conditions </Text>
-                and
+              and
               {/* eslint-disable-next-line prettier/prettier */}
               <Text style={styles.termsAndConditionsBold}> Privacy Policy </Text>
             </Text>
@@ -587,6 +629,18 @@ function Verify(props): JSX.Element {
   const [email, setEmail] = useState('');
   const [inputCode, setInputCode] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const verify = async (inputEmail: string = '', inputCode: string = '') => {
     // Making sure the inputEmail is from a W&M email domain
@@ -594,7 +648,7 @@ function Verify(props): JSX.Element {
 
     if (inputEmail && domain === 'wm.edu') {
       await axios
-        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {email: email})
         .then(response => {
           setCode({
             code: response.data.code,
@@ -664,6 +718,7 @@ function Verify(props): JSX.Element {
                   borderRadius: 10,
                   textAlign: 'center',
                   lineHeight: 30,
+                  overflow: 'hidden',
                 }}>
                 {code.codeSent ? 'Code Sent' : 'Send Code'}
               </Text>
@@ -688,6 +743,7 @@ function Verify(props): JSX.Element {
                   borderRadius: 10,
                   textAlign: 'center',
                   lineHeight: 30,
+                  overflow: 'hidden',
                 }}
                 onPress={() => verify(null, inputCode)}>
                 {inputCode === code.code && inputCode.length
@@ -733,6 +789,18 @@ function Login(props): JSX.Element {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   // Redirect to Forgot Password screen immediately if desired from app
   useState(() => {
     if (props.redirect === 'Forgot Password') {
@@ -752,7 +820,7 @@ function Login(props): JSX.Element {
     };
     if (data.username && data.password) {
       await axios
-        .post('http://10.0.2.2:8000/users/login/', data)
+        .post(`${emulator ? baseUrl : ngrok}/users/login/`, data)
         .then(response => {
           if (response.data.login) {
             if (response.data.register) {
@@ -772,10 +840,7 @@ function Login(props): JSX.Element {
           }
         })
         .catch((err: any) => console.log(err));
-      setInfo({
-        username: '',
-        password: '',
-      });
+      setInfo({...info, password: ''});
     } else {
       setErrorMessage('Please enter login information.');
       setInfo({...info, password: ''});
@@ -900,6 +965,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 40,
     color: Colors.white,
+    overflow: 'hidden',
   },
   createAccountButton: {
     width: 250,
@@ -910,6 +976,7 @@ const styles = StyleSheet.create({
     lineHeight: 40,
     color: Colors.white,
     margin: 10,
+    overflow: 'hidden',
   },
   header: {
     fontSize: 20,
@@ -1007,6 +1074,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D7D7D7',
     borderRadius: 10,
     padding: 15,
+    overflow: 'hidden',
   },
   errorMessageBanner: {
     display: 'flex',
@@ -1021,6 +1089,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     borderRadius: 5,
+    overflow: 'hidden',
   },
   errorMessageTextContainer: {
     display: 'flex',
@@ -1043,6 +1112,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: Colors.black,
     borderWidth: 1,
+    overflow: 'hidden',
   },
 });
 

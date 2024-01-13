@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import {
   Button,
@@ -16,11 +16,14 @@ import {
   View,
   Alert,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import * as ImagePicker from 'expo-image-picker';
-import DocumentPicker from 'react-native-document-picker';
-import {Picker} from '@react-native-picker/picker';
+// import DocumentPicker from 'react-native-document-picker';
+import {UserContext} from './App';
+import {Categories} from './Categories';
+import {normalize} from './Profile';
 
 function EditPost(props): JSX.Element {
   //Image upload documentation: https://github.com/expo/expo/blob/main/docs/pages/versions/unversioned/sdk/imagepicker.mdx
@@ -28,6 +31,15 @@ function EditPost(props): JSX.Element {
   const [display, setDisplay] = useState('');
   const [images, setImages] = useState([]);
   const [newData, setNewData] = useState(null);
+  const [category, showCategory] = useState(false);
+  const [postCategory, setPostCategory] = useState('');
+
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
     fetchData();
@@ -35,7 +47,7 @@ function EditPost(props): JSX.Element {
 
   const fetchData = async () => {
     await axios
-      .get('http://10.0.2.2:8000/posts/' + props.id)
+      .get(`${emulator ? baseUrl : ngrok}/posts/${props.id}`)
       .then(response => {
         props.setPost(response.data);
         setDisplay(response.data.display_image);
@@ -43,7 +55,7 @@ function EditPost(props): JSX.Element {
       .catch((err: any) => console.log(err));
 
     await axios
-      .get('http://10.0.2.2:8000/images/' + props.id)
+      .get(`${emulator ? baseUrl : ngrok}/images/${props.id}`)
       .then(response => {
         let response_images = Object.values(response.data);
         let newList = [];
@@ -74,7 +86,7 @@ function EditPost(props): JSX.Element {
     }
 
     await axios
-      .patch('http://10.0.2.2:8000/edit_post/' + props.id + '/', data, {
+      .patch(`${emulator ? baseUrl : ngrok}/edit_post/${props.id}/`, data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -83,160 +95,189 @@ function EditPost(props): JSX.Element {
   };
 
   const chooseImage = async () => {
-    const res = await DocumentPicker.pick({
-      type: [DocumentPicker.types.images],
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    let image = {
-      uri: res[0].uri,
-      type: res[0].type,
-      name: 'image.png',
-    };
-    props.setPost({
-      ...props.post,
-      display_image: {
-        uri: res[0].uri,
-        type: res[0].type,
+
+    if (!res.canceled) {
+      let image = {
+        uri: res.assets[0].uri,
+        type: res.assets[0].type,
         name: 'image.png',
-      },
-    });
-    setNewData(image);
-    setDisplay(res[0].uri);
+      };
+      props.setPost({
+        ...props.post,
+        display_image: {
+          uri: res.assets[0].uri,
+          type: res.assets[0].type,
+          name: 'image.png',
+        },
+      });
+      setNewData(image);
+      setDisplay(res.assets[0].uri);
+    }
   };
 
   return (
-    <View
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        width: '100%',
-        height: '90%',
-      }}>
-      <ScrollView>
-        <View style={styles.postItem}>
-          <Button
-            title="Select your display image"
-            onPress={chooseImage}
-            color={'rgb(17, 87, 64)'}
-          />
-          <ScrollView style={styles.imagesContainer} horizontal={true}>
-            {display && (
-              <Image
-                source={{uri: display}}
-                style={{width: 200, height: 200}}
-              />
-            )}
-            {images.map(image => {
-              return (
-                image && (
-                  <Image
-                    source={{uri: image}}
-                    style={{width: 200, height: 200}}
-                  />
-                )
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.postItem}>
-          <TextInput
-            placeholder="Product"
-            onChangeText={value =>
-              props.setPost({...props.post, product: value})
-            }
-            style={styles.input}
-            value={props.post.product}
-          />
-        </View>
-        <View style={styles.postItemPrice}>
-          <Text style={styles.dollarSign}>$</Text>
-          <TextInput
-            placeholder="Enter Price"
-            onChangeText={value => {
-              if (Number(value)) {
-                props.setPost({...props.post, price: Number(value)});
+    <>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          width: '100%',
+          height: '90%',
+          opacity: category ? 0.6 : 1.0,
+        }}>
+        <ScrollView>
+          <View style={styles.postItem}>
+            <TouchableWithoutFeedback onPress={chooseImage}>
+              <Text
+                style={{
+                  backgroundColor: 'rgb(17, 87, 64)',
+                  padding: 10,
+                  textAlign: 'center',
+                  fontSize: normalize(15),
+                  color: 'white',
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                }}>
+                Select your image(s)
+              </Text>
+            </TouchableWithoutFeedback>
+            <ScrollView style={styles.imagesContainer} horizontal={true}>
+              {display && (
+                <Image
+                  source={{uri: display}}
+                  style={{width: 200, height: 200}}
+                />
+              )}
+              {images.map(image => {
+                return (
+                  image && (
+                    <Image
+                      source={{uri: image}}
+                      style={{width: 200, height: 200}}
+                    />
+                  )
+                );
+              })}
+            </ScrollView>
+          </View>
+          <View style={styles.postItem}>
+            <TextInput
+              placeholder="Product"
+              onChangeText={value =>
+                props.setPost({...props.post, product: value})
               }
-            }}
-            style={styles.input}
-            value={props.post.price}
-          />
-        </View>
-        <View style={styles.postItemCategory}>
-          <Text>Category: {props.post.category}</Text>
-          <Picker
-            selectedValue={props.post.category}
-            onValueChange={itemValue => {
-              if (props.categories.includes(itemValue)) {
-                props.setPost({...props.post, category: itemValue});
+              style={styles.input}
+              value={props.post.product}
+            />
+          </View>
+          <View style={styles.postItemPrice}>
+            <Text style={styles.dollarSign}>$ </Text>
+            <TextInput
+              placeholder=" Enter Price"
+              onChangeText={value => {
+                if (Number(value)) {
+                  props.setPost({...props.post, price: Number(value)});
+                }
+              }}
+              style={styles.input}
+              value={props.post.price}
+            />
+          </View>
+          <View style={styles.postItemCategory}>
+            <Text>Category: {props.post.category}</Text>
+            <TouchableWithoutFeedback onPress={() => showCategory(!category)}>
+              <Text
+                style={{
+                  backgroundColor: 'rgb(17, 87, 64)',
+                  padding: 10,
+                  textAlign: 'center',
+                  fontSize: normalize(15),
+                  color: 'white',
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                }}>
+                {postCategory ? postCategory : 'Choose Category'}
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.postItemDraft}>
+            <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
+            <Switch
+              trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
+              value={props.post.draft}
+              onValueChange={() =>
+                props.setPost({...props.post, draft: !props.post.draft})
               }
-            }}
-            style={styles.pickerItem}>
-            {props.categories.map((value: string) => {
-              return <Picker.Item label={value} value={value} />;
-            })}
-            <Picker.Item label={'test'} value={'test'} />
-          </Picker>
-        </View>
-        <View style={styles.postItemDraft}>
-          <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
-          <Switch
-            trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-            value={props.post.draft}
-            onValueChange={() =>
-              props.setPost({...props.post, draft: !props.post.draft})
-            }
-          />
-        </View>
-        <View style={styles.postItemStatus}>
-          <Button
-            title="SELLING"
-            color={
-              props.post.status === 'SELLING'
-                ? 'rgb(185, 151, 91)'
-                : 'rgb(17, 87, 64)'
-            }
-            onPress={() => {
-              props.setPost({...props.post, status: 'SELLING'});
-            }}
-          />
-          <Button
-            title="PENDING"
-            color={
-              props.post.status === 'PENDING'
-                ? 'rgb(185, 151, 91)'
-                : 'rgb(17, 87, 64)'
-            }
-            onPress={() => {
-              props.setPost({...props.post, status: 'PENDING'});
-            }}
-          />
-        </View>
-        <View style={styles.postItemDescription}>
-          <TextInput
-            placeholder="Write a description for your product here:"
-            multiline={true}
-            numberOfLines={4}
-            style={styles.descriptionInput}
-            textAlignVertical={'top'}
-            onChangeText={value =>
-              props.setPost({...props.post, description: value})
-            }
-            value={props.post.description}
-          />
-        </View>
-      </ScrollView>
+            />
+          </View>
+          <View style={styles.postItemStatus}>
+            <Button
+              title="SELLING"
+              color={
+                props.post.status === 'SELLING'
+                  ? 'rgb(185, 151, 91)'
+                  : 'rgb(17, 87, 64)'
+              }
+              onPress={() => {
+                props.setPost({...props.post, status: 'SELLING'});
+              }}
+            />
+            <Button
+              title="PENDING"
+              color={
+                props.post.status === 'PENDING'
+                  ? 'rgb(185, 151, 91)'
+                  : 'rgb(17, 87, 64)'
+              }
+              onPress={() => {
+                props.setPost({...props.post, status: 'PENDING'});
+              }}
+            />
+          </View>
+          <View style={styles.postItemDescription}>
+            <TextInput
+              placeholder="Write a description for your product here:"
+              multiline={true}
+              numberOfLines={4}
+              style={styles.descriptionInput}
+              textAlignVertical={'top'}
+              onChangeText={value =>
+                props.setPost({...props.post, description: value})
+              }
+              value={props.post.description}
+            />
+          </View>
+        </ScrollView>
 
-      <TouchableOpacity
-        onPress={() => {
-          postData();
-          props.returnHome();
-        }}
-        style={styles.submit}>
-        <View>
-          <Text style={{color: Colors.white, fontSize: 30}}>EDIT POST</Text>
+        <TouchableOpacity
+          onPress={() => {
+            postData();
+            props.returnHome();
+          }}
+          style={styles.submit}>
+          <View>
+            <Text style={{color: Colors.white, fontSize: 30}}>EDIT POST</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+      {category && (
+        <View style={styles.category}>
+          <Categories
+            newPost={true}
+            setPost={props.setPost}
+            post={props.post}
+            showCategory={showCategory}
+          />
         </View>
-      </TouchableOpacity>
-    </View>
+      )}
+    </>
   );
 }
 
@@ -245,6 +286,20 @@ function NewPost(props): JSX.Element {
 
   const [display, setDisplay] = useState('');
   const [images, setImages] = useState([]);
+  const [category, showCategory] = useState(false);
+  const [postCategory, setPostCategory] = useState('');
+
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const MAX_NUMBER_OF_IMAGES = 5;
 
@@ -260,7 +315,7 @@ function NewPost(props): JSX.Element {
 
     let post_id;
     await axios
-      .post('http://10.0.2.2:8000/posts/', post, {
+      .post(`${emulator ? baseUrl : ngrok}/posts/`, post, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -278,7 +333,7 @@ function NewPost(props): JSX.Element {
     }
 
     await axios
-      .post('http://10.0.2.2:8000/images/', additional_images, {
+      .post(`${emulator ? baseUrl : ngrok}/images/`, additional_images, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -295,171 +350,197 @@ function NewPost(props): JSX.Element {
    * for their new post
    */
   const chooseImage = async () => {
-    const res = await DocumentPicker.pick({
-      type: [DocumentPicker.types.images],
-      allowMultiSelection: true,
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
 
-    let image = {
-      uri: res[0].uri,
-      type: res[0].type,
-      name: 'image.png',
-    };
-
-    props.setPost({...props.post, display_image: image});
-    setDisplay(res[0].uri);
-
-    let data = [];
-    data.push(null);
-
-    for (let i = 1; i < res.length; i++) {
-      image = {
-        uri: res[i].uri,
-        type: res[i].type,
+    if (!res.canceled) {
+      let image = {
+        uri: res.assets[0].uri,
+        type: res.assets[0].type,
         name: 'image.png',
       };
-      data.push(image);
+
+      props.setPost({...props.post, display_image: image});
+      setDisplay(res.assets[0].uri);
+
+      let data = [];
+      data.push(null);
+
+      for (let i = 1; i < res.assets.length; i++) {
+        image = {
+          uri: res.assets[i].uri,
+          type: res.assets[i].type,
+          name: 'image.png',
+        };
+        data.push(image);
+      }
+      setImages(data);
     }
-    setImages(data);
   };
 
   return (
-    <View
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        width: '100%',
-        height: '90%',
-      }}>
-      <ScrollView>
-        <View style={styles.postItem}>
-          <Button
-            title="Select your image(s)"
-            onPress={chooseImage}
-            color={'rgb(17, 87, 64)'}
-          />
-          <ScrollView style={styles.imagesContainer} horizontal={true}>
-            {display && (
-              <Image
-                source={{uri: display}}
-                style={{width: 200, height: 200}}
-              />
-            )}
-            {images.map(image => {
-              return (
-                image && (
-                  <Image
-                    source={{uri: image.uri}}
-                    style={{width: 200, height: 200}}
-                  />
-                )
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.postItem}>
-          <TextInput
-            placeholder="Product"
-            onChangeText={value =>
-              props.setPost({...props.post, product: value})
-            }
-            style={styles.input}
-          />
-        </View>
-        <View style={styles.postItemPrice}>
-          <Text style={styles.dollarSign}>$</Text>
-          <TextInput
-            placeholder="Enter Price"
-            onChangeText={value => {
-              if (Number(value)) {
-                props.setPost({...props.post, price: Number(value)});
-              }
-            }}
-            style={styles.input}
-          />
-        </View>
-        <View style={styles.postItemCategory}>
-          <Text>Category: {props.post.category}</Text>
-          <Picker
-            selectedValue={props.post.category}
-            onValueChange={itemValue => {
-              if (props.categories.includes(itemValue)) {
-                props.setPost({...props.post, category: itemValue});
-              }
-            }}
-            style={styles.pickerItem}>
-            {props.categories.map((value: string) => {
-              return <Picker.Item label={value} value={value} />;
-            })}
-            <Picker.Item label={'test'} value={'test'} />
-          </Picker>
-        </View>
-        <View style={styles.postItemDraft}>
-          <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
-          <Switch
-            trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-            value={props.post.draft}
-            onValueChange={() =>
-              props.setPost({...props.post, draft: !props.post.draft})
-            }
-          />
-        </View>
-        <View style={styles.postItemStatus}>
-          <Button
-            title="SELLING"
-            color={
-              props.post.status === 'SELLING'
-                ? 'rgb(185, 151, 91)'
-                : 'rgb(17, 87, 64)'
-            }
-            onPress={() => {
-              props.setPost({...props.post, status: 'SELLING'});
-            }}
-          />
-          <Button
-            title="PENDING"
-            color={
-              props.post.status === 'PENDING'
-                ? 'rgb(185, 151, 91)'
-                : 'rgb(17, 87, 64)'
-            }
-            onPress={() => {
-              props.setPost({...props.post, status: 'PENDING'});
-            }}
-          />
-        </View>
-        <View style={styles.postItemDescription}>
-          <TextInput
-            placeholder="Write a description for your product here:"
-            multiline={true}
-            numberOfLines={4}
-            style={styles.descriptionInput}
-            textAlignVertical={'top'}
-            onChangeText={value =>
-              props.setPost({...props.post, description: value})
-            }
-          />
-        </View>
-      </ScrollView>
+    <>
       <View
         style={{
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          height: '90%',
+          opacity: category ? 0.6 : 1.0,
         }}>
-        <TouchableOpacity
-          onPress={async () => {
-            await postData();
-          }}
-          style={styles.submit}>
-          <View>
-            <Text style={{color: Colors.white, fontSize: 30}}>PUBLISH</Text>
+        <ScrollView>
+          <View style={styles.postItem}>
+            <TouchableWithoutFeedback onPress={chooseImage}>
+              <Text
+                style={{
+                  backgroundColor: 'rgb(17, 87, 64)',
+                  padding: 10,
+                  textAlign: 'center',
+                  fontSize: normalize(15),
+                  color: 'white',
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                }}>
+                Select your image(s)
+              </Text>
+            </TouchableWithoutFeedback>
+            <ScrollView style={styles.imagesContainer} horizontal={true}>
+              {display && (
+                <Image
+                  source={{uri: display}}
+                  style={{width: 200, height: 200}}
+                />
+              )}
+              {images.map(image => {
+                return (
+                  image && (
+                    <Image
+                      source={{uri: image.uri}}
+                      style={{width: 200, height: 200}}
+                    />
+                  )
+                );
+              })}
+            </ScrollView>
           </View>
-        </TouchableOpacity>
+          <View style={styles.postItem}>
+            <TextInput
+              placeholder="Product"
+              onChangeText={value =>
+                props.setPost({...props.post, product: value})
+              }
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.postItemPrice}>
+            <Text style={styles.dollarSign}>$</Text>
+            <TextInput
+              placeholder=" Enter Price"
+              onChangeText={value => {
+                if (Number(value)) {
+                  props.setPost({...props.post, price: Number(value)});
+                }
+              }}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.postItemCategory}>
+            <Text>Category: {props.post.category}</Text>
+            <TouchableWithoutFeedback onPress={() => showCategory(true)}>
+              <Text
+                style={{
+                  backgroundColor: 'rgb(17, 87, 64)',
+                  padding: 10,
+                  textAlign: 'center',
+                  fontSize: normalize(15),
+                  color: 'white',
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                }}>
+                {postCategory ? postCategory : 'Choose Category'}
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.postItemDraft}>
+            <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
+            <Switch
+              trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
+              value={props.post.draft}
+              onValueChange={() =>
+                props.setPost({...props.post, draft: !props.post.draft})
+              }
+            />
+          </View>
+          <View style={styles.postItemStatus}>
+            <Button
+              title="SELLING"
+              color={
+                props.post.status === 'SELLING'
+                  ? 'rgb(185, 151, 91)'
+                  : 'rgb(17, 87, 64)'
+              }
+              onPress={() => {
+                props.setPost({...props.post, status: 'SELLING'});
+              }}
+            />
+            <Button
+              title="PENDING"
+              color={
+                props.post.status === 'PENDING'
+                  ? 'rgb(185, 151, 91)'
+                  : 'rgb(17, 87, 64)'
+              }
+              onPress={() => {
+                props.setPost({...props.post, status: 'PENDING'});
+              }}
+            />
+          </View>
+          <View style={styles.postItemDescription}>
+            <TextInput
+              placeholder="Write a description for your product here:"
+              multiline={true}
+              style={styles.descriptionInput}
+              textAlignVertical={'top'}
+              onChangeText={value =>
+                props.setPost({...props.post, description: value})
+              }
+            />
+          </View>
+        </ScrollView>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
+            onPress={async () => {
+              await postData();
+            }}
+            style={styles.submit}>
+            <View>
+              <Text style={{color: Colors.white, fontSize: 30}}>PUBLISH</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+      {category && (
+        <View style={styles.category}>
+          <Categories
+            newPost={true}
+            setPost={props.setPost}
+            post={props.post}
+            showCategory={showCategory}
+          />
+        </View>
+      )}
+    </>
   );
 }
 
@@ -479,21 +560,6 @@ function CreatePost(props): JSX.Element {
     category: 'MISC.',
     status: null,
   });
-
-  const categories = [
-    'CLOTHING',
-    'FURNITURE',
-    'FREE STUFF',
-    'VEHICLES',
-    'TECHNOLOGY',
-    'HOBBIES',
-    'OFFICE SUPPLIES',
-    'DORM GOODS',
-    'FOOD',
-    'ENTERTAINMENT',
-    'BOOKS',
-    'MISC.',
-  ];
 
   const status = ['SELLING', 'PENDING', 'SOLD'];
   const [onCancel, setOnCancel] = useState(false);
@@ -516,7 +582,6 @@ function CreatePost(props): JSX.Element {
             post={post}
             setPost={setPost}
             status={status}
-            categories={categories}
             returnHome={props.returnHome}
             username={props.username}
             getProfile={props.getProfile}
@@ -528,7 +593,6 @@ function CreatePost(props): JSX.Element {
             post={post}
             setPost={setPost}
             status={status}
-            categories={categories}
             returnHome={props.returnHome}
             username={props.username}
             id={props.showPost.id}
@@ -556,7 +620,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 0.5,
     width: '100%',
-    padding: 5,
+    padding: normalize(15),
   },
   postItemCategory: {
     display: 'flex',
@@ -567,7 +631,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     columnGap: 10,
     width: '100%',
-    padding: 5,
+    padding: normalize(15),
   },
   postItemPrice: {
     display: 'flex',
@@ -577,7 +641,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 0.5,
     width: '100%',
-    padding: 5,
+    padding: normalize(15),
   },
   postItemStatus: {
     display: 'flex',
@@ -597,7 +661,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 0.5,
     width: '100%',
-    padding: 5,
+    padding: normalize(15),
     columnGap: 10,
   },
   postItemDescription: {
@@ -635,6 +699,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
+    overflow: 'hidden',
     backgroundColor: 'rgb(17, 87, 64)',
     height: 50,
     borderColor: 'gray',
@@ -648,6 +713,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
+    overflow: 'hidden',
     backgroundColor: Colors.blue,
     height: 50,
     borderColor: 'gray',
@@ -657,6 +723,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(17, 87, 64)',
     width: 50,
     height: 50,
+  },
+  category: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    position: 'absolute',
   },
 });
 

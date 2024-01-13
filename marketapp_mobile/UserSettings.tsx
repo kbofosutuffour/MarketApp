@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Button,
   Image,
@@ -16,6 +16,7 @@ import {format} from 'date-fns';
 import uuid from 'react-native-uuid';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
+import {UserContext} from './App';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 // based on iphone 5s's scale
@@ -58,6 +59,18 @@ function Profile(props): JSX.Element {
   const [showDate, setShowDate] = useState(false);
   const [userSettings, setUserSettings] = useState({});
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   useEffect(() => {
     setUserSettings(props.userSettings);
     setDateCreated(props.date);
@@ -77,7 +90,9 @@ function Profile(props): JSX.Element {
       <View style={styles.profileDescription}>
         <Image
           source={{
-            uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+            uri: `${emulator ? baseUrl : ngrok}${
+              props.profile.profile_picture
+            }`,
           }}
           style={styles.profilePictureBorder}
         />
@@ -148,6 +163,19 @@ function ChangePassword(props: any): JSX.Element {
     codeSent: false,
   });
   const [inputCode, setInputCode] = useState('');
+
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   // Add username as soon as the component renders
   useEffect(() => {
     setNewPassword({...newPassword, username: props.profile.username});
@@ -161,7 +189,7 @@ function ChangePassword(props: any): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post('http://10.0.2.2:8000/users/verify/', {email: email})
+        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {email: email})
         .then(response => {
           setCode({
             code: response.data.code,
@@ -191,7 +219,10 @@ function ChangePassword(props: any): JSX.Element {
       newPassword.username.length
     ) {
       await axios
-        .post('http://10.0.2.2:8000/users/change_password/', newPassword)
+        .post(
+          `${emulator ? baseUrl : ngrok}/users/change_password/`,
+          newPassword,
+        )
         .then(response => {
           setPasswordState({
             sendCode: false,
@@ -282,6 +313,7 @@ function ChangePassword(props: any): JSX.Element {
                       width: 90,
                       height: 35,
                       borderRadius: 15,
+                      overflow: 'hidden',
                       backgroundColor: code.codeSent
                         ? 'rgb(138,178,147)'
                         : 'rgb(176,211,229)',
@@ -311,6 +343,7 @@ function ChangePassword(props: any): JSX.Element {
                       width: 90,
                       height: 30,
                       borderRadius: 10,
+                      overflow: 'hidden',
                       color: 'black',
                       textAlign: 'center',
                       lineHeight: 30,
@@ -357,7 +390,9 @@ function ChangePassword(props: any): JSX.Element {
             <Image
               style={styles.wmLogo}
               source={{
-                uri: 'http://10.0.2.2:8000/' + props.profile.profile_picture,
+                uri: `${emulator ? baseUrl : ngrok}/${
+                  props.profile.profile_picture
+                }`,
               }}
             />
             <View style={styles.loginText}>
@@ -415,6 +450,18 @@ function Notifications(props: any): JSX.Element {
   const [userSettings, setUserSettings] = useState({});
   const [profileID, setProfileID] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   useEffect(() => {
     showNotifications();
   }, []);
@@ -422,20 +469,21 @@ function Notifications(props: any): JSX.Element {
   const showNotifications = async () => {
     let profile_id;
     await axios
-      .get('http://10.0.2.2:8000/profiles/get_id/' + props.profile + '/')
+      .get(`${emulator ? baseUrl : ngrok}/profiles/get_id/${props.profile}/`)
       .then(response => {
         setProfileID(response.data.id);
         profile_id = response.data.id;
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get('http://10.0.2.2:8000/user_settings/' + profile_id)
+      .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile_id}`)
       .then(response => {
         setNewMessages(response.data.new_messages);
         setLikedPostUpdates(response.data.liked_posts_updates);
         setUserSettings(response.data);
       })
       .catch(error => console.log(error));
+    props.setHasLoaded(true);
   };
 
   const changedNewMessages = async choice => {
@@ -443,10 +491,10 @@ function Notifications(props: any): JSX.Element {
     data.new_messages = choice;
     await axios
       .patch(
-        'http://10.0.2.2:8000/user_settings/new_messages/' + profileID + '/',
+        `${emulator ? baseUrl : ngrok}/user_settings/new_messages/${profileID}`,
         data,
       )
-      .then(response => {
+      .then(() => {
         setNewMessages(choice);
       })
       .catch(error => console.log(error));
@@ -457,10 +505,10 @@ function Notifications(props: any): JSX.Element {
     data.liked_post_updates = choice;
     await axios
       .patch(
-        'http://10.0.2.2:8000/user_settings/liked_posts/' + profileID + '/',
+        `${emulator ? baseUrl : ngrok}/user_settings/liked_posts/${profileID}/`,
         data,
       )
-      .then(response => {
+      .then(() => {
         setLikedPostUpdates(choice);
       })
       .catch(error => console.log(error));
@@ -486,9 +534,7 @@ function Notifications(props: any): JSX.Element {
             Pink Bunny: 'Hello, I would like to purchase this'
           </Text>
           <View style={styles.toggle}>
-            <View style={{width: 20}}>
-              <Text>On</Text>
-            </View>
+            <Text style={{width: 50}}>On</Text>
             <TouchableWithoutFeedback onPress={() => changedNewMessages(true)}>
               <View style={styles.outerCircle}>
                 <View
@@ -498,15 +544,14 @@ function Notifications(props: any): JSX.Element {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    overflow: 'hidden',
                   }}
                 />
               </View>
             </TouchableWithoutFeedback>
           </View>
           <View style={styles.toggle}>
-            <View style={{width: 20}}>
-              <Text>Off</Text>
-            </View>
+            <Text style={{width: 50}}>Off</Text>
             <TouchableWithoutFeedback onPress={() => changedNewMessages(false)}>
               <View style={styles.outerCircle}>
                 <View
@@ -516,6 +561,7 @@ function Notifications(props: any): JSX.Element {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    overflow: 'hidden',
                   }}
                 />
               </View>
@@ -534,9 +580,7 @@ function Notifications(props: any): JSX.Element {
             $18.00
           </Text>
           <View style={styles.toggle}>
-            <View style={{width: 20}}>
-              <Text>On</Text>
-            </View>
+            <Text style={{width: 50}}>On</Text>
             <TouchableWithoutFeedback onPress={() => changedLikedPosts(true)}>
               <View style={styles.outerCircle}>
                 <View
@@ -548,15 +592,14 @@ function Notifications(props: any): JSX.Element {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    overflow: 'hidden',
                   }}
                 />
               </View>
             </TouchableWithoutFeedback>
           </View>
           <View style={styles.toggle}>
-            <View style={{width: 20}}>
-              <Text>Off</Text>
-            </View>
+            <Text style={{width: 50}}>Off</Text>
             <TouchableWithoutFeedback onPress={() => changedLikedPosts(false)}>
               <View style={styles.outerCircle}>
                 <View
@@ -568,6 +611,7 @@ function Notifications(props: any): JSX.Element {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    overflow: 'hidden',
                   }}
                 />
               </View>
@@ -638,10 +682,22 @@ function HelpOrFeedback(props: any): JSX.Element {
     feedback: false,
   });
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   const [content, setContent] = useState('');
 
   const sendFeedback = async () => {
-    axios.post('http://10.0.2.2:8000/feedback/', {
+    axios.post(`${emulator ? baseUrl : ngrok}/feedback/`, {
       username: props.profile.id,
       email: props.profile.email,
       first_name: props.profile.first_name,
@@ -787,6 +843,18 @@ function Support(props: any): JSX.Element {
 function Violations(props: any): JSX.Element {
   const [settings, setSettings]: [any, Function] = useState({});
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   const violations = [
     'scamming',
     'harassment',
@@ -814,7 +882,7 @@ function Violations(props: any): JSX.Element {
    * @param id the id of the violation in the database
    */
   const sendAppeal = async (id: string | number) => {
-    await axios.patch(`http://10.0.2.2:8000/violation/${id}/`, {
+    await axios.patch(`${emulator ? baseUrl : ngrok}/violation/${id}/`, {
       id: id,
       appeal: true,
     });
@@ -855,7 +923,7 @@ function Violations(props: any): JSX.Element {
                       if (!settings[violation.type.toLowerCase()]) {
                         await sendAppeal(violation.id);
                         props.setHasLoaded(true);
-                      } 
+                      }
                     }}
                     key={uuid.v4()}>
                     <Text
@@ -876,6 +944,7 @@ function Violations(props: any): JSX.Element {
                         height: 25,
                         lineHeight: 25,
                         borderRadius: 10,
+                        overflow: 'hidden',
                         textAlign: 'center',
                       }}
                       key={uuid.v4()}>
@@ -897,6 +966,18 @@ function UserSettings(props: any): JSX.Element {
 
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
   const options = [
     'Settings',
     'Profile',
@@ -908,22 +989,35 @@ function UserSettings(props: any): JSX.Element {
   ];
 
   return (
-    <>
+    <View
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        height: '100%',
+        width: '100%',
+        flex: 1,
+      }}>
       {view.settings && (
         <View
           // eslint-disable-next-line react-native/no-inline-styles
           style={{
             backgroundColor: '#f6f7f5',
-            height: filterHeight(SCREEN_HEIGHT),
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             opacity: !errorMessage ? 1 : 0.6,
+            height: '100%',
+            width: '100%',
+            flex: 1,
           }}>
           <View style={styles.profilePictureContainer}>
             <Image
               source={{
-                uri: 'http://10.0.2.2:8000' + props.profile.profile_picture,
+                uri: `${emulator ? baseUrl : ngrok}${
+                  props.profile.profile_picture
+                }`,
               }}
               style={styles.profilePictureBorder}
             />
@@ -936,6 +1030,9 @@ function UserSettings(props: any): JSX.Element {
                 <>
                   <TouchableWithoutFeedback
                     onPress={() => {
+                      if (value === 'Notifications') {
+                        props.setHasLoaded(false);
+                      }
                       setView({[value.toLowerCase()]: true});
                       props.setUserSettings({
                         ...props.userSettings,
@@ -990,6 +1087,8 @@ function UserSettings(props: any): JSX.Element {
           profile={props.profile.username}
           userSettings={props.userSettings.data}
           setView={setView}
+          fetchData={props.fetchData}
+          setHasLoaded={props.setHasLoaded}
         />
       )}
       {view.privacy && (
@@ -1031,7 +1130,7 @@ function UserSettings(props: any): JSX.Element {
           </View>
         </View>
       )}
-    </>
+    </View>
   );
 }
 
@@ -1042,6 +1141,7 @@ const styles = StyleSheet.create({
     width: normalize(90),
     height: normalize(90),
     borderRadius: normalize(45),
+    overflow: 'hidden',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1064,13 +1164,16 @@ const styles = StyleSheet.create({
     height: normalize(90),
     borderRadius: normalize(45),
     borderColor: Colors.black,
+    overflow: 'hidden',
   },
   userSettings: {
     backgroundColor: '#f6f7f5',
-    height: filterHeight(SCREEN_HEIGHT),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    height: '100%',
+    width: '100%',
+    flex: 1,
   },
   settingsOptionContainer: {
     borderBottomWidth: 1,
@@ -1110,6 +1213,7 @@ const styles = StyleSheet.create({
   },
   settingsOptionSendFeedback: {
     borderRadius: 20,
+    overflow: 'hidden',
     height: normalize(40),
     width: '85%',
     display: 'flex',
@@ -1122,6 +1226,7 @@ const styles = StyleSheet.create({
   settingsOptionLogOut: {
     borderColor: 'gray',
     borderRadius: 20,
+    overflow: 'hidden',
     height: normalize(40),
     width: '85%',
     display: 'flex',
@@ -1135,6 +1240,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderColor: 'gray',
     borderRadius: 20,
+    overflow: 'hidden',
     width: '85%',
     display: 'flex',
     justifyContent: 'center',
@@ -1176,6 +1282,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: Colors.black,
     borderWidth: 1,
+    overflow: 'hidden',
   },
   toggleContainer: {
     display: 'flex',
@@ -1197,7 +1304,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    columnGap: 300,
+    columnGap: normalize(200),
     width: '100%',
   },
   violationsToggle: {
@@ -1285,6 +1392,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 40,
     borderRadius: 15,
+    overflow: 'hidden',
     backgroundColor: 'rgb(17, 87, 64)',
     textAlign: 'center',
     lineHeight: 40,
@@ -1302,6 +1410,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     backgroundColor: '#D7D7D7',
     borderRadius: 10,
+    overflow: 'hidden',
     padding: 15,
   },
   errorMessageBanner: {
@@ -1317,6 +1426,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     borderRadius: 5,
+    overflow: 'hidden',
   },
   errorMessageTextContainer: {
     display: 'flex',
@@ -1333,6 +1443,7 @@ const styles = StyleSheet.create({
     width: '70%',
     height: 40,
     borderRadius: 15,
+    overflow: 'hidden',
     backgroundColor: 'rgb(17, 87, 64)',
     textAlign: 'center',
     lineHeight: 40,
@@ -1347,6 +1458,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
+    overflow: 'hidden',
     rowGap: 10,
   },
   feedbackInput: {
@@ -1354,6 +1466,7 @@ const styles = StyleSheet.create({
     height: '50%',
     backgroundColor: '#D0D3D4',
     borderRadius: 20,
+    overflow: 'hidden',
     padding: 20,
   },
   userFeedbackSettings: {
@@ -1369,6 +1482,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderColor: 'gray',
     borderRadius: 20,
+    overflow: 'hidden',
     width: '85%',
     display: 'flex',
     justifyContent: 'center',

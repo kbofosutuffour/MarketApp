@@ -1,6 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import axios from 'axios';
-import React, {MutableRefObject, useEffect, useRef, useState} from 'react';
+import React, {
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   Button,
@@ -19,6 +25,7 @@ import Footer from './Footer';
 import {format, formatDistance} from 'date-fns';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 import uuid from 'react-native-uuid';
+import {UserContext} from './App';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -186,6 +193,18 @@ function Chats(props): JSX.Element {
   const [text, setText] = useState('');
 
   /**
+   * The base url used to access images and other data within the app directory.
+   * Different between Android and iOS
+   */
+  // const {baseUrl} = useContext(UserContext);
+  const emulator = false;
+  const baseUrl =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
+  /**
    * Holds a reference to the scroll view used
    * to display the chat; necessary for automatically
    * scrolling to the bottom immediately after this component
@@ -207,9 +226,7 @@ function Chats(props): JSX.Element {
   */
   useEffect(() => {
     if (chats.id) {
-      ws.current = new WebSocket(
-        'ws://10.0.2.2:8000/ws/chat/' + chats.id + '/',
-      );
+      ws.current = new WebSocket(`ws://10.0.2.2/ws/chat/${chats.id}`);
       ws.current.onopen = () => {
         // connection opened
         // ws.current?.send('connection opened'); // send a message
@@ -226,6 +243,7 @@ function Chats(props): JSX.Element {
 
       ws.current.onerror = e => {
         // an error occurred
+        console.log(e);
       };
 
       ws.current.onclose = e => {
@@ -234,7 +252,7 @@ function Chats(props): JSX.Element {
           console.log(e.code, e.reason);
         }
       };
-    } 
+    }
   }, [chats.id]);
 
   /**
@@ -307,7 +325,9 @@ function Chats(props): JSX.Element {
     image = null,
     product = null,
   ) => {
-    var chat_request = 'http://10.0.2.2:8000/messages/get_messages/' + id;
+    var chat_request = `${
+      emulator ? baseUrl : ngrok
+    }/messages/get_messages/${id}`;
     axios
       .get(chat_request)
       .then(res => {
@@ -351,26 +371,32 @@ function Chats(props): JSX.Element {
       image: null,
     };
     await axios
-      .post('http://10.0.2.2:8000/messages/', data)
+      .post(`${emulator ? baseUrl : ngrok}/messages/`, data)
       .then(() => {
         // If there isn't a webserver running,
         // show the new message on the sender side
-        if (!ws.current) {
+        if (!ws.current?.readyState) {
           getChats(room_id);
         }
       })
       .catch((err: any) => console.log(err));
-    ws.current?.send(JSON.stringify(data));
+    if (ws.current?.readyState) {
+      ws.current?.send(JSON.stringify(data));
+    }
   };
   return (
     <>
-      {rooms.showRoom && (
-        <View
-          style={{
-            backgroundColor: Colors.white,
-            height: filterHeight(SCREEN_HEIGHT),
-          }}>
-          <ScrollView>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          flex: 1,
+        }}>
+        {rooms.showRoom && (
+          <ScrollView style={{backgroundColor: Colors.white, width: '100%'}}>
             {rooms.rooms.buyers.map(value => {
               return (
                 <Room
@@ -410,47 +436,54 @@ function Chats(props): JSX.Element {
                 );
               })}
           </ScrollView>
-        </View>
-      )}
-      {!rooms.showRoom && chats.showChats && (
-        <View
-          style={{
-            backgroundColor: Colors.white,
-            height: filterHeight(SCREEN_HEIGHT),
-          }}>
-          <View style={styles.post}>
-            <View style={styles.postImageContainer}>
-              <Image
-                style={styles.postImage}
-                source={{
-                  uri: chats.image,
-                }}
-              />
-            </View>
+        )}
+        {!rooms.showRoom && chats.showChats && (
+          <View
+            style={{
+              backgroundColor: Colors.white,
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              flex: 1,
+              marginBottom: normalize(70),
+            }}>
+            <View style={styles.post}>
+              <View style={styles.postImageContainer}>
+                <Image
+                  style={styles.postImage}
+                  source={{
+                    uri: chats.image,
+                  }}
+                />
+              </View>
 
-            <View style={styles.postText}>
-              <Text style={{color: 'black', fontSize: 17.5}}>
-                {chats.product}
-              </Text>
+              <View style={styles.postText}>
+                <Text style={{color: 'black', fontSize: 17.5}}>
+                  {chats.product}
+                </Text>
+              </View>
+              <View style={styles.editPost}>
+                <Image
+                  style={styles.editButtons}
+                  source={require('./media/edit_post.png')}
+                />
+              </View>
             </View>
-            <View style={styles.editPost}>
-              <Image
-                style={styles.editButtons}
-                source={require('./media/edit_post.png')}
-              />
-            </View>
-          </View>
-          <View style={{height: '100%'}}>
             <ScrollView
               showsVerticalScrollIndicator={false}
               ref={scrollViewRef}
               onContentSizeChange={async () =>
                 await scrollViewRef.current.scrollToEnd({animated: false})
-              }>
+              }
+              style={{overflow: 'hidden'}}>
               {chats.chats.map(value => {
                 var img =
                   value.username == props.profile.username
-                    ? 'http://10.0.2.2:8000' + props.profile.profile_picture
+                    ? `${emulator ? baseUrl : ngrok}${
+                        props.profile.profile_picture
+                      }`
                     : value.username == chats.buyer.username
                     ? chats.buyer.profile_picture
                     : chats.seller.profile_picture;
@@ -483,8 +516,8 @@ function Chats(props): JSX.Element {
               />
             </View>
           </View>
-        </View>
-      )}
+        )}
+      </View>
       <Footer
         returnHome={returnHome}
         viewProfile={viewProfile}
@@ -500,12 +533,14 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f6f7f5',
     borderRadius: 20,
+    overflow: 'hidden',
     width: 200,
   },
   userMessage: {
     padding: 20,
     backgroundColor: 'rgb(185, 151, 91)',
     borderRadius: 20,
+    overflow: 'hidden',
     width: 200,
   },
   leftMessage: {
@@ -530,12 +565,14 @@ const styles = StyleSheet.create({
     width: normalize(60),
     height: normalize(60),
     borderRadius: normalize(35),
+    overflow: 'hidden',
     backgroundColor: Colors.black,
   },
   productImage: {
     width: normalize(60),
     height: normalize(60),
     borderRadius: normalize(35),
+    overflow: 'hidden',
     backgroundColor: Colors.black,
     position: 'absolute',
     right: 30,
@@ -544,6 +581,7 @@ const styles = StyleSheet.create({
     width: normalize(50),
     height: normalize(50),
     borderRadius: normalize(25),
+    overflow: 'hidden',
     backgroundColor: Colors.black,
   },
   messagePicture: {
@@ -570,25 +608,28 @@ const styles = StyleSheet.create({
   inputContainer: {
     display: 'flex',
     flexDirection: 'row',
+    height: normalize(50),
     columnGap: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1,
   },
   input: {
     backgroundColor: '#f6f7f5',
     width: '65%',
     borderRadius: 10,
     borderWidth: 1,
+    overflow: 'hidden',
     borderColor: Colors.black,
-    marginTop: 10,
-    marginBottom: 10,
+    height: '80%',
   },
   send: {
     backgroundColor: 'rgb(185, 151, 91)',
     borderRadius: 10,
+    overflow: 'hidden',
+    height: '80%',
   },
   post: {
-    position: 'absolute',
     width: '100%',
     backgroundColor: 'white',
     display: 'flex',
@@ -604,6 +645,7 @@ const styles = StyleSheet.create({
     width: normalize(60),
     height: normalize(60),
     borderRadius: normalize(15),
+    overflow: 'hidden',
     display: 'flex',
     marginRight: 10,
     justifyContent: 'center',
@@ -613,9 +655,9 @@ const styles = StyleSheet.create({
     width: normalize(60),
     height: normalize(60),
     borderRadius: normalize(15),
+    overflow: 'hidden',
     display: 'flex',
     backgroundColor: 'black',
-    overflow: 'hidden',
   },
   postText: {
     display: 'flex',
