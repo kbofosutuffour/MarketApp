@@ -94,20 +94,36 @@ class EditProfileViewSet(viewsets.ViewSet):
             print('error')
             return Response({'error': 'There was an error liking the post.  Pleas try again.'})
         
+        
     def partial_update(self, request, pk=None):
         profile = Profile.objects.get(username=pk)
         serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        print(request.data)
         if serializer.is_valid():
-            serializer.save()
-            # profile.profile_picture = request.data.profile_picture
-            # profile.save()
-            # print(profile.profile_picture, 'profile.profile_picture')
-            # print(serializer.data.get('profile_picture'), 'serializer')
-            return Response({'message': 'You have successfully edited your profile'})
+            profile = serializer.save()
+            self.updateChats(profile, request.data)
+            return Response({'message': 'You have successfully edited your profile', 'status': 200})
         else:
             print(serializer.errors)
-            return Response({'error': serializer.errors})
+            return Response({'error': serializer.errors, 'status': 400})
         
+    
+    def updateChats(self, profile, request):
+        """
+        Method used to replace all profile pictures in chat rooms to most up-to-date
+        profile picture for a user
+        """
+        buyerRooms = Room.objects.filter(buyer=profile.username)
+        for room in buyerRooms:
+            room.buyer_profile_picture = profile.profile_picture
+            room.save()
+
+        sellerRooms = Room.objects.filter(seller=profile.username)
+        for room in sellerRooms:
+            room.seller_profile_picture = profile.profile_picture
+            room.save()
+
+
     def update(self, instance, validated_data):
         instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
         instance.save()

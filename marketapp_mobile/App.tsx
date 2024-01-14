@@ -1378,7 +1378,7 @@ const styles = StyleSheet.create({
     width: normalize(50),
     height: normalize(50),
     position: 'absolute',
-    bottom: 80,
+    bottom: normalize(25),
     right: 30,
     borderRadius: normalize(35),
     overflow: 'hidden',

@@ -105,8 +105,8 @@ function Room(props): JSX.Element {
  * @param postDateTime the datetime of the post
  * @returns the time stamp from the date string parameter
  */
-const getTimePosted = (postDateTime: string) => {
-  if (postDateTime) {
+const getDate = (postDateTime: string, separator: boolean = false) => {
+  if (postDateTime.length) {
     let temp = postDateTime.split('T');
     let [date, time] = [temp[0].split('-'), temp[1].split(':')];
     let post = new Date(
@@ -117,53 +117,56 @@ const getTimePosted = (postDateTime: string) => {
       Number(time[1]),
       Number(time[2].split('.')[0]),
     );
-    return format(post, 'eee p');
+    return format(post, separator ? 'MMMM d, y' : 'eee p');
   }
 };
 
 /**
  * @returns an individual message generated from data stored in the props object
  */
-function Message(props): JSX.Element {
-  if (props.data.username !== props.current_user) {
-    return (
-      <View style={styles.leftMessage}>
-        <Image
-          style={styles.profilePicture}
-          source={{uri: props.profile_picture}}
-        />
-        <View style={styles.message}>
-          <Text>{props.data.value}</Text>
-          {props.data.image && (
-            <Image
-              style={styles.messagePicture}
-              source={{uri: props.data.image}}
-            />
-          )}
-          <Text style={styles.date}>{getTimePosted(props.data.date)}</Text>
+function Message(props: any): JSX.Element {
+  let left = props.data.username !== props.current_user;
+
+  return (
+    <>
+      {left && (
+        <View style={styles.leftMessage}>
+          <Image
+            style={styles.profilePicture}
+            source={{uri: props.profile_picture}}
+          />
+          <View style={styles.message}>
+            <Text>{props.data.value}</Text>
+            {props.data.image && (
+              <Image
+                style={styles.messagePicture}
+                source={{uri: props.data.image}}
+              />
+            )}
+            <Text style={styles.date}>{getDate(props.data.date)}</Text>
+          </View>
         </View>
-      </View>
-    );
-  } else if (props.data.username === props.current_user) {
-    return (
-      <View style={styles.rightMessage}>
-        <View style={styles.userMessage}>
-          <Text>{props.data.value}</Text>
-          {props.data.image && (
-            <Image
-              style={styles.messagePicture}
-              source={{uri: props.data.image}}
-            />
-          )}
-          <Text style={styles.date}>{getTimePosted(props.data.date)}</Text>
+      )}
+      {!left && (
+        <View style={styles.rightMessage}>
+          <View style={styles.userMessage}>
+            <Text>{props.data.value}</Text>
+            {props.data.image && (
+              <Image
+                style={styles.messagePicture}
+                source={{uri: props.data.image}}
+              />
+            )}
+            <Text style={styles.date}>{getDate(props.data.date)}</Text>
+          </View>
+          <Image
+            style={styles.profilePicture}
+            source={{uri: props.profile_picture}}
+          />
         </View>
-        <Image
-          style={styles.profilePicture}
-          source={{uri: props.profile_picture}}
-        />
-      </View>
-    );
-  }
+      )}
+    </>
+  );
 }
 
 /**
@@ -214,7 +217,7 @@ function Chats(props): JSX.Element {
 
   /**
     Variable that serves as a web socket object.
-    Changes when a user selects a specific room 
+    Changes when a user selects a specific room
   */
   let ws: MutableRefObject<null> | MutableRefObject<WebSocket> =
     React.useRef(null);
@@ -279,6 +282,7 @@ function Chats(props): JSX.Element {
    * state information for a specific chat room
    */
   const viewChats = () => {
+    separatorDate.current = '';
     ws.current?.close();
     setRooms({...rooms, showRoom: true});
     setChats({
@@ -297,6 +301,12 @@ function Chats(props): JSX.Element {
       product: '',
     });
   };
+
+  /**
+   * Value to hold the current day of messages.  Used
+   * to separate the messages by day
+   */
+  const separatorDate = useRef('');
 
   // After the page is rendered, retrieve all of the chatrooms the user is in
   // from the database
@@ -447,7 +457,7 @@ function Chats(props): JSX.Element {
               justifyContent: 'flex-start',
               alignItems: 'center',
               flex: 1,
-              marginBottom: normalize(70),
+              // marginBottom: normalize(70),
             }}>
             <View style={styles.post}>
               <View style={styles.postImageContainer}>
@@ -479,7 +489,7 @@ function Chats(props): JSX.Element {
               }
               style={{overflow: 'hidden'}}>
               {chats.chats.map(value => {
-                var img =
+                let img =
                   value.username == props.profile.username
                     ? `${emulator ? baseUrl : ngrok}${
                         props.profile.profile_picture
@@ -487,16 +497,33 @@ function Chats(props): JSX.Element {
                     : value.username == chats.buyer.username
                     ? chats.buyer.profile_picture
                     : chats.seller.profile_picture;
-                var buyer = value.username == chats.buyer.username;
+                let buyer = value.username == chats.buyer.username;
+
+                // Logic for separating the messages by day
+                let messageDate = getDate(value.date, true);
+                let newSeparator =
+                  messageDate !== separatorDate.current ? true : false;
+
+                if (newSeparator) {
+                  separatorDate.current = messageDate;
+                }
+
                 return (
-                  <Message
-                    data={value}
-                    profile_picture={img}
-                    buyer={buyer}
-                    seller={!buyer}
-                    current_user={props.profile.username}
-                    key={uuid.v4()}
-                  />
+                  <>
+                    {newSeparator && (
+                      <View style={styles.dateSeparator}>
+                        <Text>{messageDate}</Text>
+                      </View>
+                    )}
+                    <Message
+                      data={value}
+                      profile_picture={img}
+                      buyer={buyer}
+                      seller={!buyer}
+                      current_user={props.profile.username}
+                      key={uuid.v4()}
+                    />
+                  </>
                 );
               })}
             </ScrollView>
@@ -673,6 +700,15 @@ const styles = StyleSheet.create({
   editButtons: {
     width: 10,
     height: 30,
+  },
+  dateSeparator: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: normalize(10),
+    marginBottom: normalize(10),
   },
 });
 
