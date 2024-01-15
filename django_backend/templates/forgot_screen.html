@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="..\static\register.css">
+    <script src="{% static 'register.js' %}"></script>
+    <title>Login Page</title>
+</head>
+<body style = "background-color: #115740">
+    <div id="box">
+        <img src="{% static 'media/wm_logo_white.png' %}" />
+        <h1 class="text">Welcome to H2H!</h1> <br>
+
+        
+        <div>
+        {% for message in messages %}
+        <h5 style="color: red">{{message}}</h5>
+        {% endfor %}
+
+            <form method="POST" action="">
+                {% csrf_token %}
+                <p class="text">Forgot your password? Enter your username here:</p>
+                    <input type="text" class="user-input" name="username" >
+                <p class="text">Forgot your username? Enter your email here:</p>
+                    <input type="text" class="user-input" name="email" >
+
+                <input type="submit" class="submit-btn">
+            </form>
+        </div>
+
+
+        <div>
+
+        </div>
+    </div>
+</body>
+</html>

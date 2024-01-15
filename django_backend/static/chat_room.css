@@ -1,0 +1,120 @@
+#top-bar {
+    border-bottom: 7px solid rgb(185, 151, 91);
+}
+
+body {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background-color: rgb(17, 87, 64);
+}
+
+button:hover {
+    background-color: rgb(185, 151, 91);
+}
+
+
+.chat {
+    background-color: white;
+    width: 60%;
+    margin: auto;
+    border: 1px solid rgb(191, 188, 188) ;
+    height: 125px;
+}
+
+.chat-image {
+    width: 100px;
+    border-radius: 25%;
+    margin-left: 10%;
+    height: 100px;
+    position: relative;
+    top: 10px
+}
+
+.post-image{
+    width: 80px;
+    border-radius: 25%;
+    margin-left: 10%;
+    height: 80px;
+    position: relative;
+    float: right;
+    top: 10px;
+    right: 10px
+}
+.chat-image-div, .post-image-div {
+    width: 100px;
+    border-color:red;
+    display: inline-block;
+    border-radius: 50px;
+
+}
+
+.post-image-div {
+    position: relative;
+    float: right
+}
+
+.chat-text {
+    display: inline-block;
+    border-color:red;
+    border-width: 10px;
+    margin-left: 40px;
+    width: 200px;
+
+}
+
+.product {
+    font-weight: bold;
+    font-size: x-large
+}
+
+#footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15%;
+    margin: auto;
+    padding-top: 20px;
+    background-color: white;
+    width: 60%;
+    border-top: 3px solid rgb(185, 151, 91)
+}
+
+
+
+.footer_img {
+    width: 50px;
+    display: inline-block;
+}
+
+
+#new-post:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+
+#home, #profile, #chats {
+    width: 50px;
+    transition: 0.5s filter
+}
+
+
+#home:hover, #profile:hover, #chats:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+
+@media (max-width: 700px) {
+    .chat {
+        width: 100%;
+    }
+    #footer {
+        width: 100%;
+        border-top: 7px solid rgb(185, 151, 91);
+        border-radius: 0%;
+        gap: 18%
+    }
+    .post-text {
+        width: 55%;
+    }
+}

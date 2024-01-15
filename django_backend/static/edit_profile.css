@@ -1,0 +1,167 @@
+#top-bar {
+    border-bottom: 7px solid rgb(185, 151, 91);
+}
+
+body {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    background-color: rgb(17, 87, 64);
+}
+
+button:hover, input:hover {
+    background-color: rgb(185, 151, 91);
+}
+
+
+#search-login {
+    position: absolute;
+    right: 0;
+    top: 5%
+}
+
+#login {
+    position: absolute;
+    right: 0
+}
+
+
+.section {
+    background-color: white;
+    border: 1px solid rgb(191, 188, 188) ;
+    width: 60%;
+    padding: 10px 10px 10px 10px;
+    margin: auto;
+    height: fit-content;
+}
+
+.product {
+    font-weight: bold;
+    font-size: x-large
+}
+
+#profile-image {
+    width: 150px;
+    border-radius: 25%;
+    margin-left: 10%;
+    display: auto;
+    
+}
+
+#profile-image-div {
+    width: 25%;
+    border-radius: 50px;
+    /* border: 1px solid blue ; */
+    display: inline;
+    float: left;
+
+}
+
+#profile-text {
+    /* border: 1px solid green ; */
+    width: 30%;
+    position: relative;
+    float: right;
+    right: 42.5%
+
+}
+
+#profile-section {
+    margin: auto;
+    padding: 10px 10px 10px 10px;
+    background-color: white;
+    /* border: 1px solid red ; */
+    border-left: 1px solid rgb(191, 188, 188);
+    border-right: 1px solid rgb(191, 188, 188);
+    height: 200px;
+    width: 60%;
+
+}
+
+.post-image {
+    width: 150px;
+    border-radius: 25%;
+    margin-left: 10%;
+}
+
+.post-image-div{
+    width: 150px;
+    display: inline-block;
+    border-radius: 50px;
+
+}
+
+.post-text {
+    display: inline-block;
+    border-color:red;
+    border-width: 10px;
+    margin-left: 40px;
+    width: 200px;
+
+}
+
+
+#footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15%;
+    margin: auto;
+    padding-top: 20px;
+    background-color: white;
+    width: 60%;
+    border-top: 3px solid rgb(185, 151, 91)
+}
+
+
+.footer_img {
+    width: 50px;
+    display: inline-block;
+}
+
+#search {
+    position: relative;
+}
+
+.submit-btn {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    height: 50px;
+    width: 100%;
+    border: none;
+    background-color: #115740;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#new-post:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+
+#home, #profile, #chats {
+    width: 50px;
+    transition: 0.5s filter
+}
+
+
+#home:hover, #profile:hover, #chats:hover {
+    filter: invert(100%) sepia(26%) saturate(3818%) hue-rotate(167deg) brightness(108%) contrast(107%);
+      
+}
+
+@media (max-width: 700px) {
+    #profile-section, .section {
+        width: 100%;
+    }
+    #footer {
+        width: 100%;
+        border-top: 7px solid rgb(185, 151, 91);
+        border-radius: 0%;
+        gap: 18%
+    }
+
+}

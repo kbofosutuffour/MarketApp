@@ -1,0 +1,54 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="..\static\register.css">
+    <link rel="stylesheet" href="https://fonts.google.com/specimen/Inter">
+    <script src="{% static 'register.js' %}"></script>
+    <title>H2H | Register</title>
+</head>
+<body style = "background-color: #115740">
+    <div id="box">
+        <img src="{% static 'media/wm_logo_white.png' %}" style="margin-top: 10%; width: 60%;"/>
+        <h1 class="text">Welcome to Market App William & Mary</h1>
+        <h2 class="text">Create your account:</h2>
+        <!-- <div id="input">
+            <div class="user-pass">
+                <input type="text" id="username" placeholder="Please Enter your School Email Here" required>
+                <button id="send-code">Send Code</button>
+            </div><br>
+            <div class="user-pass">
+                <input type="text" id="password" placeholder="Please Enter your Verification Code Here" required>
+            </div><br>
+            <div style="margin: 5px"><input type="checkbox"><label>I have read and agreed to the <a href="">Terms and Conditions</b></a> and <a href=""><b>Privacy Policy</b></a></label></div>
+            <br><button id="sigb-up"><a href="{% static 'login.html' %}">Sign up</a></button>
+            <br>
+        </div> -->
+        
+        <div>
+        {% for message in messages %}
+        <h5 style="color: red">{{message}}</h5>
+        {% endfor %}
+
+            <form method="POST" action="register">
+                {% csrf_token %}
+                <!-- <p>Username:</p> -->
+                    <input type="text" class="user-input" name="username" placeholder="Enter your username">
+                <!-- <p>Email:</p> -->
+                    <input type="text" class="user-input" name="email" placeholder="Enter your school email" >
+                <!-- <p>Password:</p> -->
+                    <input type="password" class="user-input" name="password" placeholder="Enter your password">        
+                <!-- <p>Confirm Password:</p> -->
+                    <input type="password"  class="user-input" name="password2" placeholder="Confirm your password"><br>
+                
+                <input type="submit" class="submit-btn">
+            </form>
+        </div>
+        <div> <a href="login">Already have an account? Login here!</a></div>
+    </div>
+</body>
+</html>

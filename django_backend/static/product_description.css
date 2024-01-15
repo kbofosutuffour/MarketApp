@@ -1,0 +1,144 @@
+
+#image-div {
+    float: left;
+    width: 45%;
+    position: relative;
+    top: 20px
+}
+
+#right {
+    float: right;
+    position: relative;
+    right: 200px;
+    top: 100px;
+    width: 40%;
+    height: 400px;
+    border: 1px solid gray;
+
+}
+
+#image0 {
+    height: 550px;
+    width: auto;
+    float: right;
+    display: inline;
+}
+
+#image1, #image2, #image3, #image4 {
+    height: 570px;
+    float: right;
+}
+
+#left-arrow {
+    position: relative;
+    top: 250px;
+    height: 50px;
+    left: 250px;
+    background-color: white;
+    opacity: 0%;
+    width: 50px;
+
+}
+
+#right-arrow {
+    position: relative;
+    top: 200px;
+    height: 50px;
+    left: 625px;
+    background-color: white;
+    opacity: 0%;
+    width: 50px;
+    
+}
+
+#left-arrow-img, #right-arrow-img {
+    width: 50px;
+}
+
+#profile {
+    display: inline;
+}
+#profile-picture {
+    display: inline;
+    width: 70px;
+}
+
+#username-form {
+    display: inline;
+    position: relative;
+}
+
+#username-button {
+    height: 30px;
+    font-size: large;
+    position: relative;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#description {
+    display: block;
+    border-top: 1px solid gray;
+}
+
+#product {
+    margin-top: 30px
+}
+
+/* #footer {
+    position: relative;
+    top: 100px;
+    margin-bottom: 0px;
+
+} */
+
+#message {
+    position: relative;
+    width: 70px;
+    height: 30px;
+    text-align: center;
+    float: right;
+    right: 10px;
+    bottom: 40px;
+    background-color: rgb(127, 189, 255);
+    border-radius: 20%;
+    transition: border 0.5s 
+}
+
+#message:hover {
+    border: 3px solid black;
+
+}
+
+#price {
+    position: relative;
+    left: 10px
+}
+
+#new-post {
+    transition: 0.5s filter
+}
+
+
+#footer {
+    position: fixed bottom;
+    width: 100%;
+    border-top: 7px solid rgb(185, 151, 91);
+    border-radius: 0%;
+    gap: 18%
+     
+}
+
+
+.footer_img {
+    
+    width: 50px;
+    display: inline-block;
+    margin-left: 20%;
+}
+
+#home, #profile, #chats {
+    width: 50px;
+    transition: 0.5s filter
+}
+

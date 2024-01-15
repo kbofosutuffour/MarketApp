@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H2H | Edit Profile</title>
+    <link rel="stylesheet" href="{% static 'edit_profile.css' %}">
+    <script src="{% static 'edit_profile.js' %}"></script>
+
+
+    
+</head>
+<body>
+    <div id = 'top-bar' style="width: 100%; margin-bottom: 5px; height: 50px">
+
+        {% if user.is_authenticated %}
+            <div style="margin-right: 90%; display: inline; width: fit-content;"><h2 style="color: white; position: relative; top:25%">Edit Profile</h2></div>
+
+        {% endif %}
+
+        <br><br>
+        <div id="cancel-publish" style="display: inline;">
+            <a href="returnHome" style="text-decoration: none;"><p id="cancel" onmouseenter="cancel()" onmouseout="cancel_out()">Cancel</p></a>
+        </div>
+ 
+    </div>
+
+    <div id="profile-section">
+        <div id="profile-image-div">
+            {% if not hasProfile %}
+            <img id="profile-image" src="{% static 'media/empty_profile.jpg' %}"/>
+            {% else %}
+            <img id="profile-image" src="{{ profile.profile_picture.url }}"/>
+
+            {% endif %}
+        </div>
+        <div id="profile-text">
+            <h1 id="profile-name">{{profile.username}}</h1>
+        </div>
+    </div>
+
+    
+    <div class="section">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button class="submit-btn" type="submit">Upload</button>
+        </form>
+    </div>
+
+    
+    <div style="position: fixed; bottom: 0; width: 100%; left: 50%; transform: translateX(-50%)">
+        <div id="footer">
+                <div class = "footer_img"><a href="returnHome"><img src="{% static 'media/home.png' %}" id="home"/></a></div>
+                <div class = "footer_img"><a href="chat_room" id="to-chat"><img src="{% static 'media/chat.png' %}" id="chats"/></a></div>
+                <div class = "footer_img"><a href="profile" id="to-profile"><img src="{% static 'media/profile.png' %}" id="profile" /></a></div>
+        </div>
+    </div>
+</body>
+</html>
