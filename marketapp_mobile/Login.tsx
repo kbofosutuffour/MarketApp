@@ -40,20 +40,6 @@ function normalize(size: any) {
   }
 }
 
-/**
- * An attempt to make the height of each page
- * consistent.
- * @param height the screen height of the phone
- * @returns the height needed for the phone screens
- */
-function filterHeight(height: number) {
-  if (height < 716) {
-    return SCREEN_HEIGHT * 0.765;
-  } else if (height < 780) {
-    return SCREEN_HEIGHT * 0.8;
-  }
-}
-
 function ForgotPassword(props): JSX.Element {
   const [passwordState, setPasswordState] = useState({
     sendCode: true,
@@ -61,6 +47,7 @@ function ForgotPassword(props): JSX.Element {
   });
 
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [newPassword, setNewPassword] = useState({
     username: '',
     password: '',
@@ -93,18 +80,24 @@ function ForgotPassword(props): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {email: email})
+        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {
+          email: email,
+          username: username,
+        })
         .then(response => {
-          setCode({
-            code: response.data.code,
-            codeSent: true,
-          });
+          if (response.data.status === 400) {
+            props.setErrorMessage(
+              'Error with the validation process.  Make sure the email is used for this account and try again.',
+            );
+          } else {
+            setCode({
+              code: response.data.code,
+              codeSent: true,
+            });
+          }
         })
         .catch((err: any) => {
           console.log(err);
-          props.setErrorMessage(
-            'Error with the validation process.  Please try again.',
-          );
         });
     } else if (inputCode === code.code && code.code.length) {
       setPasswordState({
@@ -127,13 +120,19 @@ function ForgotPassword(props): JSX.Element {
           `${emulator ? baseUrl : ngrok}/users/change_password/`,
           newPassword,
         )
-        .then(() => {
-          props.setLoginState({
-            login: true,
-            register: false,
-            forgotPassword: false,
-            verifyEmail: false,
-          });
+        .then(res => {
+          if (res.data.success) {
+            props.setLoginState({
+              login: true,
+              register: false,
+              forgotPassword: false,
+              verifyEmail: false,
+            });
+          } else {
+            props.setErrorMessage(
+              'Username and email on file do not match.  Please re-enter your email and try again',
+            );
+          }
         })
         .catch((err: any) => console.log(err));
     } else if (
@@ -171,10 +170,21 @@ function ForgotPassword(props): JSX.Element {
           <View style={styles.loginContainer}>
             <Image
               style={styles.wmLogo}
-              source={require('./media/wm_logo_green.png')}
+              source={require('./media/app_logo.png')}
             />
             <View style={styles.loginText}>
               <Text style={styles.header}>Verify your W&M email account</Text>
+              <View style={styles.inputLeft}>
+                <TextInput
+                  placeholder="Enter your username"
+                  onChangeText={text => {
+                    setNewPassword({...newPassword, username: text});
+                    setUsername(text);
+                  }}
+                  style={styles.input}
+                />
+              </View>
+
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your school email"
@@ -271,19 +281,10 @@ function ForgotPassword(props): JSX.Element {
           <View style={styles.loginContainer}>
             <Image
               style={styles.wmLogo}
-              source={require('./media/wm_logo_green.png')}
+              source={require('./media/app_logo.png')}
             />
             <View style={styles.loginText}>
               <Text style={styles.header}>Create a new password</Text>
-              <View style={styles.emailInput}>
-                <TextInput
-                  placeholder="Enter your username"
-                  onChangeText={text =>
-                    setNewPassword({...newPassword, username: text})
-                  }
-                  style={styles.input}
-                />
-              </View>
               <TextInput
                 placeholder="Enter your password"
                 onChangeText={text =>
@@ -690,10 +691,7 @@ function Verify(props): JSX.Element {
         />
       </TouchableWithoutFeedback>
       <View style={styles.loginContainer}>
-        <Image
-          style={styles.wmLogo}
-          source={require('./media/wm_logo_green.png')}
-        />
+        <Image style={styles.wmLogo} source={require('./media/app_logo.png')} />
         <View style={styles.loginText}>
           <Text style={styles.header}>Verify your W&M email account</Text>
           <View style={styles.emailInput}>
@@ -854,7 +852,7 @@ function Login(props): JSX.Element {
           <View style={styles.loginContainer}>
             <Image
               style={styles.wmLogo}
-              source={require('./media/wm_logo_green.png')}
+              source={require('./media/app_logo.png')}
             />
             <View style={styles.loginText}>
               <Text style={styles.header}>
@@ -1030,6 +1028,18 @@ const styles = StyleSheet.create({
     color: Colors.black,
     paddingLeft: 10,
     margin: 0,
+  },
+  inputLeft: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'gray',
+    width: normalize(270),
+    height: normalize(40),
+    color: Colors.black,
+    paddingLeft: 10,
+    margin: 0,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
   },
   inputSmall: {
     borderBottomWidth: 2,

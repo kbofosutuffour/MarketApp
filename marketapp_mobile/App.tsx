@@ -363,7 +363,7 @@ function App(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState('');
   const [hasSeenDraft, setHasSeenDraft] = useState(false);
 
-  const [hasloaded, setHasLoaded] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const [deletePost, setDelete]: [any, Function] = useState({
     data: {},
@@ -504,6 +504,9 @@ function App(): JSX.Element {
       });
   };
 
+  /**
+   * Individual function to retrieve the settings information from a specific user
+   */
   const getUserSettings = async () => {
     await axios
       .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile.data.id}`)
@@ -513,6 +516,9 @@ function App(): JSX.Element {
       });
   };
 
+  /**
+   * Individual function to retrieve the profile information from a specific user
+   */
   const getProfile = async () => {
     let data = {};
     await axios
@@ -525,6 +531,9 @@ function App(): JSX.Element {
     await getPosts();
   };
 
+  /**
+   * Individual function to retrieve the chat rooms for a specific user
+   */
   const getRooms = async () => {
     await axios
       .get(`${emulator ? baseUrl : ngrok}/rooms/get_rooms/${user.username}`)
@@ -534,7 +543,6 @@ function App(): JSX.Element {
       .catch((err: any) => console.log(err));
   };
 
-  // function used to show results of a user search
   /**
    * Function used to show results of a user's search
    * @param text user's input on the search bar
@@ -735,6 +743,7 @@ function App(): JSX.Element {
       profile: {},
       sentFrom: user.username,
     });
+    setHasLoaded(true);
   };
 
   /**
@@ -822,14 +831,14 @@ function App(): JSX.Element {
    * @param height the height of the scroll view
    */
   const handleScroll = (height: number) => {
-    isOnTop(height === 0 ? true : false);
+    isOnTop(height <= 0 ? true : false);
   };
 
   /**
    * Maximum vertical speed considered before
    * the page will refresh
    */
-  const MAX_VELOCITY = 2;
+  const MAX_VELOCITY = 1.5;
 
   /**
    * Function responsible for reloading the page.
@@ -935,7 +944,7 @@ function App(): JSX.Element {
             Each file will be able to access the data in the value parameter */}
 
         {/* Landing Page */}
-        {!hasloaded && <Landing showLogin={user.showLogin} />}
+        {!hasLoaded && <Landing showLogin={user.showLogin} />}
 
         {/* Login/Register Page */}
         {user.showLogin && (
@@ -970,7 +979,7 @@ function App(): JSX.Element {
                     handleScroll(event.nativeEvent.contentOffset.y)
                   }
                   onScrollEndDrag={event =>
-                    refreshPage(event.nativeEvent.velocity?.y)
+                    refreshPage(Math.abs(event.nativeEvent.velocity?.y))
                   }
                   style={styles.scrollView}>
                   <View
@@ -1096,7 +1105,7 @@ function App(): JSX.Element {
                 viewProfile={viewProfile}
                 viewChats={viewChats}
                 type={'Home'}
-                hasloaded={hasloaded}
+                hasLoaded={hasLoaded}
               />
             </View>
           )}
@@ -1115,6 +1124,7 @@ function App(): JSX.Element {
               viewReport={viewReport}
               rateProfile={rateProfile}
               setHasLoaded={setHasLoaded}
+              setRooms={setRooms}
             />
           </>
         )}
@@ -1144,13 +1154,14 @@ function App(): JSX.Element {
               userSettings={settings}
               getProfile={getProfile}
               setHasLoaded={setHasLoaded}
+              setProfile={setProfile}
             />
             <Footer
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
               type={'Profile'}
-              hasloaded={hasloaded}
+              hasLoaded={hasLoaded}
             />
           </View>
         )}
@@ -1182,6 +1193,7 @@ function App(): JSX.Element {
               returnHome={returnHome}
               viewProfile={viewProfile}
               viewChats={viewChats}
+              hasLoaded={hasLoaded}
             />
           </View>
         )}
@@ -1215,7 +1227,7 @@ function App(): JSX.Element {
               viewProfile={viewProfile}
               viewChats={viewChats}
               type={'Profile'}
-              hasloaded={hasloaded}
+              hasLoaded={hasLoaded}
             />
           </View>
         )}

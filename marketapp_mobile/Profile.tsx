@@ -18,6 +18,11 @@ import {format} from 'date-fns';
 import uuid from 'react-native-uuid';
 import {UserContext} from './App';
 import * as ImagePicker from 'expo-image-picker';
+import {
+  GestureDetector,
+  Gesture,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -380,7 +385,8 @@ function Profile(props: any): JSX.Element {
   const [likedPosts, setLikedPosts] = useState([]);
   const [buyHistory, setBuyHistory] = useState([]);
 
-  const [test, setTest] = useState({});
+  const [profileReload, waitForProfileReload] = useState(false);
+
   /**
    * Function to delete the post in the database
    * @param id The id of the selected post
@@ -410,251 +416,294 @@ function Profile(props: any): JSX.Element {
   // by the user currently in the database after the page renders
   useEffect(() => {
     setPosts(view.main ? props.profile.posts : props.posts);
-    setLikedPosts(props.profile.liked_posts);
+    setLikedPosts(props.profile.data.liked_posts);
+    setBuyHistory(props.profile.data.buy_history);
   }, []);
+
+  const panGesture = Gesture.Pan().onEnd(async e => {
+    if (e.velocityY > 2000) {
+      waitForProfileReload(true);
+      await refreshPage();
+    }
+  });
+
+  const refreshPage = async () => {
+    await axios
+      .get(
+        `${emulator ? baseUrl : ngrok}/profile/${props.profile.data.username}`,
+      )
+      .then(res => {
+        props.setProfile({...props.profile, data: res.data});
+      })
+      .catch((err: any) => console.log(err));
+    waitForProfileReload(false);
+  };
 
   return (
     <>
       {view.otherProfile && <NavBar />}
       {(view.main || view.otherProfile) && (
-        <View style={styles.profilePage}>
-          <View style={styles.profileView}>
-            <Image
-              style={styles.profilePicture}
-              source={{
-                uri: `${emulator ? baseUrl : ngrok}${
-                  props.profile.data.profile_picture
-                }`,
-              }}
-            />
-            <View style={styles.profileDescription}>
-              <Text style={{fontSize: normalize(20), color: Colors.black}}>
-                {props.profile.data.username}
-              </Text>
-              {props.onMain && (
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    setView({
-                      main: false,
-                      editProfile: true,
-                      deletePost: false,
-                      changeProfilePicture: false,
-                      otherProfile: false,
-                    });
-                  }}>
-                  <Text style={styles.editProfileButton}>Edit Profile</Text>
-                </TouchableWithoutFeedback>
-              )}
-              {view.otherProfile && (
-                <Text>
-                  {props.profile.userSettings.show_joined_date
-                    ? 'Joined ' +
-                      format(
-                        new Date(props.profile.date[0], props.profile.date[1]),
-                        'MMMM yyyy',
-                      )
-                    : ''}
-                </Text>
-              )}
-            </View>
-            {view.otherProfile && (
-              <>
-                <TouchableWithoutFeedback
-                  onPress={() =>
-                    setOtherProfileShowOptions(!otherProfileShowOptions)
-                  }>
-                  <View style={styles.editPost}>
-                    <Image
-                      style={styles.editButtons}
-                      source={require('./media/edit_post.png')}
-                    />
-                  </View>
-                </TouchableWithoutFeedback>
-                {otherProfileShowOptions && (
-                  <View style={styles.statusOptions}>
-                    <TouchableWithoutFeedback>
-                      <Text>Block User</Text>
-                    </TouchableWithoutFeedback>
-                    <TouchableWithoutFeedback>
-                      <Text>Report User</Text>
-                    </TouchableWithoutFeedback>
-                  </View>
-                )}
-              </>
-            )}
-          </View>
-          <View
-            style={{
-              display: 'flex',
-              width: '100%',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: view.main ? 'center' : 'flex-start',
-              backgroundColor: Colors.white,
-            }}>
-            <TouchableWithoutFeedback
-              onPress={() =>
-                setType({
-                  sell_history: true,
-                  buy_history: false,
-                  liked_posts: false,
-                })
+        <GestureHandlerRootView style={styles.profilePage}>
+          <GestureDetector gesture={panGesture}>
+            <View
+              style={
+                !profileReload ? styles.profilePage : styles.profilePageRefresh
               }>
+              <View style={styles.profileView}>
+                <Image
+                  style={styles.profilePicture}
+                  source={{
+                    uri: `${emulator ? baseUrl : ngrok}${
+                      props.profile.data.profile_picture
+                    }`,
+                  }}
+                />
+                <View style={styles.profileDescription}>
+                  <Text style={{fontSize: normalize(20), color: Colors.black}}>
+                    {props.profile.data.username}
+                  </Text>
+                  {props.onMain && (
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        setView({
+                          main: false,
+                          editProfile: true,
+                          deletePost: false,
+                          changeProfilePicture: false,
+                          otherProfile: false,
+                        });
+                      }}
+                      disabled={profileReload}>
+                      <Text style={styles.editProfileButton}>Edit Profile</Text>
+                    </TouchableWithoutFeedback>
+                  )}
+                  {view.otherProfile && (
+                    <Text>
+                      {props.profile.userSettings.show_joined_date
+                        ? 'Joined ' +
+                          format(
+                            new Date(
+                              props.profile.date[0],
+                              props.profile.date[1],
+                            ),
+                            'MMMM yyyy',
+                          )
+                        : ''}
+                    </Text>
+                  )}
+                </View>
+                {view.otherProfile && (
+                  <>
+                    <TouchableWithoutFeedback
+                      onPress={() =>
+                        setOtherProfileShowOptions(!otherProfileShowOptions)
+                      }
+                      disabled={profileReload}>
+                      <View style={styles.editPost}>
+                        <Image
+                          style={styles.editButtons}
+                          source={require('./media/edit_post.png')}
+                        />
+                      </View>
+                    </TouchableWithoutFeedback>
+                    {otherProfileShowOptions && (
+                      <View style={styles.statusOptions}>
+                        <TouchableWithoutFeedback>
+                          <Text>Block User</Text>
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback>
+                          <Text>Report User</Text>
+                        </TouchableWithoutFeedback>
+                      </View>
+                    )}
+                  </>
+                )}
+              </View>
               <View
                 style={{
                   display: 'flex',
+                  width: '100%',
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  borderColor: 'gray',
-                  borderTopWidth: 0.5,
-                  padding: normalize(15),
-                  width: '33.33%',
-                  backgroundColor: type.sell_history ? Colors.white : '#D7D7D7',
+                  justifyContent: view.main ? 'center' : 'flex-start',
+                  backgroundColor: Colors.white,
                 }}>
-                <Text
-                  style={{
-                    color: type.sell_history ? 'black' : 'gray',
-                    width: view.main ? 50 : 100,
-                    textAlign: 'center',
-                    fontSize: view.main ? 15 : 17.5,
-                  }}>
-                  Sell History
-                </Text>
+                <TouchableWithoutFeedback
+                  onPress={() =>
+                    setType({
+                      sell_history: true,
+                      buy_history: false,
+                      liked_posts: false,
+                    })
+                  }
+                  disabled={profileReload}>
+                  <View
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderColor: 'gray',
+                      borderTopWidth: 0.5,
+                      padding: normalize(15),
+                      width: '33.33%',
+                      backgroundColor: type.sell_history
+                        ? Colors.white
+                        : '#D7D7D7',
+                    }}>
+                    <Text
+                      style={{
+                        color: type.sell_history ? 'black' : 'gray',
+                        width: view.main ? 50 : 100,
+                        textAlign: 'center',
+                        fontSize: view.main ? 15 : 17.5,
+                      }}>
+                      Sell History
+                    </Text>
+                  </View>
+                </TouchableWithoutFeedback>
+                {view.main && (
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setType({
+                        sell_history: false,
+                        buy_history: true,
+                        liked_posts: false,
+                      })
+                    } disabled={profileReload}>
+                    <View
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderColor: 'gray',
+                        borderTopWidth: 0.5,
+                        padding: normalize(15),
+                        width: '33.33%',
+                        backgroundColor: type.buy_history
+                          ? Colors.white
+                          : '#D7D7D7',
+                      }}>
+                      <Text
+                        style={{
+                          color: type.buy_history ? 'black' : 'gray',
+                          width: 50,
+                          textAlign: 'center',
+                          fontSize: 15,
+                        }}>
+                        Buy History
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                )}
+                {view.main && (
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setType({
+                        sell_history: false,
+                        buy_history: false,
+                        liked_posts: true,
+                      })
+                    } disabled={profileReload}>
+                    <View
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderColor: 'gray',
+                        borderTopWidth: 0.5,
+                        padding: normalize(15),
+                        width: '33.33%',
+                        backgroundColor: type.liked_posts
+                          ? Colors.white
+                          : '#D7D7D7',
+                      }}>
+                      <Text
+                        style={{
+                          color: type.liked_posts ? 'black' : 'gray',
+                          width: 50,
+                          textAlign: 'center',
+                          fontSize: 15,
+                        }}>
+                        Liked Posts
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                )}
               </View>
-            </TouchableWithoutFeedback>
-            {view.main && (
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  setType({
-                    sell_history: false,
-                    buy_history: true,
-                    liked_posts: false,
-                  })
-                }>
-                <View
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: 'gray',
-                    borderTopWidth: 0.5,
-                    padding: normalize(15),
-                    width: '33.33%',
-                    backgroundColor: type.buy_history
-                      ? Colors.white
-                      : '#D7D7D7',
-                  }}>
-                  <Text
-                    style={{
-                      color: type.buy_history ? 'black' : 'gray',
-                      width: 50,
-                      textAlign: 'center',
-                      fontSize: 15,
-                    }}>
-                    Buy History
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-            )}
-            {view.main && (
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  setType({
-                    sell_history: false,
-                    buy_history: false,
-                    liked_posts: true,
-                  })
-                }>
-                <View
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: 'gray',
-                    borderTopWidth: 0.5,
-                    padding: normalize(15),
-                    width: '33.33%',
-                    backgroundColor: type.liked_posts
-                      ? Colors.white
-                      : '#D7D7D7',
-                  }}>
-                  <Text
-                    style={{
-                      color: type.liked_posts ? 'black' : 'gray',
-                      width: 50,
-                      textAlign: 'center',
-                      fontSize: 15,
-                    }}>
-                    Liked Posts
-                  </Text>
-                </View>
-              </TouchableWithoutFeedback>
-            )}
-          </View>
 
-          {/* Where the user's posts are shown */}
-          <ScrollView
-            contentInsetAdjustmentBehavior="automatic"
-            style={styles.scrollView}>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                padding: 0,
-              }}>
-              {props.all_posts.map(post => {
-                if (type.sell_history) {
-                  if (post.username === props.profile.data.username) {
-                    return (
-                      <Post
-                        data={post}
-                        setDesc={props.setDesc}
-                        viewPost={props.viewPost}
-                        setView={setView}
-                        setDelete={setDelete}
-                        current_user={props.current_user}
-                        main={view.main}
-                        key={uuid.v4()}
-                      />
-                    );
-                  }
-                }
-              })}
-              {view.main &&
-                props.all_posts.map(post => {
-                  if (type.liked_posts) {
-                    if (likedPosts.length && likedPosts.includes(post.id)) {
-                      return (
-                        <Post
-                          data={post}
-                          setDesc={props.setDesc}
-                          viewPost={props.viewPost}
-                          setView={setView}
-                          current_user={props.current_user}
-                          main={view.main}
-                          key={uuid.v4()}
-                        />
-                      );
+              {/* Where the user's posts are shown */}
+              <ScrollView
+                contentInsetAdjustmentBehavior="automatic"
+                style={styles.scrollView}>
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    padding: 0,
+                  }}>
+                  {props.all_posts.map(post => {
+                    if (type.sell_history) {
+                      if (post.username === props.profile.data.username) {
+                        return (
+                          <Post
+                            data={post}
+                            setDesc={props.setDesc}
+                            viewPost={props.viewPost}
+                            setView={setView}
+                            setDelete={setDelete}
+                            current_user={props.current_user}
+                            main={view.main}
+                            key={uuid.v4()}
+                          />
+                        );
+                      }
                     }
-                  } else if (type.buy_history) {
-                    if (buyHistory.length && buyHistory.includes(post.id)) {
-                      return (
-                        <Post
-                          data={post}
-                          setDesc={props.setDesc}
-                          viewPost={props.viewPost}
-                          setView={setView}
-                          current_user={props.current_user}
-                          main={view.main}
-                        />
-                      );
-                    }
-                  }
-                })}
+                  })}
+                  {view.main &&
+                    props.all_posts.map(post => {
+                      if (type.liked_posts) {
+                        if (
+                          likedPosts &&
+                          likedPosts.length &&
+                          likedPosts.includes(post.id)
+                        ) {
+                          return (
+                            <Post
+                              data={post}
+                              setDesc={props.setDesc}
+                              viewPost={props.viewPost}
+                              setView={setView}
+                              current_user={props.current_user}
+                              main={view.main}
+                              key={uuid.v4()}
+                            />
+                          );
+                        }
+                      } else if (type.buy_history) {
+                        if (
+                          buyHistory &&
+                          buyHistory.length &&
+                          buyHistory.includes(post.id)
+                        ) {
+                          return (
+                            <Post
+                              data={post}
+                              setDesc={props.setDesc}
+                              viewPost={props.viewPost}
+                              setView={setView}
+                              current_user={props.current_user}
+                              main={view.main}
+                            />
+                          );
+                        }
+                      }
+                    })}
+                </View>
+              </ScrollView>
             </View>
-          </ScrollView>
-        </View>
+          </GestureDetector>
+        </GestureHandlerRootView>
       )}
       {view.editProfile && (
         <EditProfile
@@ -773,7 +822,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     height: '100%',
+    width: '100%',
     flex: 1,
+  },
+  profilePageRefresh: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    height: '100%',
+    width: '100%',
+    flex: 1,
+    opacity: 0.6,
   },
   profilePicture: {
     width: normalize(80),

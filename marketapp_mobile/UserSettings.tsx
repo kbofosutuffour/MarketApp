@@ -144,25 +144,24 @@ function Profile(props): JSX.Element {
 
 function ChangePassword(props: any): JSX.Element {
   const [passwordState, setPasswordState] = useState({
-    sendCode: false,
+    sendCode: true,
     createPassword: false,
   });
 
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [newPassword, setNewPassword] = useState({
     username: '',
     password: '',
     confirm: '',
     email: email,
   });
-
-  const [errorMessage, setErrorMessage] = useState('');
-
   const [code, setCode] = useState({
     code: '',
     codeSent: false,
   });
   const [inputCode, setInputCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -179,6 +178,7 @@ function ChangePassword(props: any): JSX.Element {
   // Add username as soon as the component renders
   useEffect(() => {
     setNewPassword({...newPassword, username: props.profile.username});
+    setUsername(props.profile.username);
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -189,18 +189,24 @@ function ChangePassword(props: any): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {email: email})
+        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {
+          email: email,
+          username: username,
+        })
         .then(response => {
-          setCode({
-            code: response.data.code,
-            codeSent: true,
-          });
+          if (response.data.status === 400) {
+            setErrorMessage(
+              'Error with the validation process.  Make sure the email is used for this account and try again.',
+            );
+          } else {
+            setCode({
+              code: response.data.code,
+              codeSent: true,
+            });
+          }
         })
         .catch((err: any) => {
           console.log(err);
-          setErrorMessage(
-            'Error with the validation process.  Please try again.',
-          );
         });
     } else if (inputCode === code.code && code.code.length) {
       setPasswordState({
@@ -208,7 +214,7 @@ function ChangePassword(props: any): JSX.Element {
         createPassword: true,
       });
     } else if (!inputEmail || domain !== 'wm.edu') {
-      setErrorMessage('Please enter a valid W&M address');
+      props.setErrorMessage('Please enter a valid W&M address');
     }
   };
 
@@ -223,24 +229,30 @@ function ChangePassword(props: any): JSX.Element {
           `${emulator ? baseUrl : ngrok}/users/change_password/`,
           newPassword,
         )
-        .then(response => {
-          setPasswordState({
-            sendCode: false,
-            createPassword: true,
-          });
+        .then(res => {
+          if (res.data.success) {
+            props.setView({profile: true});
+            props.setErrorMessage(
+              'You have successfully changed your password',
+            );
+          } else {
+            props.setErrorMessage(
+              'Username and email on file do not match.  Please re-enter your email and try again',
+            );
+          }
         })
         .catch((err: any) => console.log(err));
     } else if (
       newPassword.password !== newPassword.confirm &&
       newPassword.password.length
     ) {
-      setErrorMessage('Passwords do not match.  Please try again.');
+      props.setErrorMessage('Passwords do not match.  Please try again.');
     } else if (newPassword.password.length < 8) {
-      setErrorMessage('Insufficient password length.  Please try again');
+      props.setErrorMessage('Insufficient password length.  Please try again');
     } else if (!newPassword.username.length) {
-      setErrorMessage('Please enter your username');
+      props.setErrorMessage('Please enter your username');
     } else {
-      setErrorMessage('An unknown error has occurred');
+      props.setErrorMessage('An unknown error has occurred');
     }
   };
 
@@ -281,7 +293,7 @@ function ChangePassword(props: any): JSX.Element {
         </>
       )}
       {passwordState.sendCode && (
-        <>
+        <View style={styles.userSettingsCenter}>
           <View style={styles.loginContainer}>
             <View style={styles.blackArrow}>
               <TouchableWithoutFeedback
@@ -360,23 +372,12 @@ function ChangePassword(props: any): JSX.Element {
               <TouchableWithoutFeedback onPress={() => verify(null, inputCode)}>
                 <Text style={styles.loginButton}>Verify Code</Text>
               </TouchableWithoutFeedback>
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  props.setLoginState({
-                    login: false,
-                    register: false,
-                    forgotPassword: false,
-                    verifyEmail: true,
-                  })
-                }>
-                <Text>Don't have an account? Click here to Sign Up</Text>
-              </TouchableWithoutFeedback>
             </View>
           </View>
-        </>
+        </View>
       )}
       {passwordState.createPassword && (
-        <>
+        <View style={styles.userSettingsCenter}>
           <View style={styles.loginContainer}>
             <View style={styles.blackArrow}>
               <TouchableWithoutFeedback
@@ -390,7 +391,7 @@ function ChangePassword(props: any): JSX.Element {
             <Image
               style={styles.wmLogo}
               source={{
-                uri: `${emulator ? baseUrl : ngrok}/${
+                uri: `${emulator ? baseUrl : ngrok}${
                   props.profile.profile_picture
                 }`,
               }}
@@ -426,7 +427,7 @@ function ChangePassword(props: any): JSX.Element {
               <Text style={styles.loginButton}>Create a new password</Text>
             </TouchableWithoutFeedback>
           </View>
-        </>
+        </View>
       )}
       {errorMessage && (
         <View style={styles.errorMessageContainer}>
@@ -906,7 +907,6 @@ function Violations(props: any): JSX.Element {
           <Text style={styles.settingsOption}>Violations</Text>
         </View>
         <View style={styles.toggleContainer}>
-          {console.log(props.violations)}
           {Object.values(props.violations).map((violation: any) => {
             return (
               violations.includes(violation.type.toLowerCase()) && (
@@ -1175,6 +1175,16 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 1,
   },
+  userSettingsCenter: {
+    backgroundColor: '#f6f7f5',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    width: '100%',
+    flex: 1,
+  },
   settingsOptionContainer: {
     borderBottomWidth: 1,
     borderColor: 'gray',
@@ -1337,7 +1347,6 @@ const styles = StyleSheet.create({
     height: 20,
   },
   loginContainer: {
-    backgroundColor: Colors.white,
     height: '80%',
     display: 'flex',
     flexDirection: 'column',

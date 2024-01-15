@@ -169,28 +169,6 @@ class Profiles(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
     """
-
-    # profiles = Profile.objects.all()
-    # response = []
-    # for profile in profiles:
-    #     data = {}
-    #     data.id = profile.id
-    #     data.username = profile.username
-    #     data.profile_picture = profile.profile_picture
-    #     data.email = 'test'
-    #     data.first_name = profile.first_name
-    #     data.last_name = profile.last_name
-    #     data.date = str(profile.date)
-
-    #     posts = profile.liked_posts.all()
-    #     post_ids = []
-    #     for post in posts:
-    #         post_ids.append(post.id)
-    #     data.liked_posts = post_ids
-    #     response.append(data)
-    # print('different profile get')
-    # return Response({"data": response})
-
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
@@ -279,11 +257,18 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(methods=['post'], detail=False)
     def verify(self, request, *args, **kwargs):
+        try:
+            User.objects.get(
+                username=request.data['username'],
+                email=request.data['email']
+            )
+            code = random.randint(10000,99999)
+            code = str(code)
+            send_code(request, code, request.data['email'])
+            return Response({'code': code, 'status': 200})
+        except:
+            return Response({'status': 400, 'error': 'Username and email do not match'})
 
-        code = random.randint(0,99999)
-        code = str(code)
-        send_code(request, code, request.data['email'])
-        return Response({'code': code})
     
     @action(methods=['post'], detail=False)
     def change_password(self, request, *args, **kwargs):
@@ -293,13 +278,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 print('success')
                 user.set_password(request.data['password'])
                 user.save()
-                return Response({'success': 1})
+                return Response({'success': 1, 'status': 200})
             except:
                 print('failed')
-                return Response({'success': 0})
+                return Response({'success': 0, 'status': 400})
         else:
             print('failed')
-            return Response({'success': 0})
+            return Response({'success': 0, 'status': 400})
     
     def create(self, request):
         serializer = UserSerializer(data=request.data)
@@ -794,15 +779,25 @@ def profile(request, user):
     """
     try:
         profile = Profile.objects.get(username=user)
+
         posts = profile.liked_posts.all()
         liked_posts = []
         for post in posts:
             liked_posts.append(post.id)
         drafts = list(profile.drafts.all())
-        hasProfile = True
+
+        posts = profile.buy_history.all()
+        buy_history = []
+        for post in posts:
+            buy_history.append(post.id)
+
+        posts = profile.drafts.all()
+        drafts = []
+        for post in posts:
+            drafts.append(post.id)
+
         context = {
             'id': profile.id,
-            'hasProfile': hasProfile,
             'username': user,
             'profile_picture': profile.profile_picture.url,
             'first_name': profile.first_name,
@@ -810,6 +805,7 @@ def profile(request, user):
             'date': profile.date,
             'email': profile.email,
             'liked_posts': liked_posts,
+            'buy_history': buy_history,
             'drafts': drafts,
         }
     except: 

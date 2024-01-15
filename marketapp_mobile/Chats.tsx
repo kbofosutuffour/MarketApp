@@ -550,6 +550,7 @@ function Chats(props): JSX.Element {
         viewProfile={viewProfile}
         viewChats={viewChats}
         type={'Chats'}
+        hasLoaded={props.hasLoaded}
       />
     </>
   );

@@ -153,7 +153,7 @@ function ProductDescription(props): JSX.Element {
    * @param product the name of the product being discussed
    * @param image the display image of the product
    */
-  var getChats = async (buyer, bpf, seller, spf, product, image) => {
+  const getChats = async (buyer, bpf, seller, spf, product, image) => {
     let data = new FormData();
     data.append('buyer', buyer);
     data.append('buyer_profile_picture', bpf);
@@ -169,7 +169,20 @@ function ProductDescription(props): JSX.Element {
         },
       })
       .catch((err: any) => console.log(err));
+    await getRooms(buyer);
     props.viewChats();
+  };
+
+  /**
+   * Individual function to retrieve the chat rooms for a specific user
+   */
+  const getRooms = async (username: string) => {
+    await axios
+      .get(`${emulator ? baseUrl : ngrok}/rooms/get_rooms/${username}`)
+      .then(res => {
+        props.setRooms(res.data);
+      })
+      .catch((err: any) => console.log(err));
   };
 
   /**
@@ -179,7 +192,6 @@ function ProductDescription(props): JSX.Element {
    * @param profile the profile data of the creator of the post on screen
    */
   const like_viewed_post = async (id, profile) => {
-    let previous_posts = profile.liked_posts;
     let data = {
       username: profile.username,
       liked_posts: id,
@@ -191,7 +203,7 @@ function ProductDescription(props): JSX.Element {
         }/`,
         data,
       )
-      .then(res => {
+      .then(() => {
         likePost(!liked);
       })
       .catch((err: any) => console.log(err));
@@ -345,6 +357,7 @@ function ProductDescription(props): JSX.Element {
           )}
           <TouchableWithoutFeedback
             onPress={() => {
+              props.setHasLoaded(false);
               getChats(
                 props.current_user,
                 {

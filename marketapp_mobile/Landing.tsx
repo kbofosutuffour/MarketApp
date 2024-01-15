@@ -24,7 +24,7 @@ function Landing(props): JSX.Element {
       <View>
         <Image
           style={styles.wmLogo}
-          source={require('./media/wm_logo_green.png')}
+          source={require('./media/app_logo.png')}
           width={50}
           height={50}
         />
@@ -49,8 +49,6 @@ const styles = StyleSheet.create({
   },
   wmLogo: {
     borderRadius: 25,
-    borderWidth: 5,
-    borderColor: 'rgb(185, 151, 91)',
     width: normalize(150),
     height: normalize(150),
     overflow: 'hidden',

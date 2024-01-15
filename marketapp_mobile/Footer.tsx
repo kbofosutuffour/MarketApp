@@ -49,47 +49,69 @@ function Footer(props: any): JSX.Element {
             alignItems: 'center',
             overflow: 'hidden',
             backgroundColor:
-              props.type === 'Home' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
-            borderRadius: 30,
-          }}>
-          <TouchableWithoutFeedback onPress={props.returnHome}>
-            <Image source={require('./media/home-05.png')} />
-          </TouchableWithoutFeedback>
-        </View>
-        <View // eslint-disable-next-line react-native/no-inline-styles
-          style={{
-            width: 60,
-            height: 60,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            backgroundColor:
-              props.type === 'Chats' ? 'rgb(185, 151, 91)' : 'rgb(17, 87, 64)',
-            borderRadius: 30,
-          }}>
-          <TouchableWithoutFeedback onPress={props.viewChats}>
-            <Image source={require('./media/message-chat-square.png')} />
-          </TouchableWithoutFeedback>
-        </View>
-        <View // eslint-disable-next-line react-native/no-inline-styles
-          style={{
-            width: 60,
-            height: 60,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            overflow: 'hidden',
-            backgroundColor:
-              props.type === 'Profile'
+              props.hasLoaded && props.type === 'Home'
                 ? 'rgb(185, 151, 91)'
                 : 'rgb(17, 87, 64)',
             borderRadius: 30,
           }}>
-          <TouchableWithoutFeedback onPress={props.viewProfile}>
-            <Image source={require('./media/user-01.png')} />
+          <TouchableWithoutFeedback
+            onPress={props.returnHome}
+            disabled={!props.hasLoaded}>
+            <View>
+              {props.hasLoaded && (
+                <Image source={require('./media/home-05.png')} />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+        <View // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            width: 60,
+            height: 60,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            backgroundColor:
+              props.hasLoaded && props.type === 'Chats'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)',
+            borderRadius: 30,
+          }}>
+          <TouchableWithoutFeedback
+            onPress={props.viewChats}
+            disabled={!props.hasLoaded}>
+            <View>
+              {props.hasLoaded && (
+                <Image source={require('./media/message-chat-square.png')} />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+        <View // eslint-disable-next-line react-native/no-inline-styles
+          style={{
+            width: 60,
+            height: 60,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            backgroundColor:
+              props.hasLoaded && props.type === 'Profile'
+                ? 'rgb(185, 151, 91)'
+                : 'rgb(17, 87, 64)',
+            borderRadius: 30,
+          }}>
+          <TouchableWithoutFeedback
+            onPress={props.viewProfile}
+            disabled={!props.hasLoaded}>
+            <View>
+              {props.hasLoaded && (
+                <Image source={require('./media/user-01.png')} />
+              )}
+            </View>
           </TouchableWithoutFeedback>
         </View>
       </View>
