@@ -580,7 +580,7 @@ def send_code(request, code, email):
     #         from_email=settings.EMAIL_HOST_USER,
     #         recipient_list=[email]
     #     )
-
+ 
 def send_feedback_email(feedback):
     """
     Function used to send the user their verification code via email
