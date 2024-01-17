@@ -574,12 +574,12 @@ def send_code(request, code, email):
 
     #send user an email
     print(code)
-    # send_mail(
-    #         subject="H2H Account Verification Code",
-    #         message=message,
-    #         from_email=settings.EMAIL_HOST_USER,
-    #         recipient_list=[email]
-    #     )
+    send_mail(
+            subject="H2H Account Verification Code",
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email]
+        )
  
 def send_feedback_email(feedback):
     """
