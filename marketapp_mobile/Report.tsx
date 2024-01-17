@@ -63,11 +63,13 @@ function Report(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const user_options = {
@@ -105,9 +107,9 @@ function Report(props): JSX.Element {
     if (user) {
       await axios
         .get(
-          `${emulator ? baseUrl : ngrok}/profiles/get_id/${
-            props.profile.username
-          }/`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_id/${props.profile.username}/`,
         )
         .then(response => {
           profile_id = response.data.id;
@@ -122,7 +124,9 @@ function Report(props): JSX.Element {
     // Getting the id of the user making the report (current user)
     await axios
       .get(
-        `${emulator ? baseUrl : ngrok}/profiles/get_id/${props.current_user}/`,
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profiles/get_id/${
+          props.current_user
+        }/`,
       )
       .then(response => {
         current_user_id = response.data.id;
@@ -136,7 +140,7 @@ function Report(props): JSX.Element {
       reported_by: current_user_id,
     };
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/report/`, data)
+      .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/report/`, data)
       .catch((err: any) => console.log(err));
   };
 
@@ -170,7 +174,7 @@ function Report(props): JSX.Element {
             <View style={styles.profileContainer}>
               <Image
                 source={{
-                  uri: `${emulator ? baseUrl : ngrok}${
+                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                     props.profile.profile_picture
                   }`,
                 }}

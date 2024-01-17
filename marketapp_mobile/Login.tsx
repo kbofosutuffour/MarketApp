@@ -65,11 +65,13 @@ function ForgotPassword(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -80,10 +82,13 @@ function ForgotPassword(props): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {
-          email: email,
-          username: username,
-        })
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/verify/`,
+          {
+            email: email,
+            username: username,
+          },
+        )
         .then(response => {
           if (response.data.status === 400) {
             props.setErrorMessage(
@@ -117,7 +122,9 @@ function ForgotPassword(props): JSX.Element {
     ) {
       await axios
         .post(
-          `${emulator ? baseUrl : ngrok}/users/change_password/`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/users/change_password/`,
           newPassword,
         )
         .then(res => {
@@ -348,11 +355,13 @@ function Register(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const chooseImage = async () => {
@@ -400,7 +409,7 @@ function Register(props): JSX.Element {
       //TODO: Add logic for if user has a user set up, but NOT a password
       await axios
         .post(
-          `${emulator ? baseUrl : ngrok}/users/`,
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/`,
           {
             username: profile.username,
             password: profile.password,
@@ -425,11 +434,15 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/profiles/`, data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profiles/`,
+          data,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
           },
-        })
+        )
         .then(response => {
           console.log(response);
           profile_id = response.data.id;
@@ -442,14 +455,17 @@ function Register(props): JSX.Element {
         });
 
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/user_settings/`, {
-          username: profile_id,
-        })
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/user_settings/`,
+          {
+            username: profile_id,
+          },
+        )
         .then(() => props.returnHome(profile.username))
         .catch((err: any) => console.log(err));
 
       // await axios
-      //   .post(`${emulator ? baseUrl : ngrok}/report/`, {
+      //   .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/report/`, {
       //     username: profile_id,
       //   })
       //   .then(() => props.returnHome(profile.username))
@@ -635,11 +651,13 @@ function Verify(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -649,7 +667,10 @@ function Verify(props): JSX.Element {
 
     if (inputEmail && domain === 'wm.edu') {
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {email: email})
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/verify/`,
+          {email: email},
+        )
         .then(response => {
           setCode({
             code: response.data.code,
@@ -792,11 +813,13 @@ function Login(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // Redirect to Forgot Password screen immediately if desired from app
@@ -818,7 +841,10 @@ function Login(props): JSX.Element {
     };
     if (data.username && data.password) {
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/users/login/`, data)
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/login/`,
+          data,
+        )
         .then(response => {
           if (response.data.login) {
             if (response.data.register) {

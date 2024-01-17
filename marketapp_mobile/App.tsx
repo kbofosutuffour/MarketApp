@@ -388,11 +388,13 @@ function App(): JSX.Element {
    * The base url used to access images and other data within the app directory.
    * Different between Android and iOS
    */
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // The axios is a JavaScript library that is used to perform
@@ -421,7 +423,11 @@ function App(): JSX.Element {
 
     if (user.username) {
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/profile/${user.username}`)
+        .get(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profile/${
+            user.username
+          }`,
+        )
         .then(res => {
           data.showProfile = false;
           data.data = res.data;
@@ -431,38 +437,50 @@ function App(): JSX.Element {
       let profile_id;
       await axios
         .get(
-          `${emulator ? baseUrl : ngrok}/profiles/get_date_created/${
-            user.username
-          }`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_date_created/${user.username}`,
         )
         .then(res => {
           data.date = res.data.date.split('-');
         });
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/profiles/get_id/${user.username}`)
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_id/${user.username}`,
+        )
         .then(res => {
           profile_id = res.data.id;
           data.id = res.data.id;
         })
         .catch((err: any) => console.log(err));
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/posts/get_posts/${user.username}`)
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/posts/get_posts/${user.username}`,
+        )
         .then(res => {
           data.posts = res.data;
         })
         .catch((err: any) => console.log(err));
       await axios
         .get(
-          `${emulator ? baseUrl : ngrok}/profiles/get_liked_posts/${
-            user.username
-          }`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_liked_posts/${user.username}`,
         )
         .then(res => {
           data.liked_posts = res.data.liked_posts;
         })
         .catch((err: any) => console.log(err));
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile_id}`)
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/user_settings/${profile_id}`,
+        )
         .then(res => {
           data.settings = res.data;
           setUserSettings({...settings, data: res.data});
@@ -471,7 +489,7 @@ function App(): JSX.Element {
       await axios
         .get(
           `${
-            emulator ? baseUrl : ngrok
+            inProdMode ? prodURL : emulator ? devURL : ngrok
           }/violation/get_violations/${profile_id}`,
         )
         .then(res => {
@@ -487,7 +505,7 @@ function App(): JSX.Element {
    */
   const getPosts = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/posts`)
+      .get(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts`)
       .then(res => {
         if (res.data.length === 0) {
           setErrorMessage(
@@ -509,7 +527,11 @@ function App(): JSX.Element {
    */
   const getUserSettings = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile.data.id}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/user_settings/${
+          profile.data.id
+        }`,
+      )
       .then(res => {
         setProfile({...profile, settings: res.data});
         setUserSettings({...settings, data: res.data});
@@ -522,7 +544,11 @@ function App(): JSX.Element {
   const getProfile = async () => {
     let data = {};
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/profile/${user.username}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profile/${
+          user.username
+        }`,
+      )
       .then(res => {
         data = res.data;
       })
@@ -536,7 +562,11 @@ function App(): JSX.Element {
    */
   const getRooms = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/rooms/get_rooms/${user.username}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/get_rooms/${
+          user.username
+        }`,
+      )
       .then(res => {
         setRooms(res.data);
       })
@@ -861,10 +891,14 @@ function App(): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/images/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/posts/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     setDelete({
       data: {},
@@ -883,7 +917,7 @@ function App(): JSX.Element {
    */
   const countFlagPost = async (post_id: number | string) => {
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/flag/`, {
+      .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/flag/`, {
         post: post_id,
         flagged_by: profile.data.id,
       })
@@ -902,7 +936,10 @@ function App(): JSX.Element {
    */
   const flagPost = async (id: number | string) => {
     await axios
-      .patch(`${emulator ? baseUrl : ngrok}/posts/${id}/`, {flag: true})
+      .patch(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${id}/`,
+        {flag: true},
+      )
       .catch((err: any) => console.log(err));
   };
 
@@ -916,7 +953,7 @@ function App(): JSX.Element {
     score: number | string,
   ) => {
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/ratings/`, {
+      .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/ratings/`, {
         username: profile_id,
         rated_by: profile.data.id,
         score: score,
@@ -939,7 +976,7 @@ function App(): JSX.Element {
       {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
           This produces the effect of changing what is seen on the screen */}
 
-      <UserContext.Provider value={{baseUrl: baseUrl}}>
+      <UserContext.Provider value={{prodURL: prodURL}}>
         {/* useContext serves as a 'global state' data access for all child components of App.jsx.
             Each file will be able to access the data in the value parameter */}
 
@@ -1124,6 +1161,7 @@ function App(): JSX.Element {
               viewReport={viewReport}
               rateProfile={rateProfile}
               setHasLoaded={setHasLoaded}
+              hasLoaded={hasLoaded}
               setRooms={setRooms}
             />
           </>

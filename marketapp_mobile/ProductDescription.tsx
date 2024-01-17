@@ -46,13 +46,14 @@ function ProductDescription(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
-  const ngrok =
-    'https://classic-pegasus-factual.ngrok-free.app';
+  const prodURL = 'https://marketappwm-django-api.link';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // After the page renders, retrieve information on the user
   // who created the post from the database, stored in the preceeding
@@ -68,9 +69,9 @@ function ProductDescription(props): JSX.Element {
    * page
    */
   const getData = async () => {
-    let request = `${emulator ? baseUrl : ngrok}/profile/${
-      props.post.username
-    }`;
+    let request = `${
+      inProdMode ? prodURL : emulator ? devURL : ngrok
+    }/profile/${props.post.username}`;
     let data = {
       data: {},
       userSettings: {},
@@ -85,9 +86,9 @@ function ProductDescription(props): JSX.Element {
       .catch((err: any) => console.log(err));
     await axios
       .get(
-        `${emulator ? baseUrl : ngrok}/profiles/get_liked_posts/${
-          props.current_user
-        }`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/profiles/get_liked_posts/${props.current_user}`,
       )
       .then(res => {
         likePost(
@@ -99,22 +100,28 @@ function ProductDescription(props): JSX.Element {
       .catch((err: any) => console.log(err));
     await axios
       .get(
-        `${emulator ? baseUrl : ngrok}/profiles/get_date_created/${
-          props.post.username
-        }`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/profiles/get_date_created/${props.post.username}`,
       )
       .then(res => {
         data.date = res.data.date.split('-');
       });
     await axios
       .get(
-        `${emulator ? baseUrl : ngrok}/profiles/get_id/${props.post.username}`,
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profiles/get_id/${
+          props.post.username
+        }`,
       )
       .then(res => {
         data.id = res.data.id;
       });
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/user_settings/${data.id}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/user_settings/${
+          data.id
+        }`,
+      )
       .then(res => {
         data.userSettings = res.data;
       });
@@ -130,7 +137,11 @@ function ProductDescription(props): JSX.Element {
     let new_photos = [];
     new_photos.push(props.post.display_image);
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/images/${props.post.id}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/${
+          props.post.id
+        }`,
+      )
       .then(res => {
         let indexes = Object.keys(res.data);
         for (let i = 0; i < Object.keys(res.data).length; i++) {
@@ -163,11 +174,15 @@ function ProductDescription(props): JSX.Element {
     data.append('image', image);
 
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/rooms/`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      .post(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      })
+      )
       .catch((err: any) => console.log(err));
     await getRooms(buyer);
     props.viewChats();
@@ -178,7 +193,11 @@ function ProductDescription(props): JSX.Element {
    */
   const getRooms = async (username: string) => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/rooms/get_rooms/${username}`)
+      .get(
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/rooms/get_rooms/${username}`,
+      )
       .then(res => {
         props.setRooms(res.data);
       })
@@ -198,9 +217,9 @@ function ProductDescription(props): JSX.Element {
     };
     axios
       .patch(
-        `${emulator ? baseUrl : ngrok}/edit_profile/like_post/${
-          props.current_user
-        }/`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/edit_profile/like_post/${props.current_user}/`,
         data,
       )
       .then(() => {
@@ -262,9 +281,9 @@ function ProductDescription(props): JSX.Element {
                 <TouchableWithoutFeedback onPress={() => showMain(false)}>
                   <Image
                     source={{
-                      uri: `${emulator ? baseUrl : ngrok}${
-                        profile.data.profile_picture
-                      }`,
+                      uri: `${
+                        inProdMode ? prodURL : emulator ? devURL : ngrok
+                      }${profile.data.profile_picture}`,
                     }}
                     style={styles.profilePicture}
                   />
@@ -324,34 +343,27 @@ function ProductDescription(props): JSX.Element {
         <View style={styles.footer}>
           {mainScreen && (
             <TouchableWithoutFeedback
-              onPress={() => like_viewed_post(props.post.id, profile)}>
-              {/* <View
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderColor: Colors.white,
-                  borderWidth: 1,
-                  borderRadius: 15,
-                  backgroundColor: liked ? 'red' : 'rgb(17, 87, 64)',
-                }}
-              /> */}
+              onPress={() => like_viewed_post(props.post.id, profile)}
+              disabled={!props.hasLoaded}>
               <Svg width="24" height="24" fill="none">
                 <Path
                   d="M2 9.1371C2 14 6.01943 16.5914 8.96173 18.9109C10 19.7294 11 20.5 12 20.5C13 20.5 14 19.7294 15.0383 18.9109C17.9806 16.5914 22 14 22 9.1371C22 4.27416 16.4998 0.825464 12 5.50063C7.50016 0.825464 2 4.27416 2 9.1371Z"
-                  fill={liked ? 'red' : 'rgb(17, 87, 64)'}
-                  stroke={'black'}
+                  fill={liked && props.hasLoaded ? 'red' : 'rgb(17, 87, 64)'}
+                  stroke={props.hasLoaded ? 'black' : 'rgb(17, 87, 64)'}
                   strokeWidth={liked ? 0 : 3}
                 />
               </Svg>
             </TouchableWithoutFeedback>
           )}
-          {mainScreen && (
+          {mainScreen && props.hasLoaded && (
             <Text style={{fontSize: 25, color: Colors.white}}>
               ${props.post.price}
             </Text>
           )}
           {!mainScreen && (
-            <TouchableWithoutFeedback onPress={() => showMain(true)}>
+            <TouchableWithoutFeedback
+              onPress={() => showMain(true)}
+              disabled={!props.hasLoaded}>
               <Text style={styles.message}>Return</Text>
             </TouchableWithoutFeedback>
           )}
@@ -361,13 +373,15 @@ function ProductDescription(props): JSX.Element {
               getChats(
                 props.current_user,
                 {
-                  uri: `${emulator ? baseUrl : ngrok}${props.current_user_pfp}`,
+                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
+                    props.current_user_pfp
+                  }`,
                   type: 'image/' + props.current_user_pfp.split('.').pop(),
                   name: 'image.png',
                 },
                 props.post.username,
                 {
-                  uri: `${emulator ? baseUrl : ngrok}${
+                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                     profile.data.profile_picture
                   }`,
                   type:
@@ -382,7 +396,12 @@ function ProductDescription(props): JSX.Element {
                 },
               );
             }}>
-            <Text style={styles.message}>Message</Text>
+            <Text
+              style={
+                props.hasLoaded ? styles.message : styles.messageNotLoaded
+              }>
+              Message
+            </Text>
           </TouchableWithoutFeedback>
         </View>
       </View>
@@ -477,6 +496,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#D0D3D4',
     color: 'black',
+  },
+  messageNotLoaded: {
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: 'rgb(17, 87, 64)',
   },
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',

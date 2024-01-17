@@ -34,11 +34,13 @@ function EditPost(props): JSX.Element {
   const [category, showCategory] = useState(false);
   const [postCategory, setPostCategory] = useState('');
 
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -47,7 +49,9 @@ function EditPost(props): JSX.Element {
 
   const fetchData = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/posts/${props.id}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${props.id}`,
+      )
       .then(response => {
         props.setPost(response.data);
         setDisplay(response.data.display_image);
@@ -55,7 +59,11 @@ function EditPost(props): JSX.Element {
       .catch((err: any) => console.log(err));
 
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/images/${props.id}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/${
+          props.id
+        }`,
+      )
       .then(response => {
         let response_images = Object.values(response.data);
         let newList = [];
@@ -86,11 +94,17 @@ function EditPost(props): JSX.Element {
     }
 
     await axios
-      .patch(`${emulator ? baseUrl : ngrok}/edit_post/${props.id}/`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      .patch(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/edit_post/${
+          props.id
+        }/`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      })
+      )
       .catch((err: any) => console.log(err, data));
   };
 
@@ -294,11 +308,13 @@ function NewPost(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const MAX_NUMBER_OF_IMAGES = 5;
@@ -315,11 +331,15 @@ function NewPost(props): JSX.Element {
 
     let post_id;
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/posts/`, post, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      .post(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/`,
+        post,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      })
+      )
       .then(response => {
         post_id = response.data.post_id;
       })
@@ -333,11 +353,15 @@ function NewPost(props): JSX.Element {
     }
 
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/images/`, additional_images, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      .post(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/`,
+        additional_images,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      })
+      )
       .catch((err: any) => console.log(err));
 
     props.returnHome();

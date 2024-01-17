@@ -64,11 +64,13 @@ function Profile(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -90,7 +92,7 @@ function Profile(props): JSX.Element {
       <View style={styles.profileDescription}>
         <Image
           source={{
-            uri: `${emulator ? baseUrl : ngrok}${
+            uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
               props.profile.profile_picture
             }`,
           }}
@@ -168,11 +170,13 @@ function ChangePassword(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // Add username as soon as the component renders
@@ -189,10 +193,13 @@ function ChangePassword(props: any): JSX.Element {
     if (inputEmail && domain === 'wm.edu') {
       setNewPassword({...newPassword, email: inputEmail});
       await axios
-        .post(`${emulator ? baseUrl : ngrok}/users/verify/`, {
-          email: email,
-          username: username,
-        })
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/verify/`,
+          {
+            email: email,
+            username: username,
+          },
+        )
         .then(response => {
           if (response.data.status === 400) {
             setErrorMessage(
@@ -226,7 +233,9 @@ function ChangePassword(props: any): JSX.Element {
     ) {
       await axios
         .post(
-          `${emulator ? baseUrl : ngrok}/users/change_password/`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/users/change_password/`,
           newPassword,
         )
         .then(res => {
@@ -391,7 +400,7 @@ function ChangePassword(props: any): JSX.Element {
             <Image
               style={styles.wmLogo}
               source={{
-                uri: `${emulator ? baseUrl : ngrok}${
+                uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                   props.profile.profile_picture
                 }`,
               }}
@@ -456,11 +465,13 @@ function Notifications(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -470,14 +481,22 @@ function Notifications(props: any): JSX.Element {
   const showNotifications = async () => {
     let profile_id;
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/profiles/get_id/${props.profile}/`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profiles/get_id/${
+          props.profile
+        }/`,
+      )
       .then(response => {
         setProfileID(response.data.id);
         profile_id = response.data.id;
       })
       .catch((err: any) => console.log(err));
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile_id}`)
+      .get(
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/user_settings/${profile_id}`,
+      )
       .then(response => {
         setNewMessages(response.data.new_messages);
         setLikedPostUpdates(response.data.liked_posts_updates);
@@ -492,7 +511,9 @@ function Notifications(props: any): JSX.Element {
     data.new_messages = choice;
     await axios
       .patch(
-        `${emulator ? baseUrl : ngrok}/user_settings/new_messages/${profileID}`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/user_settings/new_messages/${profileID}`,
         data,
       )
       .then(() => {
@@ -506,7 +527,9 @@ function Notifications(props: any): JSX.Element {
     data.liked_post_updates = choice;
     await axios
       .patch(
-        `${emulator ? baseUrl : ngrok}/user_settings/liked_posts/${profileID}/`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/user_settings/liked_posts/${profileID}/`,
         data,
       )
       .then(() => {
@@ -688,23 +711,28 @@ function HelpOrFeedback(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const [content, setContent] = useState('');
 
   const sendFeedback = async () => {
-    axios.post(`${emulator ? baseUrl : ngrok}/feedback/`, {
-      username: props.profile.id,
-      email: props.profile.email,
-      first_name: props.profile.first_name,
-      last_name: props.profile.last_name,
-      content: content,
-    });
+    axios.post(
+      `${inProdMode ? prodURL : emulator ? devURL : ngrok}/feedback/`,
+      {
+        username: props.profile.id,
+        email: props.profile.email,
+        first_name: props.profile.first_name,
+        last_name: props.profile.last_name,
+        content: content,
+      },
+    );
 
     // Return to the mains settings screen with a message telling
     // the user the message was sent
@@ -849,11 +877,13 @@ function Violations(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const violations = [
@@ -883,10 +913,13 @@ function Violations(props: any): JSX.Element {
    * @param id the id of the violation in the database
    */
   const sendAppeal = async (id: string | number) => {
-    await axios.patch(`${emulator ? baseUrl : ngrok}/violation/${id}/`, {
-      id: id,
-      appeal: true,
-    });
+    await axios.patch(
+      `${inProdMode ? prodURL : emulator ? devURL : ngrok}/violation/${id}/`,
+      {
+        id: id,
+        appeal: true,
+      },
+    );
     props.setHasLoaded(false);
     await props.fetchData();
   };
@@ -971,11 +1004,13 @@ function UserSettings(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const options = [
@@ -1015,7 +1050,7 @@ function UserSettings(props: any): JSX.Element {
           <View style={styles.profilePictureContainer}>
             <Image
               source={{
-                uri: `${emulator ? baseUrl : ngrok}${
+                uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                   props.profile.profile_picture
                 }`,
               }}

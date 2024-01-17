@@ -35,8 +35,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', 'classic-pegasus-factual.ngrok-free.app']
-ALLOWED_HOSTS = ['3.141.103.158', 'classic-pegasus-factual.ngrok-free.app']
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', 'classic-pegasus-factual.ngrok-free.app', 'marketappwm-django-api.link']
 
 # Application definition
 

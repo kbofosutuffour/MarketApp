@@ -200,11 +200,13 @@ function Chats(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   /**
@@ -336,7 +338,7 @@ function Chats(props): JSX.Element {
     product = null,
   ) => {
     var chat_request = `${
-      emulator ? baseUrl : ngrok
+      inProdMode ? prodURL : emulator ? devURL : ngrok
     }/messages/get_messages/${id}`;
     axios
       .get(chat_request)
@@ -381,7 +383,10 @@ function Chats(props): JSX.Element {
       image: null,
     };
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/messages/`, data)
+      .post(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/messages/`,
+        data,
+      )
       .then(() => {
         // If there isn't a webserver running,
         // show the new message on the sender side
@@ -491,7 +496,7 @@ function Chats(props): JSX.Element {
               {chats.chats.map(value => {
                 let img =
                   value.username == props.profile.username
-                    ? `${emulator ? baseUrl : ngrok}${
+                    ? `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                         props.profile.profile_picture
                       }`
                     : value.username == chats.buyer.username

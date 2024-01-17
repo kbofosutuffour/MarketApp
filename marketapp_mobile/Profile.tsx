@@ -69,11 +69,13 @@ function Post(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -88,7 +90,9 @@ function Post(props: any): JSX.Element {
     };
     axios
       .patch(
-        `${emulator ? baseUrl : ngrok}/edit_post/status/${username}/`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/edit_post/status/${username}/`,
         data,
       )
       .then(() => {
@@ -236,11 +240,13 @@ function EditProfile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -249,9 +255,9 @@ function EditProfile(props: any): JSX.Element {
 
   const changeDateSettings = async (value: boolean) => {
     axios.patch(
-      `${emulator ? baseUrl : ngrok}/user_settings/show_joined_date/${
-        props.profile_id
-      }/`,
+      `${
+        inProdMode ? prodURL : emulator ? devURL : ngrok
+      }/user_settings/show_joined_date/${props.profile_id}/`,
       {
         username: props.profile_id,
         show_joined_date: value,
@@ -285,7 +291,7 @@ function EditProfile(props: any): JSX.Element {
             <View>
               <Image
                 source={{
-                  uri: `${emulator ? baseUrl : ngrok}${
+                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                     props.profile.data.profile_picture
                   }`,
                 }}
@@ -355,11 +361,13 @@ function Profile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // State variables that allows the user to switch between
@@ -395,10 +403,14 @@ function Profile(props: any): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/images/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/posts/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     setView({
       main: true,
@@ -430,7 +442,9 @@ function Profile(props: any): JSX.Element {
   const refreshPage = async () => {
     await axios
       .get(
-        `${emulator ? baseUrl : ngrok}/profile/${props.profile.data.username}`,
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profile/${
+          props.profile.data.username
+        }`,
       )
       .then(res => {
         props.setProfile({...props.profile, data: res.data});
@@ -453,7 +467,7 @@ function Profile(props: any): JSX.Element {
                 <Image
                   style={styles.profilePicture}
                   source={{
-                    uri: `${emulator ? baseUrl : ngrok}${
+                    uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                       props.profile.data.profile_picture
                     }`,
                   }}
@@ -569,7 +583,8 @@ function Profile(props: any): JSX.Element {
                         buy_history: true,
                         liked_posts: false,
                       })
-                    } disabled={profileReload}>
+                    }
+                    disabled={profileReload}>
                     <View
                       style={{
                         display: 'flex',
@@ -603,7 +618,8 @@ function Profile(props: any): JSX.Element {
                         buy_history: false,
                         liked_posts: true,
                       })
-                    } disabled={profileReload}>
+                    }
+                    disabled={profileReload}>
                     <View
                       style={{
                         display: 'flex',
@@ -773,7 +789,7 @@ function Profile(props: any): JSX.Element {
                 source={{
                   uri: changedPic
                     ? changedPic.uri
-                    : `${emulator ? baseUrl : ngrok}${
+                    : `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                         props.profile.data.profile_picture
                       }`,
                 }}
@@ -790,9 +806,9 @@ function Profile(props: any): JSX.Element {
 
               await axios
                 .patch(
-                  `${emulator ? baseUrl : ngrok}/edit_profile/${
-                    props.profile.data.username
-                  }/`,
+                  `${
+                    inProdMode ? prodURL : emulator ? devURL : ngrok
+                  }/edit_profile/${props.profile.data.username}/`,
                   data,
                 )
                 .catch((err: any) => console.log(err));
