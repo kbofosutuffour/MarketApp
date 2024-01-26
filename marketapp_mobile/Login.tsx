@@ -19,6 +19,7 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 import {UserContext} from './App';
+import {PrivacyPolicy} from './PrivacyPolicy';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -87,6 +88,7 @@ function ForgotPassword(props): JSX.Element {
           {
             email: email,
             username: username,
+            register: 0,
           },
         )
         .then(response => {
@@ -111,6 +113,8 @@ function ForgotPassword(props): JSX.Element {
       });
     } else if (!inputEmail || domain !== 'wm.edu') {
       props.setErrorMessage('Please enter a valid W&M address');
+    } else if (inputCode !== code.code) {
+      props.setErrorMessage('Incorrect verification code.  Please try again');
     }
   };
 
@@ -184,6 +188,7 @@ function ForgotPassword(props): JSX.Element {
               <View style={styles.inputLeft}>
                 <TextInput
                   placeholder="Enter your username"
+                  placeholderTextColor={'gray'}
                   onChangeText={text => {
                     setNewPassword({...newPassword, username: text});
                     setUsername(text);
@@ -195,6 +200,7 @@ function ForgotPassword(props): JSX.Element {
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your school email"
+                  placeholderTextColor={'gray'}
                   onChangeText={text => setEmail(text)}
                   value={email}
                   style={styles.inputSmall}
@@ -222,6 +228,7 @@ function ForgotPassword(props): JSX.Element {
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your verification code"
+                  placeholderTextColor={'gray'}
                   onChangeText={text => setInputCode(text)}
                   value={inputCode}
                   style={styles.inputSmall}
@@ -294,6 +301,7 @@ function ForgotPassword(props): JSX.Element {
               <Text style={styles.header}>Create a new password</Text>
               <TextInput
                 placeholder="Enter your password"
+                placeholderTextColor={'gray'}
                 onChangeText={text =>
                   setNewPassword({...newPassword, password: text})
                 }
@@ -305,6 +313,7 @@ function ForgotPassword(props): JSX.Element {
             <View style={styles.emailInput}>
               <TextInput
                 placeholder="Confirm your password"
+                placeholderTextColor={'gray'}
                 onChangeText={text =>
                   setNewPassword({...newPassword, confirm: text})
                 }
@@ -330,6 +339,7 @@ function ForgotPassword(props): JSX.Element {
 
 function Register(props): JSX.Element {
   const [hasRead, setRead] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const [email, setEmail] = useState('');
   const [agreed, setAgreement] = useState(false);
 
@@ -349,6 +359,20 @@ function Register(props): JSX.Element {
   });
 
   const [profilePicture, setProfilePicture] = useState('');
+
+  /**
+   * Used to show that the user has viewed the Privacy Policy.
+   * Required to create an account.
+   */
+  useEffect(() => {
+    if (hasOpened) {
+      setRead(true);
+    }
+  }, [hasOpened]);
+
+  useState(() => {
+    fetch();
+  }, []);
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -399,6 +423,7 @@ function Register(props): JSX.Element {
       profile.password.length >= 8 &&
       profile.username.length > 0 &&
       agreed &&
+      hasRead &&
       Object.keys(profile.profile_picture).length;
 
     if (validInformation) {
@@ -423,9 +448,9 @@ function Register(props): JSX.Element {
             },
           },
         )
-        .then(response => {
-          console.log(response);
-        })
+        // .then(response => {
+        //   console.log(response);
+        // })
         .catch((err: any) => {
           console.log(err);
           props.setErrorMessage(
@@ -482,6 +507,10 @@ function Register(props): JSX.Element {
       props.setErrorMessage(
         'Must accept Terms and Conditions and Privacy Policy',
       );
+    } else if (!hasRead) {
+      props.setErrorMessage(
+        'Please view our Terms and Conditions and Privacy Policy',
+      );
     } else {
       props.setErrorMessage(
         'An unknown error has occurred.  Please try again later',
@@ -519,24 +548,28 @@ function Register(props): JSX.Element {
         <View style={styles.createAccountText}>
           <TextInput
             placeholder="Enter your first name"
+            placeholderTextColor={'gray'}
             onChangeText={text => setProfile({...profile, first_name: text})}
             value={profile.first_name}
             style={styles.input}
           />
           <TextInput
             placeholder="Enter your last name"
+            placeholderTextColor={'gray'}
             onChangeText={text => setProfile({...profile, last_name: text})}
             value={profile.last_name}
             style={styles.input}
           />
           <TextInput
             placeholder="Re-enter your email address"
+            placeholderTextColor={'gray'}
             onChangeText={text => setEmail(text)}
             value={email}
             style={styles.input}
           />
           <TextInput
             placeholder="Enter your username"
+            placeholderTextColor={'gray'}
             onChangeText={text => setProfile({...profile, username: text})}
             value={profile.username}
             style={styles.input}
@@ -573,6 +606,7 @@ function Register(props): JSX.Element {
 
           <TextInput
             placeholder="Enter your password"
+            placeholderTextColor={'gray'}
             onChangeText={text => setProfile({...profile, password: text})}
             style={styles.input}
             value={profile.password}
@@ -581,6 +615,7 @@ function Register(props): JSX.Element {
           />
           <TextInput
             placeholder="Confirm your password"
+            placeholderTextColor={'gray'}
             onChangeText={text => setConfirmPassword(text)}
             value={confirmPassword}
             style={styles.input}
@@ -609,11 +644,13 @@ function Register(props): JSX.Element {
             <Text style={{width: '80%', textAlign: 'center'}}>
               I have read and agreed to the
               <Text style={styles.termsAndConditionsBold}>
-                {/* eslint-disable-next-line prettier/prettier */}
-                Terms and Conditions </Text>
+                {' Terms and Conditions '}
+              </Text>
               and
               {/* eslint-disable-next-line prettier/prettier */}
-              <Text style={styles.termsAndConditionsBold}> Privacy Policy </Text>
+              <TouchableWithoutFeedback onPress={() => setHasOpened(true)}>
+                <Text style={styles.privacyPolicyBold}> Privacy Policy</Text>
+              </TouchableWithoutFeedback>
             </Text>
           </View>
 
@@ -633,6 +670,16 @@ function Register(props): JSX.Element {
           </TouchableWithoutFeedback>
         </View>
       </View>
+      {hasOpened && (
+        <View style={styles.privacyPolicyContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setHasOpened(false)}>
+              <Text style={styles.exitErrorMessage}>Close</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <PrivacyPolicy />
+        </View>
+      )}
     </>
   );
 }
@@ -669,7 +716,7 @@ function Verify(props): JSX.Element {
       await axios
         .post(
           `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/verify/`,
-          {email: email},
+          {email: email, register: 1},
         )
         .then(response => {
           setCode({
@@ -690,7 +737,10 @@ function Verify(props): JSX.Element {
         forgotPassword: false,
         verifyEmail: false,
       });
+    } else if (inputCode !== code.code) {
+      props.setErrorMessage('Incorrect verification code.  Please try again.');
     } else if (!inputEmail || domain !== 'wm.edu') {
+      console.log(inputEmail, 'test')
       props.setErrorMessage('Please enter a valid W&M address');
     }
   };
@@ -719,6 +769,7 @@ function Verify(props): JSX.Element {
             <TextInput
               style={styles.inputSmall}
               placeholder="Enter your school email"
+              placeholderTextColor={'gray'}
               onChangeText={text => setEmail(text)}
             />
             <TouchableWithoutFeedback
@@ -747,6 +798,7 @@ function Verify(props): JSX.Element {
             <TextInput
               style={styles.inputSmall}
               placeholder="Please enter your verification code here"
+              placeholderTextColor={'gray'}
               onChangeText={text => setInputCode(text)}
             />
             <TouchableWithoutFeedback>
@@ -886,12 +938,14 @@ function Login(props): JSX.Element {
               </Text>
               <TextInput
                 placeholder="Enter username"
+                placeholderTextColor={'gray'}
                 onChangeText={text => setInfo({...info, username: text})}
                 value={info.username}
                 style={styles.input}
               />
               <TextInput
                 placeholder="Enter Password"
+                placeholderTextColor={'gray'}
                 onChangeText={text => setInfo({...info, password: text})}
                 value={info.password}
                 style={styles.input}
@@ -1093,6 +1147,11 @@ const styles = StyleSheet.create({
   termsAndConditionsBold: {
     fontWeight: 'bold',
   },
+  privacyPolicyBold: {
+    fontWeight: 'bold',
+    color: 'blue',
+    textDecorationLine: 'underline',
+  },
   usernameWarning: {
     marginTop: 10,
     marginBottom: normalize(20),
@@ -1103,7 +1162,21 @@ const styles = StyleSheet.create({
     left: '32.5%',
     transform: [{translateX: -50}],
     width: 250,
-    height: 150,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#D7D7D7',
+    borderRadius: 10,
+    padding: 15,
+    overflow: 'hidden',
+  },
+  privacyPolicyContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '15%',
+    transform: [{translateX: -50}],
+    maxWidth: normalize(300),
+    maxHeight: normalize(400),
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
@@ -1129,7 +1202,7 @@ const styles = StyleSheet.create({
   },
   errorMessageTextContainer: {
     display: 'flex',
-    height: 70,
+    padding: 10,
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',

@@ -117,9 +117,7 @@ function Report(props): JSX.Element {
         .catch((err: any) => console.log(err));
     }
 
-    if (post) {
-      console.log('placeholder');
-    }
+    //TODO: create logic for reporting posts
 
     // Getting the id of the user making the report (current user)
     await axios

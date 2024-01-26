@@ -198,6 +198,7 @@ function ChangePassword(props: any): JSX.Element {
           {
             email: email,
             username: username,
+            register: 0,
           },
         )
         .then(response => {
@@ -221,7 +222,9 @@ function ChangePassword(props: any): JSX.Element {
         createPassword: true,
       });
     } else if (!inputEmail || domain !== 'wm.edu') {
-      props.setErrorMessage('Please enter a valid W&M address');
+      setErrorMessage('Please enter a valid W&M address');
+    } else if (inputCode !== code.code) {
+      setErrorMessage('Incorrect verification code.  Please try again');
     }
   };
 
@@ -315,13 +318,14 @@ function ChangePassword(props: any): JSX.Element {
             </View>
             <Image
               style={styles.wmLogo}
-              source={require('./media/wm_logo_green.png')}
+              source={require('./media/app_logo.png')}
             />
             <View style={styles.loginText}>
               <Text style={styles.header}>Verify your W&M email account</Text>
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your school email"
+                  placeholderTextColor={'gray'}
                   onChangeText={text => setEmail(text)}
                   value={email}
                   style={styles.inputSmall}
@@ -349,6 +353,7 @@ function ChangePassword(props: any): JSX.Element {
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your verification code"
+                  placeholderTextColor={'gray'}
                   onChangeText={text => setInputCode(text)}
                   value={inputCode}
                   style={styles.inputSmall}
@@ -398,7 +403,7 @@ function ChangePassword(props: any): JSX.Element {
               </TouchableWithoutFeedback>
             </View>
             <Image
-              style={styles.wmLogo}
+              style={styles.profilePictureChangePassword}
               source={{
                 uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                   props.profile.profile_picture
@@ -409,6 +414,7 @@ function ChangePassword(props: any): JSX.Element {
               <Text style={styles.header}>Create a new password</Text>
               <TextInput
                 placeholder="Enter your password"
+                placeholderTextColor={'gray'}
                 onChangeText={text =>
                   setNewPassword({...newPassword, password: text})
                 }
@@ -418,6 +424,7 @@ function ChangePassword(props: any): JSX.Element {
               />
               <TextInput
                 placeholder="Confirm your password"
+                placeholderTextColor={'gray'}
                 onChangeText={text =>
                   setNewPassword({...newPassword, confirm: text})
                 }
@@ -426,7 +433,6 @@ function ChangePassword(props: any): JSX.Element {
                 secureTextEntry={true}
               />
             </View>
-
             <Text>Password must contain 8 characters</Text>
             <TouchableWithoutFeedback
               style={styles.loginButton}
@@ -1390,9 +1396,15 @@ const styles = StyleSheet.create({
     rowGap: 20,
   },
   wmLogo: {
-    width: 150,
-    height: 150,
-    borderRadius: 25,
+    width: normalize(125),
+    height: normalize(125),
+    borderRadius: normalize(30),
+    overflow: 'hidden',
+  },
+  profilePictureChangePassword: {
+    width: normalize(125),
+    height: normalize(125),
+    borderRadius: normalize(125),
     overflow: 'hidden',
   },
   loginText: {

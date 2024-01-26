@@ -20,8 +20,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 
 application = get_asgi_application()
 
-import myapp.urls
-
 # Information and code taken from Django Channel documentation:
 # https://channels.readthedocs.io/en/latest/tutorial/index.html
 

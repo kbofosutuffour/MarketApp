@@ -1,8 +1,7 @@
 from django.urls import path, re_path
 from django.conf.urls import include
-from . import views
 from . import consumers
-from myapp.views import *
+from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, search, profile
 from rest_framework.routers import DefaultRouter
 
 """
@@ -32,8 +31,8 @@ router.register(r'violation', ViolationViewSet, basename="violation")
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('search', views.search, name='search'),
-    path('profile/<str:user>', views.profile, name='profile'),
+    path('search', search, name='search'),
+    path('profile/<str:user>', profile, name='profile'),
 ]
 
 # Information and code taken from Django Channel documentation:

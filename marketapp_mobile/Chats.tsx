@@ -209,6 +209,13 @@ function Chats(props): JSX.Element {
   const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
+  const chatsBaseUrl = inProdMode
+    ? 'marketappwm-django-api'
+    : emulator
+    ? Platform.OS === 'android'
+      ? '10.0.2.2'
+      : 'localhost'
+    : 'classic-pegasus-factual.ngrok-free.app';
   /**
    * Holds a reference to the scroll view used
    * to display the chat; necessary for automatically
@@ -231,7 +238,7 @@ function Chats(props): JSX.Element {
   */
   useEffect(() => {
     if (chats.id) {
-      ws.current = new WebSocket(`ws://10.0.2.2/ws/chat/${chats.id}`);
+      ws.current = new WebSocket(`ws://3.141.103.158:8001/ws/chat/${chats.id}`);
       ws.current.onopen = () => {
         // connection opened
         // ws.current?.send('connection opened'); // send a message

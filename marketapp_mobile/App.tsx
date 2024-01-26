@@ -1523,7 +1523,7 @@ const styles = StyleSheet.create({
     height: 30,
   },
   postOptions: {
-    width: '40%',
+    padding: 10,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -1534,8 +1534,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.white,
     rowGap: 5,
-    position: 'relative',
-    right: 170,
+    position: 'absolute',
+    right: 50,
   },
   deleteYes: {
     padding: 10,

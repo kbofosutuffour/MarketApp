@@ -257,18 +257,18 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(methods=['post'], detail=False)
     def verify(self, request, *args, **kwargs):
-        try:
-            User.objects.get(
-                username=request.data['username'],
-                email=request.data['email']
-            )
-            code = random.randint(10000,99999)
-            code = str(code)
-            send_code(request, code, request.data['email'])
-            return Response({'code': code, 'status': 200})
-        except:
-            return Response({'status': 400, 'error': 'Username and email do not match'})
-
+        if not request.data['register']:
+            try:
+                User.objects.get(
+                    username=request.data['username'],
+                    email=request.data['email']
+                )
+            except:
+                return Response({'status': 400, 'error': 'Username and email do not match'})
+        code = random.randint(10000,99999)
+        code = str(code)
+        send_code(request, code, request.data['email'])
+        return Response({'code': code, 'status': 200})
     
     @action(methods=['post'], detail=False)
     def change_password(self, request, *args, **kwargs):
@@ -300,12 +300,12 @@ class UserViewSet(viewsets.ModelViewSet):
             user.first_name = request.data['first_name']
             user.last_name = request.data['last_name']
             user.save()
-            return Response({'message': 'You have successfully registered for H2H'})
+            return Response({'message': 'You have successfully registered for H2H', "status": 200})
         elif exists:
-            return Response({'message': 'User already registered.  Be sure to create a profile.'})
+            return Response({'message': 'User already registered.  Be sure to create a profile.', "status": 200})
         else:
             print(serializer.errors)
-            return Response({'error': serializer.errors})
+            return Response({'error': serializer.errors, "status": 400})
     
          
 

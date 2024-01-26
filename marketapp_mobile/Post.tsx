@@ -184,6 +184,7 @@ function EditPost(props): JSX.Element {
           <View style={styles.postItem}>
             <TextInput
               placeholder="Product"
+              placeholderTextColor={'gray'}
               onChangeText={value =>
                 props.setPost({...props.post, product: value})
               }
@@ -195,6 +196,7 @@ function EditPost(props): JSX.Element {
             <Text style={styles.dollarSign}>$ </Text>
             <TextInput
               placeholder=" Enter Price"
+              placeholderTextColor={'gray'}
               onChangeText={value => {
                 if (Number(value)) {
                   props.setPost({...props.post, price: Number(value)});
@@ -258,6 +260,7 @@ function EditPost(props): JSX.Element {
           <View style={styles.postItemDescription}>
             <TextInput
               placeholder="Write a description for your product here:"
+              placeholderTextColor={'gray'}
               multiline={true}
               numberOfLines={4}
               style={styles.descriptionInput}
@@ -455,6 +458,7 @@ function NewPost(props): JSX.Element {
           <View style={styles.postItem}>
             <TextInput
               placeholder="Product"
+              placeholderTextColor={'gray'}
               onChangeText={value =>
                 props.setPost({...props.post, product: value})
               }
@@ -465,6 +469,7 @@ function NewPost(props): JSX.Element {
             <Text style={styles.dollarSign}>$</Text>
             <TextInput
               placeholder=" Enter Price"
+              placeholderTextColor={'gray'}
               onChangeText={value => {
                 if (Number(value)) {
                   props.setPost({...props.post, price: Number(value)});
@@ -527,6 +532,7 @@ function NewPost(props): JSX.Element {
           <View style={styles.postItemDescription}>
             <TextInput
               placeholder="Write a description for your product here:"
+              placeholderTextColor={'gray'}
               multiline={true}
               style={styles.descriptionInput}
               textAlignVertical={'top'}
@@ -696,7 +702,8 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 0.5,
     width: '100%',
-    height: '40%',
+    height: normalize(200),
+    marginBottom: normalize(20),
     padding: 5,
   },
   imagesContainer: {
