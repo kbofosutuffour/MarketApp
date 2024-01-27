@@ -257,18 +257,18 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(methods=['post'], detail=False)
     def verify(self, request, *args, **kwargs):
-        try:
-            User.objects.get(
-                username=request.data['username'],
-                email=request.data['email']
-            )
-            code = random.randint(10000,99999)
-            code = str(code)
-            send_code(request, code, request.data['email'])
-            return Response({'code': code, 'status': 200})
-        except:
-            return Response({'status': 400, 'error': 'Username and email do not match'})
-
+        if request.data['register'] == 0:
+            try:
+                User.objects.get(
+                    username=request.data['username'],
+                    email=request.data['email']
+                )
+            except:
+                return Response({'status': 400, 'error': 'Username and email do not match', 'register': request.data['register']})
+        code = random.randint(10000,99999)
+        code = str(code)
+        send_code(request, code, request.data['email'])
+        return Response({'code': code, 'status': 200})
     
     @action(methods=['post'], detail=False)
     def change_password(self, request, *args, **kwargs):

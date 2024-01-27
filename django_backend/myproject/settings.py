@@ -33,15 +33,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', 'classic-pegasus-factual.ngrok-free.app']
+ALLOWED_HOSTS = ['marketappwm-django-api.link', '3.141.103.158']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'daphne', #Daphne ASGI application server; used for chat feature
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,7 +52,6 @@ INSTALLED_APPS = [
     'myapp', # myapp application we've created,
     'rest_framework', # needed for use with react native
     'corsheaders', # needed for cross-origin requests
-    'channels',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +100,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -115,6 +116,7 @@ DATABASES = {
     },
 
 }
+
 
 
 # Password validation
@@ -188,3 +190,6 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 # Custom setting. To email
 RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
+
+# HTTPS Settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
