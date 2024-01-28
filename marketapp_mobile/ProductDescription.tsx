@@ -29,8 +29,8 @@ import {UserContext} from './App';
 /**
  * @returns Screen that shows a description of a post passed through the props object
  */
-function ProductDescription(props): JSX.Element {
-  const [profile, setProfile] = useState({});
+function ProductDescription(props: any): JSX.Element {
+  const [profile, setProfile]: [any, Function] = useState({});
   const [posts, setPosts] = useState({});
   const [liked, likePost] = useState(false);
   const [mainScreen, showMain] = useState(true);
@@ -308,7 +308,7 @@ function ProductDescription(props): JSX.Element {
                     <Text>Report Post</Text>
                   </TouchableWithoutFeedback>
                   <TouchableWithoutFeedback
-                    onPress={() => props.viewReport({}, profile)}>
+                    onPress={() => props.viewReport({}, profile.data)}>
                     <Text>Report User</Text>
                   </TouchableWithoutFeedback>
                 </View>

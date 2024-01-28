@@ -259,7 +259,13 @@ function Post(props: any): JSX.Element {
         </View>
 
         {props.user && (
-          <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.showPostOptions({
+                showOptions: true,
+                post: props.data,
+              })
+            }>
             <View style={styles.editPost}>
               <Image
                 style={styles.editButtons}
@@ -270,7 +276,7 @@ function Post(props: any): JSX.Element {
         )}
 
         {/* Editing options for posts on the home page*/}
-        {props.user && options && (
+        {props.user && options && false && (
           <View style={styles.postOptions}>
             {/* Only admins should be able to delete posts */}
             {props.user.admin && (
@@ -349,6 +355,7 @@ function App(): JSX.Element {
   });
 
   const [showChats, setChats] = useState(false);
+  const [chatNotifications, setChatNotifications] = useState(0);
 
   const [rooms, setRooms] = useState({});
 
@@ -370,10 +377,17 @@ function App(): JSX.Element {
     deletePost: false,
   });
 
+  // Used for the post pop-up options
+  const [postOptions, showPostOptions] = useState({
+    showOptions: false,
+    post: {},
+  });
+
   // When the defined components finish rendering, fetch
   // posts and profile information from the database
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.username]);
 
   // Used to remove the landing screen if a user is logged in
@@ -879,6 +893,10 @@ function App(): JSX.Element {
   const refreshPage = (velocity: number | undefined) => {
     if (onTop && velocity && velocity > MAX_VELOCITY) {
       setHasLoaded(false);
+      showPostOptions({
+        showOptions: false,
+        post: {},
+      });
       fetchData();
     }
   };
@@ -1042,6 +1060,7 @@ function App(): JSX.Element {
                               countFlagPost={countFlagPost}
                               setHasLoaded={setHasLoaded}
                               key={uuid.v4()}
+                              showPostOptions={showPostOptions}
                             />
                           );
                         } else if (
@@ -1068,6 +1087,7 @@ function App(): JSX.Element {
                             countFlagPost={countFlagPost}
                             setHasLoaded={setHasLoaded}
                             key={uuid.v4()}
+                            showPostOptions={showPostOptions}
                           />
                         );
                       })}
@@ -1143,6 +1163,7 @@ function App(): JSX.Element {
                 viewChats={viewChats}
                 type={'Home'}
                 hasLoaded={hasLoaded}
+                chatNotifications={chatNotifications}
               />
             </View>
           )}
@@ -1200,6 +1221,7 @@ function App(): JSX.Element {
               viewChats={viewChats}
               type={'Profile'}
               hasLoaded={hasLoaded}
+              chatNotifications={chatNotifications}
             />
           </View>
         )}
@@ -1232,6 +1254,8 @@ function App(): JSX.Element {
               viewProfile={viewProfile}
               viewChats={viewChats}
               hasLoaded={hasLoaded}
+              chatNotifications={chatNotifications}
+              setChatNotifications={setChatNotifications}
             />
           </View>
         )}
@@ -1266,6 +1290,7 @@ function App(): JSX.Element {
               viewChats={viewChats}
               type={'Profile'}
               hasLoaded={hasLoaded}
+              chatNotifications={chatNotifications}
             />
           </View>
         )}
@@ -1313,6 +1338,54 @@ function App(): JSX.Element {
             <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
               <Text style={styles.draftMessage}>No</Text>
             </TouchableWithoutFeedback>
+          </View>
+        )}
+        {postOptions.showOptions && (
+          <View style={styles.newPostOptionsContainer}>
+            <View style={{width: '80%'}}>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (postOptions.post.id) {
+                    countFlagPost(postOptions.post.id);
+                  }
+                }}>
+                <Text style={styles.hidePost}>Flag Post</Text>
+              </TouchableWithoutFeedback>
+              {user.admin && (
+                <TouchableWithoutFeedback
+                  onPress={() =>
+                    showPostOptions({
+                      showOptions: false,
+                      post: {},
+                    })
+                  }>
+                  <Text style={styles.deletePost}>Delete Post</Text>
+                </TouchableWithoutFeedback>
+              )}
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (Object.keys(postOptions.post).length) {
+                    viewReport(postOptions.post);
+                  }
+                  showPostOptions({
+                    showOptions: false,
+                    post: {},
+                  });
+                }}>
+                <Text style={styles.reportPost}>Report Post</Text>
+              </TouchableWithoutFeedback>
+            </View>
+            <View style={{width: '80%'}}>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  showPostOptions({
+                    showOptions: false,
+                    post: {},
+                  })
+                }>
+                <Text style={styles.closePostOptions}>Close</Text>
+              </TouchableWithoutFeedback>
+            </View>
           </View>
         )}
       </UserContext.Provider>
@@ -1403,13 +1476,13 @@ const styles = StyleSheet.create({
     height: normalize(75),
     display: 'flex',
     backgroundColor: 'black',
-    borderRadius: 10,
+    borderRadius: 25,
     overflow: 'hidden',
   },
   postText: {
     display: 'flex',
     flexDirection: 'column',
-    width: SCREEN_WIDTH > 350 ? '60%' : '55%',
+    width: '50%',
   },
   postedDate: {
     position: 'relative',
@@ -1516,11 +1589,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '20%',
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   editButtons: {
     width: 10,
     height: 30,
+    position: 'relative',
+    left: 10,
   },
   postOptions: {
     padding: 10,
@@ -1559,6 +1638,56 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
+  },
+  newPostOptionsContainer: {
+    backgroundColor: '#F2F2F2',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: normalize(10),
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1,
+    padding: normalize(10),
+  },
+  closePostOptions: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderRadius: normalize(15),
+    borderWidth: 1,
+    overflow: 'hidden',
+    borderColor: 'white',
+    textAlign: 'center',
+    fontSize: 17.5,
+  },
+  hidePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
+  },
+  reportPost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderBottomWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
+  },
+  deletePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    fontSize: 17.5,
   },
 });
 

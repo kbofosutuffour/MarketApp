@@ -183,7 +183,7 @@ function EditPost(props): JSX.Element {
           </View>
           <View style={styles.postItem}>
             <TextInput
-              placeholder="Product"
+              placeholder="Product Name"
               placeholderTextColor={'gray'}
               onChangeText={value =>
                 props.setPost({...props.post, product: value})
@@ -380,6 +380,7 @@ function NewPost(props): JSX.Element {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
+      allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
     });
@@ -457,7 +458,7 @@ function NewPost(props): JSX.Element {
           </View>
           <View style={styles.postItem}>
             <TextInput
-              placeholder="Product"
+              placeholder="Product Name"
               placeholderTextColor={'gray'}
               onChangeText={value =>
                 props.setPost({...props.post, product: value})

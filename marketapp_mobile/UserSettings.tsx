@@ -519,7 +519,7 @@ function Notifications(props: any): JSX.Element {
       .patch(
         `${
           inProdMode ? prodURL : emulator ? devURL : ngrok
-        }/user_settings/new_messages/${profileID}`,
+        }/user_settings/new_messages/${profileID}/`,
         data,
       )
       .then(() => {
