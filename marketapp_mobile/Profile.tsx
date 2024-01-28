@@ -142,8 +142,16 @@ function Post(props: any): JSX.Element {
               </Text>
             </TouchableWithoutFeedback>
           </View>
-          {props.main && (
-            <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+
+          {/* Edit Button */}
+          {props.main && props.data.username === props.current_user && (
+            <TouchableWithoutFeedback
+              onPress={() =>
+                props.showPostOptions({
+                  showOptions: true,
+                  data: props.data,
+                })
+              }>
               <View style={styles.editPost}>
                 <Image
                   style={styles.editButtons}
@@ -153,26 +161,6 @@ function Post(props: any): JSX.Element {
             </TouchableWithoutFeedback>
           )}
 
-          {/* Editing options for current user profile page */}
-          {props.main &&
-            props.data.username === props.current_user &&
-            options && (
-              <View style={styles.postOptions}>
-                <TouchableWithoutFeedback
-                  onPress={() => props.viewPost(props.data.id)}>
-                  <Text>Edit Post</Text>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    props.setDelete(props.data);
-                    props.setView({
-                      deletePost: true,
-                    });
-                  }}>
-                  <Text>Delete Post</Text>
-                </TouchableWithoutFeedback>
-              </View>
-            )}
           {props.data.username === props.current_user && statusOptions && (
             <View style={styles.statusOptions}>
               <TouchableWithoutFeedback
@@ -394,6 +382,12 @@ function Profile(props: any): JSX.Element {
   const [buyHistory, setBuyHistory] = useState([]);
 
   const [profileReload, waitForProfileReload] = useState(false);
+
+  // Used for the post pop-up options
+  const [postOptions, showPostOptions] = useState({
+    showOptions: false,
+    data: {},
+  });
 
   /**
    * Function to delete the post in the database
@@ -671,6 +665,7 @@ function Profile(props: any): JSX.Element {
                             current_user={props.current_user}
                             main={view.main}
                             key={uuid.v4()}
+                            showPostOptions={showPostOptions}
                           />
                         );
                       }
@@ -693,6 +688,7 @@ function Profile(props: any): JSX.Element {
                               current_user={props.current_user}
                               main={view.main}
                               key={uuid.v4()}
+                              showPostOptions={showPostOptions}
                             />
                           );
                         }
@@ -710,6 +706,7 @@ function Profile(props: any): JSX.Element {
                               setView={setView}
                               current_user={props.current_user}
                               main={view.main}
+                              showPostOptions={showPostOptions}
                             />
                           );
                         }
@@ -717,6 +714,43 @@ function Profile(props: any): JSX.Element {
                     })}
                 </View>
               </ScrollView>
+              {postOptions.showOptions && (
+                <View style={styles.newPostOptionsContainer}>
+                  <View style={{width: '80%'}}>
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        if (postOptions.data.id) {
+                          props.viewPost(postOptions.data.id);
+                        }
+                      }}>
+                      <Text style={styles.hidePost}>Edit Post</Text>
+                    </TouchableWithoutFeedback>
+
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        setDelete(postOptions.data);
+                        setView({deletePost: true});
+                        showPostOptions({
+                          showOptions: false,
+                          data: {},
+                        });
+                      }}>
+                      <Text style={styles.deletePost}>Delete Post</Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                  <View style={{width: '80%'}}>
+                    <TouchableWithoutFeedback
+                      onPress={() =>
+                        showPostOptions({
+                          showOptions: false,
+                          data: {},
+                        })
+                      }>
+                      <Text style={styles.closePostOptions}>Close</Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </View>
+              )}
             </View>
           </GestureDetector>
         </GestureHandlerRootView>
@@ -1123,6 +1157,50 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(17, 87, 64)',
     color: 'white',
     textAlign: 'center',
+  },
+  newPostOptionsContainer: {
+    backgroundColor: '#F2F2F2',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: normalize(10),
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1,
+    padding: normalize(10),
+  },
+  closePostOptions: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderRadius: normalize(15),
+    borderWidth: 1,
+    overflow: 'hidden',
+    borderColor: 'white',
+    textAlign: 'center',
+    fontSize: 17.5,
+  },
+  hidePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
+  },
+  deletePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderBottomWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
   },
 });
 export default Profile;

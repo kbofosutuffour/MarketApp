@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Image, StyleSheet, TouchableWithoutFeedback, View} from 'react-native';
+import {Image, StyleSheet, Text, TouchableWithoutFeedback, View} from 'react-native';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -86,6 +86,12 @@ function Footer(props: any): JSX.Element {
               {props.hasLoaded && (
                 <Image source={require('./media/message-chat-square.png')} />
               )}
+              {/* TODO: Implement chat notifications
+              {props.chatNotifications !== 0 && (
+                <Text style={styles.chatNotification}>
+                  {props.chatNotifications}
+                </Text>
+              )} */}
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -132,10 +138,22 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 10,
   },
-
   goldBar: {
     backgroundColor: 'rgb(185, 151, 91)',
     height: '1%',
+  },
+  chatNotification: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: 'orange',
+    color: 'white',
+    borderRadius: 10,
+    overflow: 'hidden',
+    textAlign: 'center',
+    height: 20,
+    width: 20,
+    fontSize: 15,
   },
 });
 

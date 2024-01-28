@@ -106,8 +106,12 @@ function Room(props): JSX.Element {
  * @returns the time stamp from the date string parameter
  */
 const getDate = (postDateTime: string, separator: boolean = false) => {
-  if (postDateTime.length) {
+  if (postDateTime && postDateTime.length) {
     let temp = postDateTime.split('T');
+    if (!temp[1]) {
+      temp = postDateTime.split(' ');
+    }
+
     let [date, time] = [temp[0].split('-'), temp[1].split(':')];
     let post = new Date(
       Number(date[0]),
@@ -159,10 +163,10 @@ function Message(props: any): JSX.Element {
             )}
             <Text style={styles.date}>{getDate(props.data.date)}</Text>
           </View>
-          <Image
+          {/* <Image
             style={styles.profilePicture}
             source={{uri: props.profile_picture}}
-          />
+          /> */}
         </View>
       )}
     </>
@@ -210,7 +214,7 @@ function Chats(props): JSX.Element {
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   const chatsBaseUrl = inProdMode
-    ? 'marketappwm-django-api'
+    ? 'marketappwm-django-api.link'
     : emulator
     ? Platform.OS === 'android'
       ? '10.0.2.2'
@@ -238,7 +242,7 @@ function Chats(props): JSX.Element {
   */
   useEffect(() => {
     if (chats.id) {
-      ws.current = new WebSocket(`ws://3.141.103.158:8001/ws/chat/${chats.id}`);
+      ws.current = new WebSocket(`wss://${chatsBaseUrl}/ws/chat/${chats.id}`);
       ws.current.onopen = () => {
         // connection opened
         // ws.current?.send('connection opened'); // send a message
@@ -251,6 +255,9 @@ function Chats(props): JSX.Element {
         let data = JSON.parse(e.data);
         new_chats.push(data);
         setChats({...chats, chats: new_chats});
+
+        // Used to show the user a message notification
+        props.setChatNotifications(props.chatNotifications + 1);
       };
 
       ws.current.onerror = e => {
@@ -260,7 +267,7 @@ function Chats(props): JSX.Element {
 
       ws.current.onclose = e => {
         // connection closed
-        if (e.code !== 1006) {
+        if (e.code !== 1000) {
           console.log(e.code, e.reason);
         }
       };
