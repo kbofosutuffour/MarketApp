@@ -33,6 +33,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('search', search, name='search'),
     path('profile/<str:user>', profile, name='profile'),
+    re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
 ]
 
 # Information and code taken from Django Channel documentation:

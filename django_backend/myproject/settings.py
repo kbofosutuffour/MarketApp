@@ -35,7 +35,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['marketappwm-django-api.link', '3.141.103.158']
+ALLOWED_HOSTS = ['marketappwm-django-api.link', '3.141.103.158', '0.0.0.0']
 
 
 # Application definition
