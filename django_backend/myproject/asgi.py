@@ -17,11 +17,9 @@ from django.core.asgi import get_asgi_application
 from myapp.ws_urls import websocket_urlpatterns
 from myapp import consumers
 
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
 
 get_application = get_asgi_application()
-
 
 # Information and code taken from Django Channel documentation:
 # https://channels.readthedocs.io/en/latest/tutorial/index.html

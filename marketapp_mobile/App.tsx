@@ -259,7 +259,13 @@ function Post(props: any): JSX.Element {
         </View>
 
         {props.user && (
-          <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              props.showPostOptions({
+                showOptions: true,
+                post: props.data,
+              })
+            }>
             <View style={styles.editPost}>
               <Image
                 style={styles.editButtons}
@@ -270,7 +276,7 @@ function Post(props: any): JSX.Element {
         )}
 
         {/* Editing options for posts on the home page*/}
-        {props.user && options && (
+        {props.user && options && false && (
           <View style={styles.postOptions}>
             {/* Only admins should be able to delete posts */}
             {props.user.admin && (
@@ -349,6 +355,7 @@ function App(): JSX.Element {
   });
 
   const [showChats, setChats] = useState(false);
+  const [chatNotifications, setChatNotifications] = useState(0);
 
   const [rooms, setRooms] = useState({});
 
@@ -370,10 +377,17 @@ function App(): JSX.Element {
     deletePost: false,
   });
 
+  // Used for the post pop-up options
+  const [postOptions, showPostOptions] = useState({
+    showOptions: false,
+    post: {},
+  });
+
   // When the defined components finish rendering, fetch
   // posts and profile information from the database
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.username]);
 
   // Used to remove the landing screen if a user is logged in
@@ -388,11 +402,13 @@ function App(): JSX.Element {
    * The base url used to access images and other data within the app directory.
    * Different between Android and iOS
    */
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // The axios is a JavaScript library that is used to perform
@@ -421,7 +437,11 @@ function App(): JSX.Element {
 
     if (user.username) {
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/profile/${user.username}`)
+        .get(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profile/${
+            user.username
+          }`,
+        )
         .then(res => {
           data.showProfile = false;
           data.data = res.data;
@@ -431,38 +451,50 @@ function App(): JSX.Element {
       let profile_id;
       await axios
         .get(
-          `${emulator ? baseUrl : ngrok}/profiles/get_date_created/${
-            user.username
-          }`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_date_created/${user.username}`,
         )
         .then(res => {
           data.date = res.data.date.split('-');
         });
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/profiles/get_id/${user.username}`)
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_id/${user.username}`,
+        )
         .then(res => {
           profile_id = res.data.id;
           data.id = res.data.id;
         })
         .catch((err: any) => console.log(err));
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/posts/get_posts/${user.username}`)
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/posts/get_posts/${user.username}`,
+        )
         .then(res => {
           data.posts = res.data;
         })
         .catch((err: any) => console.log(err));
       await axios
         .get(
-          `${emulator ? baseUrl : ngrok}/profiles/get_liked_posts/${
-            user.username
-          }`,
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/profiles/get_liked_posts/${user.username}`,
         )
         .then(res => {
           data.liked_posts = res.data.liked_posts;
         })
         .catch((err: any) => console.log(err));
       await axios
-        .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile_id}`)
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/user_settings/${profile_id}`,
+        )
         .then(res => {
           data.settings = res.data;
           setUserSettings({...settings, data: res.data});
@@ -471,7 +503,7 @@ function App(): JSX.Element {
       await axios
         .get(
           `${
-            emulator ? baseUrl : ngrok
+            inProdMode ? prodURL : emulator ? devURL : ngrok
           }/violation/get_violations/${profile_id}`,
         )
         .then(res => {
@@ -487,7 +519,7 @@ function App(): JSX.Element {
    */
   const getPosts = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/posts`)
+      .get(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts`)
       .then(res => {
         if (res.data.length === 0) {
           setErrorMessage(
@@ -509,7 +541,11 @@ function App(): JSX.Element {
    */
   const getUserSettings = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/user_settings/${profile.data.id}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/user_settings/${
+          profile.data.id
+        }`,
+      )
       .then(res => {
         setProfile({...profile, settings: res.data});
         setUserSettings({...settings, data: res.data});
@@ -522,7 +558,11 @@ function App(): JSX.Element {
   const getProfile = async () => {
     let data = {};
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/profile/${user.username}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profile/${
+          user.username
+        }`,
+      )
       .then(res => {
         data = res.data;
       })
@@ -536,7 +576,11 @@ function App(): JSX.Element {
    */
   const getRooms = async () => {
     await axios
-      .get(`${emulator ? baseUrl : ngrok}/rooms/get_rooms/${user.username}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/get_rooms/${
+          user.username
+        }`,
+      )
       .then(res => {
         setRooms(res.data);
       })
@@ -849,6 +893,10 @@ function App(): JSX.Element {
   const refreshPage = (velocity: number | undefined) => {
     if (onTop && velocity && velocity > MAX_VELOCITY) {
       setHasLoaded(false);
+      showPostOptions({
+        showOptions: false,
+        post: {},
+      });
       fetchData();
     }
   };
@@ -861,10 +909,14 @@ function App(): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/images/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/posts/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     setDelete({
       data: {},
@@ -883,7 +935,7 @@ function App(): JSX.Element {
    */
   const countFlagPost = async (post_id: number | string) => {
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/flag/`, {
+      .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/flag/`, {
         post: post_id,
         flagged_by: profile.data.id,
       })
@@ -902,7 +954,10 @@ function App(): JSX.Element {
    */
   const flagPost = async (id: number | string) => {
     await axios
-      .patch(`${emulator ? baseUrl : ngrok}/posts/${id}/`, {flag: true})
+      .patch(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${id}/`,
+        {flag: true},
+      )
       .catch((err: any) => console.log(err));
   };
 
@@ -916,7 +971,7 @@ function App(): JSX.Element {
     score: number | string,
   ) => {
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/ratings/`, {
+      .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/ratings/`, {
         username: profile_id,
         rated_by: profile.data.id,
         score: score,
@@ -939,7 +994,7 @@ function App(): JSX.Element {
       {/* Notice how the following components will only render if the preceding conditions for each bracket is true.
           This produces the effect of changing what is seen on the screen */}
 
-      <UserContext.Provider value={{baseUrl: baseUrl}}>
+      <UserContext.Provider value={{prodURL: prodURL}}>
         {/* useContext serves as a 'global state' data access for all child components of App.jsx.
             Each file will be able to access the data in the value parameter */}
 
@@ -1005,6 +1060,7 @@ function App(): JSX.Element {
                               countFlagPost={countFlagPost}
                               setHasLoaded={setHasLoaded}
                               key={uuid.v4()}
+                              showPostOptions={showPostOptions}
                             />
                           );
                         } else if (
@@ -1031,6 +1087,7 @@ function App(): JSX.Element {
                             countFlagPost={countFlagPost}
                             setHasLoaded={setHasLoaded}
                             key={uuid.v4()}
+                            showPostOptions={showPostOptions}
                           />
                         );
                       })}
@@ -1106,6 +1163,7 @@ function App(): JSX.Element {
                 viewChats={viewChats}
                 type={'Home'}
                 hasLoaded={hasLoaded}
+                chatNotifications={chatNotifications}
               />
             </View>
           )}
@@ -1124,6 +1182,7 @@ function App(): JSX.Element {
               viewReport={viewReport}
               rateProfile={rateProfile}
               setHasLoaded={setHasLoaded}
+              hasLoaded={hasLoaded}
               setRooms={setRooms}
             />
           </>
@@ -1162,6 +1221,7 @@ function App(): JSX.Element {
               viewChats={viewChats}
               type={'Profile'}
               hasLoaded={hasLoaded}
+              chatNotifications={chatNotifications}
             />
           </View>
         )}
@@ -1194,6 +1254,8 @@ function App(): JSX.Element {
               viewProfile={viewProfile}
               viewChats={viewChats}
               hasLoaded={hasLoaded}
+              chatNotifications={chatNotifications}
+              setChatNotifications={setChatNotifications}
             />
           </View>
         )}
@@ -1228,6 +1290,7 @@ function App(): JSX.Element {
               viewChats={viewChats}
               type={'Profile'}
               hasLoaded={hasLoaded}
+              chatNotifications={chatNotifications}
             />
           </View>
         )}
@@ -1275,6 +1338,54 @@ function App(): JSX.Element {
             <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
               <Text style={styles.draftMessage}>No</Text>
             </TouchableWithoutFeedback>
+          </View>
+        )}
+        {postOptions.showOptions && (
+          <View style={styles.newPostOptionsContainer}>
+            <View style={{width: '80%'}}>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (postOptions.post.id) {
+                    countFlagPost(postOptions.post.id);
+                  }
+                }}>
+                <Text style={styles.hidePost}>Flag Post</Text>
+              </TouchableWithoutFeedback>
+              {user.admin && (
+                <TouchableWithoutFeedback
+                  onPress={() =>
+                    showPostOptions({
+                      showOptions: false,
+                      post: {},
+                    })
+                  }>
+                  <Text style={styles.deletePost}>Delete Post</Text>
+                </TouchableWithoutFeedback>
+              )}
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (Object.keys(postOptions.post).length) {
+                    viewReport(postOptions.post);
+                  }
+                  showPostOptions({
+                    showOptions: false,
+                    post: {},
+                  });
+                }}>
+                <Text style={styles.reportPost}>Report Post</Text>
+              </TouchableWithoutFeedback>
+            </View>
+            <View style={{width: '80%'}}>
+              <TouchableWithoutFeedback
+                onPress={() =>
+                  showPostOptions({
+                    showOptions: false,
+                    post: {},
+                  })
+                }>
+                <Text style={styles.closePostOptions}>Close</Text>
+              </TouchableWithoutFeedback>
+            </View>
           </View>
         )}
       </UserContext.Provider>
@@ -1365,13 +1476,13 @@ const styles = StyleSheet.create({
     height: normalize(75),
     display: 'flex',
     backgroundColor: 'black',
-    borderRadius: 10,
+    borderRadius: 25,
     overflow: 'hidden',
   },
   postText: {
     display: 'flex',
     flexDirection: 'column',
-    width: SCREEN_WIDTH > 350 ? '60%' : '55%',
+    width: '50%',
   },
   postedDate: {
     position: 'relative',
@@ -1478,14 +1589,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '20%',
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   editButtons: {
     width: 10,
     height: 30,
+    position: 'relative',
+    left: 10,
   },
   postOptions: {
-    width: '40%',
+    padding: 10,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -1496,8 +1613,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.white,
     rowGap: 5,
-    position: 'relative',
-    right: 170,
+    position: 'absolute',
+    right: 50,
   },
   deleteYes: {
     padding: 10,
@@ -1521,6 +1638,56 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
+  },
+  newPostOptionsContainer: {
+    backgroundColor: '#F2F2F2',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: normalize(10),
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1,
+    padding: normalize(10),
+  },
+  closePostOptions: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderRadius: normalize(15),
+    borderWidth: 1,
+    overflow: 'hidden',
+    borderColor: 'white',
+    textAlign: 'center',
+    fontSize: 17.5,
+  },
+  hidePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
+  },
+  reportPost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderBottomWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
+  },
+  deletePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    fontSize: 17.5,
   },
 });
 

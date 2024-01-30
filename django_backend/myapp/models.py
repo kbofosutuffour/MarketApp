@@ -79,7 +79,7 @@ class Profile(models.Model):
     username = models.CharField(max_length=500, default=None, unique=True)
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     date = models.DateField(default=datetime.date.today)
-    email = models.CharField(default="none@wm.edu")
+    email = models.CharField(max_length=500, default="none@wm.edu")
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     saved_posts = models.ManyToManyField(Post, blank=True, related_name="saved_posts")

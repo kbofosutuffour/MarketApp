@@ -106,8 +106,12 @@ function Room(props): JSX.Element {
  * @returns the time stamp from the date string parameter
  */
 const getDate = (postDateTime: string, separator: boolean = false) => {
-  if (postDateTime.length) {
+  if (postDateTime && postDateTime.length) {
     let temp = postDateTime.split('T');
+    if (!temp[1]) {
+      temp = postDateTime.split(' ');
+    }
+
     let [date, time] = [temp[0].split('-'), temp[1].split(':')];
     let post = new Date(
       Number(date[0]),
@@ -159,10 +163,10 @@ function Message(props: any): JSX.Element {
             )}
             <Text style={styles.date}>{getDate(props.data.date)}</Text>
           </View>
-          <Image
+          {/* <Image
             style={styles.profilePicture}
             source={{uri: props.profile_picture}}
-          />
+          /> */}
         </View>
       )}
     </>
@@ -200,13 +204,22 @@ function Chats(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
+  const chatsBaseUrl = inProdMode
+    ? 'marketappwm-django-api.link'
+    : emulator
+    ? Platform.OS === 'android'
+      ? '10.0.2.2'
+      : 'localhost'
+    : 'classic-pegasus-factual.ngrok-free.app';
   /**
    * Holds a reference to the scroll view used
    * to display the chat; necessary for automatically
@@ -229,7 +242,7 @@ function Chats(props): JSX.Element {
   */
   useEffect(() => {
     if (chats.id) {
-      ws.current = new WebSocket(`ws://10.0.2.2/ws/chat/${chats.id}`);
+      ws.current = new WebSocket(`wss://${chatsBaseUrl}/ws/chat/${chats.id}`);
       ws.current.onopen = () => {
         // connection opened
         // ws.current?.send('connection opened'); // send a message
@@ -242,6 +255,9 @@ function Chats(props): JSX.Element {
         let data = JSON.parse(e.data);
         new_chats.push(data);
         setChats({...chats, chats: new_chats});
+
+        // Used to show the user a message notification
+        props.setChatNotifications(props.chatNotifications + 1);
       };
 
       ws.current.onerror = e => {
@@ -251,7 +267,7 @@ function Chats(props): JSX.Element {
 
       ws.current.onclose = e => {
         // connection closed
-        if (e.code !== 1006) {
+        if (e.code !== 1000) {
           console.log(e.code, e.reason);
         }
       };
@@ -336,7 +352,7 @@ function Chats(props): JSX.Element {
     product = null,
   ) => {
     var chat_request = `${
-      emulator ? baseUrl : ngrok
+      inProdMode ? prodURL : emulator ? devURL : ngrok
     }/messages/get_messages/${id}`;
     axios
       .get(chat_request)
@@ -381,7 +397,10 @@ function Chats(props): JSX.Element {
       image: null,
     };
     await axios
-      .post(`${emulator ? baseUrl : ngrok}/messages/`, data)
+      .post(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/messages/`,
+        data,
+      )
       .then(() => {
         // If there isn't a webserver running,
         // show the new message on the sender side
@@ -491,7 +510,7 @@ function Chats(props): JSX.Element {
               {chats.chats.map(value => {
                 let img =
                   value.username == props.profile.username
-                    ? `${emulator ? baseUrl : ngrok}${
+                    ? `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                         props.profile.profile_picture
                       }`
                     : value.username == chats.buyer.username

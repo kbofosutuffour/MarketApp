@@ -69,11 +69,13 @@ function Post(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -88,7 +90,9 @@ function Post(props: any): JSX.Element {
     };
     axios
       .patch(
-        `${emulator ? baseUrl : ngrok}/edit_post/status/${username}/`,
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/edit_post/status/${username}/`,
         data,
       )
       .then(() => {
@@ -138,8 +142,16 @@ function Post(props: any): JSX.Element {
               </Text>
             </TouchableWithoutFeedback>
           </View>
-          {props.main && (
-            <TouchableWithoutFeedback onPress={() => showOptions(!options)}>
+
+          {/* Edit Button */}
+          {props.main && props.data.username === props.current_user && (
+            <TouchableWithoutFeedback
+              onPress={() =>
+                props.showPostOptions({
+                  showOptions: true,
+                  data: props.data,
+                })
+              }>
               <View style={styles.editPost}>
                 <Image
                   style={styles.editButtons}
@@ -149,26 +161,6 @@ function Post(props: any): JSX.Element {
             </TouchableWithoutFeedback>
           )}
 
-          {/* Editing options for current user profile page */}
-          {props.main &&
-            props.data.username === props.current_user &&
-            options && (
-              <View style={styles.postOptions}>
-                <TouchableWithoutFeedback
-                  onPress={() => props.viewPost(props.data.id)}>
-                  <Text>Edit Post</Text>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    props.setDelete(props.data);
-                    props.setView({
-                      deletePost: true,
-                    });
-                  }}>
-                  <Text>Delete Post</Text>
-                </TouchableWithoutFeedback>
-              </View>
-            )}
           {props.data.username === props.current_user && statusOptions && (
             <View style={styles.statusOptions}>
               <TouchableWithoutFeedback
@@ -236,11 +228,13 @@ function EditProfile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   useEffect(() => {
@@ -249,9 +243,9 @@ function EditProfile(props: any): JSX.Element {
 
   const changeDateSettings = async (value: boolean) => {
     axios.patch(
-      `${emulator ? baseUrl : ngrok}/user_settings/show_joined_date/${
-        props.profile_id
-      }/`,
+      `${
+        inProdMode ? prodURL : emulator ? devURL : ngrok
+      }/user_settings/show_joined_date/${props.profile_id}/`,
       {
         username: props.profile_id,
         show_joined_date: value,
@@ -285,7 +279,7 @@ function EditProfile(props: any): JSX.Element {
             <View>
               <Image
                 source={{
-                  uri: `${emulator ? baseUrl : ngrok}${
+                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                     props.profile.data.profile_picture
                   }`,
                 }}
@@ -355,11 +349,13 @@ function Profile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
+  const inProdMode = true;
   const emulator = false;
-  const baseUrl =
+  const devURL =
     Platform.OS === 'android'
       ? 'http://10.0.2.2:8000'
       : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
   const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
 
   // State variables that allows the user to switch between
@@ -387,6 +383,12 @@ function Profile(props: any): JSX.Element {
 
   const [profileReload, waitForProfileReload] = useState(false);
 
+  // Used for the post pop-up options
+  const [postOptions, showPostOptions] = useState({
+    showOptions: false,
+    data: {},
+  });
+
   /**
    * Function to delete the post in the database
    * @param id The id of the selected post
@@ -395,10 +397,14 @@ function Profile(props: any): JSX.Element {
     // Note: MUST delete additional post images before deleting a post
     // To maintain foreign key integrity in the database
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/images/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     await axios
-      .delete(`${emulator ? baseUrl : ngrok}/posts/${id}/`)
+      .delete(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/${id}/`,
+      )
       .catch((err: any) => console.log(err));
     setView({
       main: true,
@@ -430,7 +436,9 @@ function Profile(props: any): JSX.Element {
   const refreshPage = async () => {
     await axios
       .get(
-        `${emulator ? baseUrl : ngrok}/profile/${props.profile.data.username}`,
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profile/${
+          props.profile.data.username
+        }`,
       )
       .then(res => {
         props.setProfile({...props.profile, data: res.data});
@@ -453,7 +461,7 @@ function Profile(props: any): JSX.Element {
                 <Image
                   style={styles.profilePicture}
                   source={{
-                    uri: `${emulator ? baseUrl : ngrok}${
+                    uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                       props.profile.data.profile_picture
                     }`,
                   }}
@@ -569,7 +577,8 @@ function Profile(props: any): JSX.Element {
                         buy_history: true,
                         liked_posts: false,
                       })
-                    } disabled={profileReload}>
+                    }
+                    disabled={profileReload}>
                     <View
                       style={{
                         display: 'flex',
@@ -603,7 +612,8 @@ function Profile(props: any): JSX.Element {
                         buy_history: false,
                         liked_posts: true,
                       })
-                    } disabled={profileReload}>
+                    }
+                    disabled={profileReload}>
                     <View
                       style={{
                         display: 'flex',
@@ -655,6 +665,7 @@ function Profile(props: any): JSX.Element {
                             current_user={props.current_user}
                             main={view.main}
                             key={uuid.v4()}
+                            showPostOptions={showPostOptions}
                           />
                         );
                       }
@@ -677,6 +688,7 @@ function Profile(props: any): JSX.Element {
                               current_user={props.current_user}
                               main={view.main}
                               key={uuid.v4()}
+                              showPostOptions={showPostOptions}
                             />
                           );
                         }
@@ -694,6 +706,7 @@ function Profile(props: any): JSX.Element {
                               setView={setView}
                               current_user={props.current_user}
                               main={view.main}
+                              showPostOptions={showPostOptions}
                             />
                           );
                         }
@@ -701,6 +714,43 @@ function Profile(props: any): JSX.Element {
                     })}
                 </View>
               </ScrollView>
+              {postOptions.showOptions && (
+                <View style={styles.newPostOptionsContainer}>
+                  <View style={{width: '80%'}}>
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        if (postOptions.data.id) {
+                          props.viewPost(postOptions.data.id);
+                        }
+                      }}>
+                      <Text style={styles.hidePost}>Edit Post</Text>
+                    </TouchableWithoutFeedback>
+
+                    <TouchableWithoutFeedback
+                      onPress={() => {
+                        setDelete(postOptions.data);
+                        setView({deletePost: true});
+                        showPostOptions({
+                          showOptions: false,
+                          data: {},
+                        });
+                      }}>
+                      <Text style={styles.deletePost}>Delete Post</Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                  <View style={{width: '80%'}}>
+                    <TouchableWithoutFeedback
+                      onPress={() =>
+                        showPostOptions({
+                          showOptions: false,
+                          data: {},
+                        })
+                      }>
+                      <Text style={styles.closePostOptions}>Close</Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </View>
+              )}
             </View>
           </GestureDetector>
         </GestureHandlerRootView>
@@ -773,7 +823,7 @@ function Profile(props: any): JSX.Element {
                 source={{
                   uri: changedPic
                     ? changedPic.uri
-                    : `${emulator ? baseUrl : ngrok}${
+                    : `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
                         props.profile.data.profile_picture
                       }`,
                 }}
@@ -790,9 +840,9 @@ function Profile(props: any): JSX.Element {
 
               await axios
                 .patch(
-                  `${emulator ? baseUrl : ngrok}/edit_profile/${
-                    props.profile.data.username
-                  }/`,
+                  `${
+                    inProdMode ? prodURL : emulator ? devURL : ngrok
+                  }/edit_profile/${props.profile.data.username}/`,
                   data,
                 )
                 .catch((err: any) => console.log(err));
@@ -1107,6 +1157,50 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgb(17, 87, 64)',
     color: 'white',
     textAlign: 'center',
+  },
+  newPostOptionsContainer: {
+    backgroundColor: '#F2F2F2',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    rowGap: normalize(10),
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1,
+    padding: normalize(10),
+  },
+  closePostOptions: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderRadius: normalize(15),
+    borderWidth: 1,
+    overflow: 'hidden',
+    borderColor: 'white',
+    textAlign: 'center',
+    fontSize: 17.5,
+  },
+  hidePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
+  },
+  deletePost: {
+    color: 'black',
+    backgroundColor: 'white',
+    padding: normalize(15),
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderBottomWidth: 1,
+    borderColor: 'white',
+    fontSize: 17.5,
   },
 });
 export default Profile;

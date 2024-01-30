@@ -265,6 +265,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 )
             except:
                 return Response({'status': 400, 'error': 'Username and email do not match', 'register': request.data['register']})
+
         code = random.randint(10000,99999)
         code = str(code)
         send_code(request, code, request.data['email'])
@@ -300,12 +301,12 @@ class UserViewSet(viewsets.ModelViewSet):
             user.first_name = request.data['first_name']
             user.last_name = request.data['last_name']
             user.save()
-            return Response({'message': 'You have successfully registered for H2H'})
+            return Response({'message': 'You have successfully registered for H2H', "status": 200})
         elif exists:
-            return Response({'message': 'User already registered.  Be sure to create a profile.'})
+            return Response({'message': 'User already registered.  Be sure to create a profile.', "status": 200})
         else:
             print(serializer.errors)
-            return Response({'error': serializer.errors})
+            return Response({'error': serializer.errors, "status": 400})
     
          
 

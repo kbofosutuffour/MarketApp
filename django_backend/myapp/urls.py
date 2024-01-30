@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from django.conf.urls import include
 from . import consumers
-from myapp.views import *
+from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, search, profile
 from rest_framework.routers import DefaultRouter
 
 """
