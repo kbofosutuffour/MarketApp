@@ -1305,6 +1305,7 @@ function App(): JSX.Element {
               showPost={showPost}
               getProfile={getProfile}
               setHasLoaded={setHasLoaded}
+              setErrorMessage={setErrorMessage}
             />
           </>
         )}
