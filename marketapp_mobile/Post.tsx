@@ -111,7 +111,7 @@ function EditPost(props): JSX.Element {
   const chooseImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
     });
@@ -227,7 +227,7 @@ function EditPost(props): JSX.Element {
             <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
             <Switch
               trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-              value={props.post.draft}
+              value={!props.post.draft}
               onValueChange={() =>
                 props.setPost({...props.post, draft: !props.post.draft})
               }
@@ -379,7 +379,6 @@ function NewPost(props): JSX.Element {
   const chooseImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
       allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
@@ -500,13 +499,13 @@ function NewPost(props): JSX.Element {
             <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
             <Switch
               trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-              value={props.post.draft}
+              value={!props.post.draft}
               onValueChange={() =>
                 props.setPost({...props.post, draft: !props.post.draft})
               }
             />
           </View>
-          <View style={styles.postItemStatus}>
+          {/* <View style={styles.postItemStatus}>
             <Button
               title="SELLING"
               color={
@@ -529,7 +528,7 @@ function NewPost(props): JSX.Element {
                 props.setPost({...props.post, status: 'PENDING'});
               }}
             />
-          </View>
+          </View> */}
           <View style={styles.postItemDescription}>
             <TextInput
               placeholder="Write a description for your product here:"
@@ -589,7 +588,7 @@ function CreatePost(props): JSX.Element {
     price: null,
     draft: false,
     category: 'MISC.',
-    status: null,
+    status: 'SELLING',
   });
 
   const status = ['SELLING', 'PENDING', 'SOLD'];

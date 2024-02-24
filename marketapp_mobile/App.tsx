@@ -528,7 +528,7 @@ function App(): JSX.Element {
         }
         setPosts({
           showPosts: true,
-          posts: res.data,
+          posts: res.data.reverse(),
         });
       })
       .catch((err: any) => {
@@ -1046,7 +1046,6 @@ function App(): JSX.Element {
                       posts.posts.map(post => {
                         /* Only show posts not created by the user on the home page */
                         if (
-                          post.username !== user.username &&
                           post.status !== 'SOLD' &&
                           !post.draft &&
                           !post.flag
@@ -1340,18 +1339,43 @@ function App(): JSX.Element {
             </TouchableWithoutFeedback>
           </View>
         )}
-        {postOptions.showOptions && (
-          <View style={styles.newPostOptionsContainer}>
-            <View style={{width: '80%'}}>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  if (postOptions.post.id) {
-                    countFlagPost(postOptions.post.id);
-                  }
-                }}>
-                <Text style={styles.hidePost}>Flag Post</Text>
-              </TouchableWithoutFeedback>
-              {user.admin && (
+        {postOptions.showOptions &&
+          user.username !== postOptions.post.username && (
+            <View style={styles.newPostOptionsContainer}>
+              <View style={{width: '80%'}}>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    if (postOptions.post.id) {
+                      countFlagPost(postOptions.post.id);
+                    }
+                  }}>
+                  <Text style={styles.hidePost}>Flag Post</Text>
+                </TouchableWithoutFeedback>
+                {user.admin && (
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      showPostOptions({
+                        showOptions: false,
+                        post: {},
+                      })
+                    }>
+                    <Text style={styles.deletePost}>Delete Post</Text>
+                  </TouchableWithoutFeedback>
+                )}
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    if (Object.keys(postOptions.post).length) {
+                      viewReport(postOptions.post);
+                    }
+                    showPostOptions({
+                      showOptions: false,
+                      post: {},
+                    });
+                  }}>
+                  <Text style={styles.reportPost}>Report Post</Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <View style={{width: '80%'}}>
                 <TouchableWithoutFeedback
                   onPress={() =>
                     showPostOptions({
@@ -1359,35 +1383,11 @@ function App(): JSX.Element {
                       post: {},
                     })
                   }>
-                  <Text style={styles.deletePost}>Delete Post</Text>
+                  <Text style={styles.closePostOptions}>Close</Text>
                 </TouchableWithoutFeedback>
-              )}
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  if (Object.keys(postOptions.post).length) {
-                    viewReport(postOptions.post);
-                  }
-                  showPostOptions({
-                    showOptions: false,
-                    post: {},
-                  });
-                }}>
-                <Text style={styles.reportPost}>Report Post</Text>
-              </TouchableWithoutFeedback>
+              </View>
             </View>
-            <View style={{width: '80%'}}>
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  showPostOptions({
-                    showOptions: false,
-                    post: {},
-                  })
-                }>
-                <Text style={styles.closePostOptions}>Close</Text>
-              </TouchableWithoutFeedback>
-            </View>
-          </View>
-        )}
+          )}
       </UserContext.Provider>
     </SafeAreaView>
   );
