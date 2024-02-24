@@ -1234,6 +1234,7 @@ function App(): JSX.Element {
               flexDirection: 'column',
               justifyContent: 'flex-start',
               flex: 1,
+              alignContent: 'left',
             }}>
             <NavBar
               searchedPosts={searchedPosts}
@@ -1425,6 +1426,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.white,
     fontSize: normalize(22.5),
+    padding: 10,
   },
   mainView: {
     display: 'flex',
