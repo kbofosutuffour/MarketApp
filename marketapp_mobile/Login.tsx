@@ -401,7 +401,7 @@ function Register(props): JSX.Element {
         ...profile,
         profile_picture: {
           uri: res.assets[0].uri,
-          type: res.assets[0].type,
+          type: 'image/jpeg',
           name: 'image.png',
         },
       });

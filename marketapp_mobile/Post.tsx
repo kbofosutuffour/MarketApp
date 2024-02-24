@@ -85,7 +85,7 @@ function EditPost(props): JSX.Element {
         let displayLength = display.split('.').length;
         data.append('display_image', {
           uri: display,
-          type: 'image/' + display.split('.')[displayLength - 1],
+          type: 'image/jpeg',
           name: 'image.png',
         });
       } else {
@@ -119,14 +119,14 @@ function EditPost(props): JSX.Element {
     if (!res.canceled) {
       let image = {
         uri: res.assets[0].uri,
-        type: res.assets[0].type,
+        type: 'image/jpeg',
         name: 'image.png',
       };
       props.setPost({
         ...props.post,
         display_image: {
           uri: res.assets[0].uri,
-          type: res.assets[0].type,
+          type: 'image/jpeg',
           name: 'image.png',
         },
       });
@@ -387,9 +387,12 @@ function NewPost(props): JSX.Element {
     if (!res.canceled) {
       let image = {
         uri: res.assets[0].uri,
-        type: res.assets[0].type,
+        type: 'image/jpeg',
+        // TODO: find return value for Android phones
+        // type: Platform.OS === 'iOS' ? res.assets[0].type : '',
         name: 'image.png',
       };
+      console.log(image, res.assets);
 
       props.setPost({...props.post, display_image: image});
       setDisplay(res.assets[0].uri);
@@ -400,7 +403,7 @@ function NewPost(props): JSX.Element {
       for (let i = 1; i < res.assets.length; i++) {
         image = {
           uri: res.assets[i].uri,
-          type: res.assets[i].type,
+          type: 'image/jpeg',
           name: 'image.png',
         };
         data.push(image);

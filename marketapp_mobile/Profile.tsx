@@ -812,7 +812,7 @@ function Profile(props: any): JSX.Element {
               if (!res.canceled) {
                 setChangedPic({
                   uri: res.assets[0].uri,
-                  type: res.assets[0].type,
+                  type: 'image/jpeg',
                   name: 'image.png',
                 });
               }
