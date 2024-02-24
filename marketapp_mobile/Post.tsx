@@ -325,6 +325,7 @@ function NewPost(props): JSX.Element {
   const [category, showCategory] = useState(false);
   const [postCategory, setPostCategory] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -579,7 +580,10 @@ function NewPost(props): JSX.Element {
           }}>
           <TouchableOpacity
             onPress={async () => {
-              await postData();
+              if (!hasSubmitted) {
+                setHasSubmitted(true);
+                await postData();
+              }
             }}
             style={styles.submit}>
             <View>
