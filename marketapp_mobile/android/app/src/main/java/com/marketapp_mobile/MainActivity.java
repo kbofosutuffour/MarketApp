@@ -14,7 +14,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "marketapp_mobile";
+    return "main";
   }
 
   /**

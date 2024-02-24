@@ -396,12 +396,14 @@ function ProductDescription(props: any): JSX.Element {
                 },
               );
             }}>
-            <Text
-              style={
-                props.hasLoaded ? styles.message : styles.messageNotLoaded
-              }>
-              Message
-            </Text>
+            {props.post.username !== props.current_user && (
+              <Text
+                style={
+                  props.hasLoaded ? styles.message : styles.messageNotLoaded
+                }>
+                Message
+              </Text>
+            )}
           </TouchableWithoutFeedback>
         </View>
       </View>
