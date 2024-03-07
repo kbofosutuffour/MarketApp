@@ -257,14 +257,15 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(methods=['post'], detail=False)
     def verify(self, request, *args, **kwargs):
-        if not request.data['register']:
+        if request.data['register'] == 0:
             try:
                 User.objects.get(
                     username=request.data['username'],
                     email=request.data['email']
                 )
             except:
-                return Response({'status': 400, 'error': 'Username and email do not match'})
+                return Response({'status': 400, 'error': 'Username and email do not match', 'register': request.data['register']})
+
         code = random.randint(10000,99999)
         code = str(code)
         send_code(request, code, request.data['email'])
@@ -688,7 +689,7 @@ def send_account_removal(request, user):
         subject="Account Removal Request | " + profile.username,
         message=message,
         from_email=settings.EMAIL_HOST_USER,
-        recipient_list=['marketappwm@gmail.com']
+        recipient_list=['marketappwm@gmail.com', 'kbofosutuffour@gmail.com']
     )
 
     return Response({'status': 200, 'message': 'Account removal request successfully sent'})

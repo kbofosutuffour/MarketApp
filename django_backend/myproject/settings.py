@@ -35,12 +35,14 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['marketappwm-django-api.link', '3.141.103.158', '0.0.0.0']
+
 
 # Application definition
 
 INSTALLED_APPS = [
     'daphne', #Daphne ASGI application server; used for chat feature
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,7 +52,6 @@ INSTALLED_APPS = [
     'myapp', # myapp application we've created,
     'rest_framework', # needed for use with react native
     'corsheaders', # needed for cross-origin requests
-    'channels',
 ]
 
 MIDDLEWARE = [
@@ -99,21 +100,23 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+
 DATABASES = {
-    # 'production': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'postgres',
-    #     'USER': 'marketappwm',
-    #     'PASSWORD': env('DATABASE_PASSWORD'),
-    #     'HOST': 'marketapp-database-1.cdc406uygnzl.us-east-2.rds.amazonaws.com',
-    #     'PORT': '5432',
-    # },
     'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'marketappwm',
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': 'marketapp-database-1.cdc406uygnzl.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
+    },
+    'development': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
 
 }
+
 
 
 # Password validation
@@ -187,3 +190,6 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 # Custom setting. To email
 RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
+
+# HTTPS Settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
