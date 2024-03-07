@@ -664,6 +664,36 @@ def send_appeal(appeal):
         recipient_list=['marketappwm@gmail.com']
     )
 
+@api_view()
+def send_account_removal(request, user):
+    """
+    Function used to sends an account removal request to marketappwm@gmail.com
+    """
+    profile = Profile.objects.get(username=user)
+
+    date = datetime.datetime.now()
+    date = date.strftime("%B %d, %Y")
+    message = f"""
+    Title: Account Removal Request |  #{profile.username}
+
+    Date: {datetime.datetime.now()}
+    From: {profile.first_name} {profile.last_name}
+    Username: {profile.username}
+
+    The following user has requested to remove their data from the application: {profile.username}
+    """
+
+    #send user an email
+    send_mail(
+        subject="Account Removal Request | " + profile.username,
+        message=message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=['marketappwm@gmail.com']
+    )
+
+    return Response({'status': 200, 'message': 'Account removal request successfully sent'})
+
+
 class EditPostView(FormView):
     """
     View used for the functionality of the edit post screes (edit_post.html)

@@ -251,8 +251,8 @@ function Post(props: any): JSX.Element {
           <Text style={{color: 'black', fontSize: 17.5}}>
             {props.data.product}
           </Text>
-          <Text>{props.data.username}</Text>
-          <Text>${props.data.price}</Text>
+          <Text style={{fontSize: normalize(10)}}>{props.data.username}</Text>
+          <Text style={{fontSize: normalize(10)}}>${props.data.price}</Text>
           <Text style={styles.postedDate}>
             {'Posted ' + getDifference(props.data.date) + ' ago'}
           </Text>
@@ -1467,9 +1467,9 @@ const styles = StyleSheet.create({
     padding: normalize(10),
     borderWidth: 1,
     borderColor: 'grey',
+    columnGap: 10,
   },
   postImageContainer: {
-    width: 125,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1479,7 +1479,7 @@ const styles = StyleSheet.create({
     height: normalize(75),
     display: 'flex',
     backgroundColor: 'black',
-    borderRadius: 25,
+    borderRadius: normalize(25),
     overflow: 'hidden',
   },
   postText: {
@@ -1490,10 +1490,11 @@ const styles = StyleSheet.create({
   postedDate: {
     position: 'relative',
     fontStyle: 'italic',
+    fontSize: normalize(10),
   },
   product: {
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: normalize(20),
     backgroundColor: 'white',
     width: 'auto',
   },
