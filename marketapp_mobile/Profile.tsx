@@ -69,7 +69,7 @@ function Post(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -228,7 +228,7 @@ function EditProfile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -349,7 +349,7 @@ function Profile(props: any): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'

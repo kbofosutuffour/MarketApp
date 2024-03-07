@@ -33,9 +33,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['marketappwm-django-api.link', '3.141.103.158', '0.0.0.0']
+# used in production
+# ALLOWED_HOSTS = ['marketappwm-django-api.link', '3.141.103.158', '0.0.0.0']
+
+# paste your unique ngrok
+ALLOWED_HOSTS = ['127.0.0.1', 'classic-pegasus-factual.ngrok-free.app']
+
 
 
 # Application definition
@@ -102,7 +107,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
 DATABASES = {
-    'default': {
+    'production': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'marketappwm',
@@ -110,7 +115,7 @@ DATABASES = {
         'HOST': 'marketapp-database-1.cdc406uygnzl.us-east-2.rds.amazonaws.com',
         'PORT': '5432',
     },
-    'development': {
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
@@ -167,7 +172,7 @@ MEDIA_ROOT =  (os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = '/media/'
 
 # https://channels.readthedocs.io/en/latest/installation.html
-ASGI_APPLICATION = "myproject.asgi.django_application"
+ASGI_APPLICATION = "myproject.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",

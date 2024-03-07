@@ -66,7 +66,7 @@ function ForgotPassword(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -370,7 +370,7 @@ function Register(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -675,7 +675,7 @@ function Verify(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -850,7 +850,7 @@ function Login(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -883,6 +883,7 @@ function Login(props): JSX.Element {
           data,
         )
         .then(response => {
+          console.log(response.data)
           if (response.data.login) {
             if (response.data.register) {
               setLoginState({

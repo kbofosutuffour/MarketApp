@@ -35,7 +35,7 @@ function EditPost(props): JSX.Element {
   const [postCategory, setPostCategory] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
@@ -332,7 +332,7 @@ function NewPost(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'

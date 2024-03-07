@@ -204,7 +204,7 @@ function Chats(props): JSX.Element {
    * Different between Android and iOS
    */
   // const {baseUrl} = useContext(UserContext);
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'

@@ -402,7 +402,7 @@ function App(): JSX.Element {
    * The base url used to access images and other data within the app directory.
    * Different between Android and iOS
    */
-  const inProdMode = true;
+  const inProdMode = false;
   const emulator = false;
   const devURL =
     Platform.OS === 'android'
