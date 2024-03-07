@@ -8,7 +8,6 @@ import {name as appName} from './app.json';
 
 // AppRegistry.registerComponent('main', () => App);
 
-console.log(Platform.OS)
 if (Platform.OS === 'web') {
     AppRegistry.registerComponent('main', () => App);
     const rootTag = document.getElementById('root') || document.getElementById('X');
