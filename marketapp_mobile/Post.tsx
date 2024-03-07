@@ -33,6 +33,7 @@ function EditPost(props): JSX.Element {
   const [newData, setNewData] = useState(null);
   const [category, showCategory] = useState(false);
   const [postCategory, setPostCategory] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const inProdMode = true;
   const emulator = false;
@@ -73,7 +74,6 @@ function EditPost(props): JSX.Element {
           }
         }
         setImages(newList);
-        console.log(newList);
       })
       .catch((err: any) => console.log(err));
   };
@@ -85,7 +85,7 @@ function EditPost(props): JSX.Element {
         let displayLength = display.split('.').length;
         data.append('display_image', {
           uri: display,
-          type: 'image/' + display.split('.')[displayLength - 1],
+          type: 'image/jpeg',
           name: 'image.png',
         });
       } else {
@@ -105,13 +105,19 @@ function EditPost(props): JSX.Element {
           },
         },
       )
-      .catch((err: any) => console.log(err, data));
+      .then(() => props.returnHome())
+      .catch((err: any) => {
+        setErrorMessage(
+          'There was a problem creating the post.  Please try again',
+        );
+        console.log(err);
+      });
   };
 
   const chooseImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
     });
@@ -119,14 +125,14 @@ function EditPost(props): JSX.Element {
     if (!res.canceled) {
       let image = {
         uri: res.assets[0].uri,
-        type: res.assets[0].type,
+        type: 'image/jpeg',
         name: 'image.png',
       };
       props.setPost({
         ...props.post,
         display_image: {
           uri: res.assets[0].uri,
-          type: res.assets[0].type,
+          type: 'image/jpeg',
           name: 'image.png',
         },
       });
@@ -227,7 +233,7 @@ function EditPost(props): JSX.Element {
             <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
             <Switch
               trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-              value={props.post.draft}
+              value={!props.post.draft}
               onValueChange={() =>
                 props.setPost({...props.post, draft: !props.post.draft})
               }
@@ -268,7 +274,9 @@ function EditPost(props): JSX.Element {
               onChangeText={value =>
                 props.setPost({...props.post, description: value})
               }
-              value={props.post.description}
+              value={
+                props.post.description !== 'null' ? props.post.description : ''
+              }
             />
           </View>
         </ScrollView>
@@ -276,7 +284,6 @@ function EditPost(props): JSX.Element {
         <TouchableOpacity
           onPress={() => {
             postData();
-            props.returnHome();
           }}
           style={styles.submit}>
           <View>
@@ -294,6 +301,18 @@ function EditPost(props): JSX.Element {
           />
         </View>
       )}
+      {errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
+        </View>
+      )}
     </>
   );
 }
@@ -305,6 +324,8 @@ function NewPost(props): JSX.Element {
   const [images, setImages] = useState([]);
   const [category, showCategory] = useState(false);
   const [postCategory, setPostCategory] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -365,11 +386,17 @@ function NewPost(props): JSX.Element {
           },
         },
       )
-      .catch((err: any) => console.log(err));
-
-    props.returnHome();
-    props.getProfile();
-    props.setHasLoaded(false);
+      .then(() => {
+        props.returnHome();
+        props.getProfile();
+        props.setHasLoaded(false);
+      })
+      .catch((err: any) => {
+        setErrorMessage(
+          'There was a problem creating the post.  Please try again',
+        );
+        console.log(err);
+      });
   };
 
   /**
@@ -379,7 +406,6 @@ function NewPost(props): JSX.Element {
   const chooseImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
       allowsMultipleSelection: true,
       aspect: [4, 3],
       quality: 1,
@@ -388,7 +414,9 @@ function NewPost(props): JSX.Element {
     if (!res.canceled) {
       let image = {
         uri: res.assets[0].uri,
-        type: res.assets[0].type,
+        type: 'image/jpeg',
+        // TODO: find return value for Android phones
+        // type: Platform.OS === 'iOS' ? res.assets[0].type : '',
         name: 'image.png',
       };
 
@@ -401,7 +429,7 @@ function NewPost(props): JSX.Element {
       for (let i = 1; i < res.assets.length; i++) {
         image = {
           uri: res.assets[i].uri,
-          type: res.assets[i].type,
+          type: 'image/jpeg',
           name: 'image.png',
         };
         data.push(image);
@@ -500,13 +528,13 @@ function NewPost(props): JSX.Element {
             <Text>{props.post.draft ? 'Save as Draft' : 'Save as Post'}</Text>
             <Switch
               trackColor={{false: '#767577', true: 'rgb(17, 87, 64)'}}
-              value={props.post.draft}
+              value={!props.post.draft}
               onValueChange={() =>
                 props.setPost({...props.post, draft: !props.post.draft})
               }
             />
           </View>
-          <View style={styles.postItemStatus}>
+          {/* <View style={styles.postItemStatus}>
             <Button
               title="SELLING"
               color={
@@ -529,7 +557,7 @@ function NewPost(props): JSX.Element {
                 props.setPost({...props.post, status: 'PENDING'});
               }}
             />
-          </View>
+          </View> */}
           <View style={styles.postItemDescription}>
             <TextInput
               placeholder="Write a description for your product here:"
@@ -552,7 +580,10 @@ function NewPost(props): JSX.Element {
           }}>
           <TouchableOpacity
             onPress={async () => {
-              await postData();
+              if (!hasSubmitted) {
+                setHasSubmitted(true);
+                await postData();
+              }
             }}
             style={styles.submit}>
             <View>
@@ -569,6 +600,18 @@ function NewPost(props): JSX.Element {
             post={props.post}
             showCategory={showCategory}
           />
+        </View>
+      )}
+      {errorMessage && (
+        <View style={styles.errorMessageContainer}>
+          <View style={styles.errorMessageBanner}>
+            <TouchableWithoutFeedback onPress={() => setErrorMessage('')}>
+              <Text style={styles.exitErrorMessage}>Exit</Text>
+            </TouchableWithoutFeedback>
+          </View>
+          <View style={styles.errorMessageTextContainer}>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+          </View>
         </View>
       )}
     </>
@@ -589,7 +632,7 @@ function CreatePost(props): JSX.Element {
     price: null,
     draft: false,
     category: 'MISC.',
-    status: null,
+    status: 'SELLING',
   });
 
   const status = ['SELLING', 'PENDING', 'SOLD'];
@@ -763,6 +806,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: '100%',
     position: 'absolute',
+  },
+  errorMessageContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '32.5%',
+    transform: [{translateX: -50}],
+    width: 250,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#D7D7D7',
+    borderRadius: 10,
+    padding: 15,
+    overflow: 'hidden',
+  },
+  errorMessageBanner: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  exitErrorMessage: {
+    backgroundColor: 'rgb(17, 87, 64)',
+    color: Colors.white,
+    height: 20,
+    width: 50,
+    textAlign: 'center',
+    lineHeight: 20,
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  errorMessageTextContainer: {
+    display: 'flex',
+    height: 70,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorMessage: {
+    color: 'black',
+    textAlign: 'center',
   },
 });
 

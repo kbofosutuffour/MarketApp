@@ -185,18 +185,6 @@ function ForgotPassword(props): JSX.Element {
             />
             <View style={styles.loginText}>
               <Text style={styles.header}>Verify your W&M email account</Text>
-              <View style={styles.inputLeft}>
-                <TextInput
-                  placeholder="Enter your username"
-                  placeholderTextColor={'gray'}
-                  onChangeText={text => {
-                    setNewPassword({...newPassword, username: text});
-                    setUsername(text);
-                  }}
-                  style={styles.input}
-                />
-              </View>
-
               <View style={styles.emailInput}>
                 <TextInput
                   placeholder="Enter your school email"
@@ -370,9 +358,12 @@ function Register(props): JSX.Element {
     }
   }, [hasOpened]);
 
-  useState(() => {
-    fetch();
-  }, []);
+  /**
+   * Stores the email used for the verification into the profile
+   */
+  useEffect(() => {
+    setEmail(props.email);
+  }, [])
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -401,7 +392,7 @@ function Register(props): JSX.Element {
         ...profile,
         profile_picture: {
           uri: res.assets[0].uri,
-          type: res.assets[0].type,
+          type: 'image/jpeg',
           name: 'image.png',
         },
       });
@@ -488,13 +479,6 @@ function Register(props): JSX.Element {
         )
         .then(() => props.returnHome(profile.username))
         .catch((err: any) => console.log(err));
-
-      // await axios
-      //   .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/report/`, {
-      //     username: profile_id,
-      //   })
-      //   .then(() => props.returnHome(profile.username))
-      //   .catch((err: any) => console.log(err));
     } else if (profile.password !== confirmPassword) {
       props.setErrorMessage('Passwords do not match.  Please try again.');
     } else if (profile.password.length < 8) {
@@ -558,13 +542,6 @@ function Register(props): JSX.Element {
             placeholderTextColor={'gray'}
             onChangeText={text => setProfile({...profile, last_name: text})}
             value={profile.last_name}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Re-enter your email address"
-            placeholderTextColor={'gray'}
-            onChangeText={text => setEmail(text)}
-            value={email}
             style={styles.input}
           />
           <TextInput
@@ -713,6 +690,9 @@ function Verify(props): JSX.Element {
     let domain = inputEmail ? inputEmail.split('@')[1] : '';
 
     if (inputEmail && domain === 'wm.edu') {
+      // Passes the email from the verification screen to the create profile screen
+      props.setEmail(inputEmail);
+
       await axios
         .post(
           `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/verify/`,
@@ -740,7 +720,6 @@ function Verify(props): JSX.Element {
     } else if (inputCode !== code.code) {
       props.setErrorMessage('Incorrect verification code.  Please try again.');
     } else if (!inputEmail || domain !== 'wm.edu') {
-      console.log(inputEmail, 'test')
       props.setErrorMessage('Please enter a valid W&M address');
     }
   };
@@ -783,8 +762,8 @@ function Verify(props): JSX.Element {
                   backgroundColor: code.codeSent
                     ? 'rgb(138,178,147)'
                     : 'rgb(176,211,229)',
-                  width: 100,
-                  height: 30,
+                  fontSize: normalize(12.5),
+                  padding: 7.5,
                   borderRadius: 10,
                   textAlign: 'center',
                   lineHeight: 30,
@@ -797,7 +776,7 @@ function Verify(props): JSX.Element {
           <View style={styles.emailInput}>
             <TextInput
               style={styles.inputSmall}
-              placeholder="Please enter your verification code here"
+              placeholder="Enter verification code"
               placeholderTextColor={'gray'}
               onChangeText={text => setInputCode(text)}
             />
@@ -809,8 +788,8 @@ function Verify(props): JSX.Element {
                     inputCode === code.code && inputCode.length
                       ? 'rgb(138,178,147)'
                       : 'rgb(176,211,229)',
-                  width: 100,
-                  height: 30,
+                  fontSize: normalize(12.5),
+                  padding: 7.5,
                   borderRadius: 10,
                   textAlign: 'center',
                   lineHeight: 30,
@@ -859,6 +838,12 @@ function Login(props): JSX.Element {
   });
 
   const [errorMessage, setErrorMessage] = useState('');
+
+  /**
+   * The email the user is creating the account with.
+   * Passed from the verification screen to the create account screen
+   */
+  const [email, setEmail] = useState('');
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -933,9 +918,7 @@ function Login(props): JSX.Element {
               source={require('./media/app_logo.png')}
             />
             <View style={styles.loginText}>
-              <Text style={styles.header}>
-                Welcome to Market App at William and Mary
-              </Text>
+              <Text style={styles.title}>Welcome to BOTL</Text>
               <TextInput
                 placeholder="Enter username"
                 placeholderTextColor={'gray'}
@@ -988,6 +971,7 @@ function Login(props): JSX.Element {
           info={info}
           returnHome={props.returnHome}
           setErrorMessage={setErrorMessage}
+          email={email}
         />
       )}
       {loginState.forgotPassword && (
@@ -1000,6 +984,8 @@ function Login(props): JSX.Element {
         <Verify
           setLoginState={setLoginState}
           setErrorMessage={setErrorMessage}
+          email={email}
+          setEmail={setEmail}
         />
       )}
       {errorMessage && (
@@ -1033,12 +1019,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    rowGap: 10,
+    rowGap: normalize(7.5),
   },
   loginButton: {
-    width: 250,
-    height: 40,
+    minWidth: 200,
     borderRadius: 15,
+    padding: 5,
+    fontSize: normalize(15),
     backgroundColor: 'rgb(17, 87, 64)',
     textAlign: 'center',
     lineHeight: 40,
@@ -1057,12 +1044,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   header: {
-    fontSize: 20,
-    width: 250,
+    fontSize: normalize(15),
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: normalize(22.5),
     textAlign: 'center',
   },
   createAccount: {
     textDecorationLine: 'underline',
+    fontSize: normalize(12.5),
     color: 'gray',
     margin: 10,
   },
@@ -1075,6 +1066,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     color: 'rgb(17, 87, 64)',
     textDecorationLine: 'underline',
+    fontSize: normalize(12.5),
   },
   wmLogo: {
     width: normalize(150),
@@ -1099,10 +1091,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    columnGap: 10,
   },
   input: {
     borderBottomWidth: 2,
     borderBottomColor: 'gray',
+    fontSize: normalize(15),
     width: normalize(250),
     height: normalize(40),
     color: Colors.black,
@@ -1129,6 +1123,7 @@ const styles = StyleSheet.create({
     color: Colors.black,
     paddingLeft: 10,
     margin: 0,
+    fontSize: normalize(12.5),
   },
   blackArrow: {
     position: 'absolute',

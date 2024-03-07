@@ -251,8 +251,8 @@ function Post(props: any): JSX.Element {
           <Text style={{color: 'black', fontSize: 17.5}}>
             {props.data.product}
           </Text>
-          <Text>{props.data.username}</Text>
-          <Text>${props.data.price}</Text>
+          <Text style={{fontSize: normalize(10)}}>{props.data.username}</Text>
+          <Text style={{fontSize: normalize(10)}}>${props.data.price}</Text>
           <Text style={styles.postedDate}>
             {'Posted ' + getDifference(props.data.date) + ' ago'}
           </Text>
@@ -528,7 +528,7 @@ function App(): JSX.Element {
         }
         setPosts({
           showPosts: true,
-          posts: res.data,
+          posts: res.data.reverse(),
         });
       })
       .catch((err: any) => {
@@ -1046,7 +1046,6 @@ function App(): JSX.Element {
                       posts.posts.map(post => {
                         /* Only show posts not created by the user on the home page */
                         if (
-                          post.username !== user.username &&
                           post.status !== 'SOLD' &&
                           !post.draft &&
                           !post.flag
@@ -1235,6 +1234,7 @@ function App(): JSX.Element {
               flexDirection: 'column',
               justifyContent: 'flex-start',
               flex: 1,
+              alignContent: 'left',
             }}>
             <NavBar
               searchedPosts={searchedPosts}
@@ -1305,6 +1305,7 @@ function App(): JSX.Element {
               showPost={showPost}
               getProfile={getProfile}
               setHasLoaded={setHasLoaded}
+              setErrorMessage={setErrorMessage}
             />
           </>
         )}
@@ -1340,18 +1341,43 @@ function App(): JSX.Element {
             </TouchableWithoutFeedback>
           </View>
         )}
-        {postOptions.showOptions && (
-          <View style={styles.newPostOptionsContainer}>
-            <View style={{width: '80%'}}>
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  if (postOptions.post.id) {
-                    countFlagPost(postOptions.post.id);
-                  }
-                }}>
-                <Text style={styles.hidePost}>Flag Post</Text>
-              </TouchableWithoutFeedback>
-              {user.admin && (
+        {postOptions.showOptions &&
+          user.username !== postOptions.post.username && (
+            <View style={styles.newPostOptionsContainer}>
+              <View style={{width: '80%'}}>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    if (postOptions.post.id) {
+                      countFlagPost(postOptions.post.id);
+                    }
+                  }}>
+                  <Text style={styles.hidePost}>Flag Post</Text>
+                </TouchableWithoutFeedback>
+                {user.admin && (
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      showPostOptions({
+                        showOptions: false,
+                        post: {},
+                      })
+                    }>
+                    <Text style={styles.deletePost}>Delete Post</Text>
+                  </TouchableWithoutFeedback>
+                )}
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    if (Object.keys(postOptions.post).length) {
+                      viewReport(postOptions.post);
+                    }
+                    showPostOptions({
+                      showOptions: false,
+                      post: {},
+                    });
+                  }}>
+                  <Text style={styles.reportPost}>Report Post</Text>
+                </TouchableWithoutFeedback>
+              </View>
+              <View style={{width: '80%'}}>
                 <TouchableWithoutFeedback
                   onPress={() =>
                     showPostOptions({
@@ -1359,35 +1385,11 @@ function App(): JSX.Element {
                       post: {},
                     })
                   }>
-                  <Text style={styles.deletePost}>Delete Post</Text>
+                  <Text style={styles.closePostOptions}>Close</Text>
                 </TouchableWithoutFeedback>
-              )}
-              <TouchableWithoutFeedback
-                onPress={() => {
-                  if (Object.keys(postOptions.post).length) {
-                    viewReport(postOptions.post);
-                  }
-                  showPostOptions({
-                    showOptions: false,
-                    post: {},
-                  });
-                }}>
-                <Text style={styles.reportPost}>Report Post</Text>
-              </TouchableWithoutFeedback>
+              </View>
             </View>
-            <View style={{width: '80%'}}>
-              <TouchableWithoutFeedback
-                onPress={() =>
-                  showPostOptions({
-                    showOptions: false,
-                    post: {},
-                  })
-                }>
-                <Text style={styles.closePostOptions}>Close</Text>
-              </TouchableWithoutFeedback>
-            </View>
-          </View>
-        )}
+          )}
       </UserContext.Provider>
     </SafeAreaView>
   );
@@ -1425,6 +1427,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.white,
     fontSize: normalize(22.5),
+    padding: 10,
   },
   mainView: {
     display: 'flex',
@@ -1464,9 +1467,9 @@ const styles = StyleSheet.create({
     padding: normalize(10),
     borderWidth: 1,
     borderColor: 'grey',
+    columnGap: 10,
   },
   postImageContainer: {
-    width: 125,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1476,7 +1479,7 @@ const styles = StyleSheet.create({
     height: normalize(75),
     display: 'flex',
     backgroundColor: 'black',
-    borderRadius: 25,
+    borderRadius: normalize(25),
     overflow: 'hidden',
   },
   postText: {
@@ -1487,10 +1490,11 @@ const styles = StyleSheet.create({
   postedDate: {
     position: 'relative',
     fontStyle: 'italic',
+    fontSize: normalize(10),
   },
   product: {
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: normalize(20),
     backgroundColor: 'white',
     width: 'auto',
   },

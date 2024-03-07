@@ -367,42 +367,44 @@ function ProductDescription(props: any): JSX.Element {
               <Text style={styles.message}>Return</Text>
             </TouchableWithoutFeedback>
           )}
-          <TouchableWithoutFeedback
-            onPress={() => {
-              props.setHasLoaded(false);
-              getChats(
-                props.current_user,
-                {
-                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
-                    props.current_user_pfp
-                  }`,
-                  type: 'image/' + props.current_user_pfp.split('.').pop(),
-                  name: 'image.png',
-                },
-                props.post.username,
-                {
-                  uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
-                    profile.data.profile_picture
-                  }`,
-                  type:
-                    'image/' + profile.data.profile_picture.split('.').pop(),
-                  name: 'image.png',
-                },
-                props.post.product,
-                {
-                  uri: props.post.display_image,
-                  type: 'image/' + props.post.display_image.split('.').pop(),
-                  name: 'image.png',
-                },
-              );
-            }}>
-            <Text
-              style={
-                props.hasLoaded ? styles.message : styles.messageNotLoaded
-              }>
-              Message
-            </Text>
-          </TouchableWithoutFeedback>
+          {props.post.username !== props.current_user && (
+            <TouchableWithoutFeedback
+              onPress={() => {
+                props.setHasLoaded(false);
+                getChats(
+                  props.current_user,
+                  {
+                    uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
+                      props.current_user_pfp
+                    }`,
+                    type: 'image/' + props.current_user_pfp.split('.').pop(),
+                    name: 'image.png',
+                  },
+                  props.post.username,
+                  {
+                    uri: `${inProdMode ? prodURL : emulator ? devURL : ngrok}${
+                      profile.data.profile_picture
+                    }`,
+                    type:
+                      'image/' + profile.data.profile_picture.split('.').pop(),
+                    name: 'image.png',
+                  },
+                  props.post.product,
+                  {
+                    uri: props.post.display_image,
+                    type: 'image/' + props.post.display_image.split('.').pop(),
+                    name: 'image.png',
+                  },
+                );
+              }}>
+              <Text
+                style={
+                  props.hasLoaded ? styles.message : styles.messageNotLoaded
+                }>
+                Message
+              </Text>
+            </TouchableWithoutFeedback>
+          )}
         </View>
       </View>
     </>

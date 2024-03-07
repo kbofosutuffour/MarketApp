@@ -1186,7 +1186,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: normalize(30),
+    marginTop: normalize(15),
     marginBottom: normalize(15),
   },
   profileDescription: {

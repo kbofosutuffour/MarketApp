@@ -812,7 +812,7 @@ function Profile(props: any): JSX.Element {
               if (!res.canceled) {
                 setChangedPic({
                   uri: res.assets[0].uri,
-                  type: res.assets[0].type,
+                  type: 'image/jpeg',
                   name: 'image.png',
                 });
               }
@@ -1094,8 +1094,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     textAlign: 'center',
-    height: 25,
+    textAlignVertical: 'center',
+    height: 30,
     lineHeight: 17.5,
+    width: 100,
   },
   outerCircle: {
     position: 'absolute',

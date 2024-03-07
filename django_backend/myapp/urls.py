@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from django.conf.urls import include
 from . import consumers
-from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, search, profile
+from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, search, profile, send_account_removal
 from rest_framework.routers import DefaultRouter
 
 """
@@ -37,7 +37,6 @@ urlpatterns = [
     re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
 ]
 
-print(urlpatterns)
 # Information and code taken from Django Channel documentation:
 # https://channels.readthedocs.io/en/latest/tutorial/index.html
 
