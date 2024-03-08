@@ -185,11 +185,20 @@ function ForgotPassword(props): JSX.Element {
             />
             <View style={styles.loginText}>
               <Text style={styles.header}>Verify your W&M email account</Text>
+              <TextInput
+                placeholder="Enter your username"
+                placeholderTextColor={'gray'}
+                onChangeText={text => {
+                  setNewPassword({...newPassword, username: text});
+                  setUsername(text);
+                }}
+                style={styles.input}
+              />
               <View style={styles.emailInput}>
                 <TextInput
-                  placeholder="Enter your school email"
+                  placeholder="Enter school email (@wm.edu)"
                   placeholderTextColor={'gray'}
-                  onChangeText={text => setEmail(text)}
+                  onChangeText={text => setEmail(text.toLowerCase())}
                   value={email}
                   style={styles.inputSmall}
                 />
@@ -328,7 +337,6 @@ function ForgotPassword(props): JSX.Element {
 function Register(props): JSX.Element {
   const [hasRead, setRead] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
-  const [email, setEmail] = useState('');
   const [agreed, setAgreement] = useState(false);
 
   const [profile, setProfile] = useState({
@@ -337,6 +345,7 @@ function Register(props): JSX.Element {
     username: '',
     password: '',
     profile_picture: {},
+    email: props.email,
   });
 
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -357,13 +366,6 @@ function Register(props): JSX.Element {
       setRead(true);
     }
   }, [hasOpened]);
-
-  /**
-   * Stores the email used for the verification into the profile
-   */
-  useEffect(() => {
-    setEmail(props.email);
-  }, [])
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -431,7 +433,7 @@ function Register(props): JSX.Element {
             password: profile.password,
             first_name: profile.first_name,
             last_name: profile.last_name,
-            email: email,
+            email: props.email,
           },
           {
             headers: {
@@ -604,7 +606,11 @@ function Register(props): JSX.Element {
           </Text>
 
           <View style={styles.termsAndConditionsContainer}>
-            <TouchableWithoutFeedback onPress={() => setAgreement(!agreed)}>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                setHasOpened(true);
+                setAgreement(!agreed);
+              }}>
               <View style={styles.outerCircle}>
                 <View
                   // eslint-disable-next-line react-native/no-inline-styles
@@ -625,9 +631,7 @@ function Register(props): JSX.Element {
               </Text>
               and
               {/* eslint-disable-next-line prettier/prettier */}
-              <TouchableWithoutFeedback onPress={() => setHasOpened(true)}>
-                <Text style={styles.privacyPolicyBold}> Privacy Policy</Text>
-              </TouchableWithoutFeedback>
+              <Text style={styles.privacyPolicyBold}> Privacy Policy</Text>
             </Text>
           </View>
 
@@ -667,7 +671,6 @@ function Verify(props): JSX.Element {
     codeSent: false,
   });
 
-  const [email, setEmail] = useState('');
   const [inputCode, setInputCode] = useState('');
 
   /**
@@ -696,7 +699,7 @@ function Verify(props): JSX.Element {
       await axios
         .post(
           `${inProdMode ? prodURL : emulator ? devURL : ngrok}/users/verify/`,
-          {email: email, register: 1},
+          {email: inputEmail, register: 1},
         )
         .then(response => {
           setCode({
@@ -747,15 +750,15 @@ function Verify(props): JSX.Element {
           <View style={styles.emailInput}>
             <TextInput
               style={styles.inputSmall}
-              placeholder="Enter your school email"
+              placeholder="Enter school email (@wm.edu)"
               placeholderTextColor={'gray'}
-              onChangeText={text => setEmail(text)}
+              onChangeText={text => props.setEmail(text)}
             />
             <TouchableWithoutFeedback
               style={{
                 backgroundColor: code.codeSent ? Colors.green : Colors.blue,
               }}
-              onPressOut={() => verify(email)}>
+              onPressOut={() => verify(props.email)}>
               <Text
                 // eslint-disable-next-line react-native/no-inline-styles
                 style={{
@@ -883,7 +886,7 @@ function Login(props): JSX.Element {
           data,
         )
         .then(response => {
-          console.log(response.data)
+          console.log(response.data);
           if (response.data.login) {
             if (response.data.register) {
               setLoginState({
@@ -1128,10 +1131,11 @@ const styles = StyleSheet.create({
   },
   blackArrow: {
     position: 'absolute',
-    left: 10,
-    top: 10,
-    width: 20,
-    height: 20,
+    top: normalize(50),
+    left: normalize(20),
+    width: normalize(20),
+    height: normalize(20),
+    zIndex: 3,
   },
   termsAndConditionsContainer: {
     display: 'flex',

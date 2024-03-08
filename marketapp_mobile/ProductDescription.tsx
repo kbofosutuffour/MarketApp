@@ -8,7 +8,7 @@
 
 import axios from 'axios';
 import React, {useEffect, useState, useContext} from 'react';
-import Profile from './Profile';
+import Profile, { normalize } from './Profile';
 
 import {
   Image,
@@ -235,14 +235,13 @@ function ProductDescription(props: any): JSX.Element {
         <TouchableWithoutFeedback onPress={props.returnHome}>
           <View style={styles.returnHome}>
             <Image
-              source={require('./media/home.png')}
+              source={require('./media/black_left_arrow.png')}
               style={{
                 width: 30,
                 height: 30,
                 borderRadius: 10,
                 overflow: 'hidden',
                 zIndex: 3,
-                backgroundColor: 'rgb(185, 151, 91)',
               }}
             />
           </View>
@@ -434,8 +433,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   displayImage: {
-    width: '90%',
-    height: '90%',
+    width: '100%',
+    height: '100%',
   },
   profile: {
     display: 'flex',
@@ -456,13 +455,12 @@ const styles = StyleSheet.create({
   },
   returnHome: {
     position: 'absolute',
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgb(185, 151, 91)',
+    width: normalize(30),
+    height: normalize(30),
     borderRadius: 10,
     overflow: 'hidden',
-    left: 30,
-    top: 30,
+    left: normalize(15),
+    top: normalize(50),
     zIndex: 2,
     display: 'flex',
     justifyContent: 'center',

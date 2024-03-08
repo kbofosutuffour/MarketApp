@@ -93,25 +93,34 @@ function EditPost(props): JSX.Element {
       }
     }
 
-    await axios
-      .patch(
-        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/edit_post/${
-          props.id
-        }/`,
-        data,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+    let validInput = Number(props.post.price);
+    console.log(validInput, 'test');
+
+    if (validInput) {
+      await axios
+        .patch(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/edit_post/${
+            props.id
+          }/`,
+          data,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
           },
-        },
-      )
-      .then(() => props.returnHome())
-      .catch((err: any) => {
-        setErrorMessage(
-          'There was a problem creating the post.  Please try again',
-        );
-        console.log(err);
-      });
+        )
+        .then(() => props.returnHome())
+        .catch((err: any) => {
+          setErrorMessage(
+            'There was a problem creating the post.  Please try again',
+          );
+          console.log(err);
+        });
+    } else {
+      setErrorMessage(
+        'There was an error in your inputs for the post.  Please try again.',
+      );
+    }
   };
 
   const chooseImage = async () => {
@@ -376,27 +385,36 @@ function NewPost(props): JSX.Element {
       additional_images.append('image' + i, images[i]);
     }
 
-    await axios
-      .post(
-        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/`,
-        additional_images,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+    let validInput = Number(props.post.price);
+    console.log(validInput, 'test');
+
+    if (validInput) {
+      await axios
+        .post(
+          `${inProdMode ? prodURL : emulator ? devURL : ngrok}/images/`,
+          additional_images,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
           },
-        },
-      )
-      .then(() => {
-        props.returnHome();
-        props.getProfile();
-        props.setHasLoaded(false);
-      })
-      .catch((err: any) => {
-        setErrorMessage(
-          'There was a problem creating the post.  Please try again',
-        );
-        console.log(err);
-      });
+        )
+        .then(() => {
+          props.returnHome();
+          props.getProfile();
+          props.setHasLoaded(false);
+        })
+        .catch((err: any) => {
+          setErrorMessage(
+            'There was a problem creating the post.  Please try again',
+          );
+          console.log(err);
+        });
+    } else {
+      setErrorMessage(
+        'There was a problem creating the post.  Please make sure you have valid inputs.',
+      );
+    }
   };
 
   /**

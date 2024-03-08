@@ -897,6 +897,16 @@ function App(): JSX.Element {
         showOptions: false,
         post: {},
       });
+      setPosts({
+        ...posts,
+        showPosts: true,
+      });
+      setCategory('');
+      setSearch({
+        showSearchBar: false,
+        showResults: false,
+        posts: [],
+      });
       fetchData();
     }
   };

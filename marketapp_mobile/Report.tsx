@@ -112,6 +112,7 @@ function Report(props): JSX.Element {
           }/profiles/get_id/${props.profile.username}/`,
         )
         .then(response => {
+          console.log(response.data, 'what')
           profile_id = response.data.id;
         })
         .catch((err: any) => console.log(err));
@@ -137,8 +138,13 @@ function Report(props): JSX.Element {
       post: props.post.id,
       reported_by: current_user_id,
     };
+    console.log(data);
     await axios
       .post(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/report/`, data)
+      .then((res) => {
+        console.log(res.data);
+        props.returnHome();
+      })
       .catch((err: any) => console.log(err));
   };
 
@@ -257,7 +263,7 @@ function Report(props): JSX.Element {
                     );
                   } else {
                     selected.forEach(async value => {
-                      await submitReport(false, true, value);
+                      await submitReport(true, false, value);
                     });
                     props.returnHome();
                   }
@@ -397,7 +403,6 @@ function Report(props): JSX.Element {
                     selected.forEach(async value => {
                       await submitReport(false, true, value);
                     });
-                    props.returnHome();
                   }
                 }}>
                 <Text

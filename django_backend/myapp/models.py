@@ -76,10 +76,10 @@ class Profile(models.Model):
     """
     Profile table is used to hold data on profile info
     """
-    username = models.CharField(max_length=500, default=None, unique=True)
+    username = models.CharField(max_length=20, default=None, unique=True)
     profile_picture = models.ImageField("Profile Picture", upload_to="profile_pictures", default=None)
     date = models.DateField(default=datetime.date.today)
-    email = models.CharField(max_length=500, default="none@wm.edu")
+    email = models.CharField(max_length=500, default=None)
     first_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     last_name = models.CharField(max_length=500, default=None, null=True, blank=True)
     saved_posts = models.ManyToManyField(Post, blank=True, related_name="saved_posts")
