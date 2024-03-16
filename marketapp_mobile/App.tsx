@@ -591,62 +591,27 @@ function App(): JSX.Element {
    * Function used to show results of a user's search
    * @param text user's input on the search bar
    */
-  const searchPosts = (text: string, category: string) => {
+  const searchPosts = async (text: string, category: string) => {
     var results: any[] = [];
+    var post_ids: any[] = [];
 
-    var prepositions = ['the', 'and', 'or', 'at', 'in', 'of'];
-    var input = text
-      .toLowerCase()
-      .split(' ')
-      .filter(value => {
-        return !prepositions.includes(value);
-      });
-    for (let i = 0; i < posts.posts.length; i++) {
-      var prod = posts.posts[i].product
-        .toLowerCase()
-        .split(' ')
-        .filter((value: string) => {
-          // eslint-disable-next-line prettier/prettier
-              return ((value !== 'and') && (value !== 'the'))
-        });
+    // Send the user search to the searching algorithm function in the backend
+    await axios
+      .get(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/search/${text}`)
+      .then(res => {
+        post_ids = res.data.posts;
+      })
+      .catch((err: any) => console.log(err));
 
-      let desc = posts.posts[i].description
-        .toLowerCase()
-        .split(' ')
-        .filter((value: string) => {
-          // eslint-disable-next-line prettier/prettier
-              return ((value !== 'and') && (value !== 'the'));
-        });
-
-      let post_category = posts.posts[i].category;
-      let post_username = posts.posts[i].username;
-
-      input.forEach((element: any) => {
-        if (category.length) {
-          if (
-            category.toUpperCase() === post_category &&
-            (prod.includes(element) || desc.includes(element)) &&
-            post_username !== user.username
-          ) {
-            try {
-              results.push(posts.posts[i]);
-            } catch {
-              console.log('error');
-            }
-          }
-        } else {
-          if (
-            (prod.includes(element) || desc.includes(element)) &&
-            post_username !== user.username
-          ) {
-            try {
-              results.push(posts.posts[i]);
-            } catch {
-              console.log('error');
-            }
-          }
+    // Changing the order of posts shown on screen based on the ranking
+    // Given from the searching algorithm
+    for (let i = 0; i < post_ids.length; i++) {
+      for (let j = 0; j < posts.posts.length; j++) {
+        if (post_ids[i] == posts.posts[j].id) {
+          console.log(post_ids[i], posts.posts[j]);
+          results.push(posts.posts[j]);
         }
-      });
+      }
     }
 
     setSearch({

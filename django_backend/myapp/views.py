@@ -531,15 +531,18 @@ def home(request):
     return Response({'posts': posts, 'number_of_posts': number_of_posts})
 
 @api_view()
-def search(request):
+def search(request, query):
     """
     View used for the functionality of the search bar of the home screen (home.html)
     """
     posts = Post.objects.all()
-    number_of_posts = len(posts)
+    ranked_ids = rank_similarity(query)
+    ranked_posts = []
+    for post in posts:
+        if post.id in ranked_ids:
+            ranked_posts.append(post)
     context = {
-        'posts': list(posts.values()),
-        'number_of_posts': number_of_posts
+        'posts': ranked_ids,
     }
     return Response(context)
 
@@ -846,3 +849,58 @@ def profile(request, user):
         }
 
     return Response(context)
+
+
+#------------------------------------------------------------ Machine Learning ----------------------------------------------------------#
+
+import requests
+import numpy as np
+import pandas as pd
+
+model_id = "sentence-transformers/all-MiniLM-L6-v2"
+hf_token = "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"
+
+api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{model_id}"
+headers = {"Authorization": f"Bearer {hf_token}"}
+
+def get_embeddings(documents):
+    """
+    Transforms the each document in the list into an embedded vector
+    """
+    response = requests.post(api_url, headers=headers, json={"inputs": documents, "options":{"wait_for_model":True}})
+    return response.json()
+
+def rank_similarity(input):
+    """
+    Ranks the similarity between the input vector and the document vectors using cosine similarity.
+    In other words, it ranks the posts based on the user's search input
+    """
+    posts = Post.objects.all()
+    documents = [post.product for post in posts]
+    documents.insert(0, input)
+    documents_ids = [post.id for post in posts]
+
+    embeddings = get_embeddings(documents)
+    query = embeddings.pop(0)
+    documents.pop(0)
+
+    return similarity(query, embeddings, documents, documents_ids)
+
+def similarity(query, embeddings, documents, documents_ids):
+    """
+    Function that calculates the cosine similarity between the query and document vectors.
+    Return a list of posts in descending order by their search ranking
+    """
+    data = []
+    for vector in embeddings:
+        dot_product = np.dot(query, vector)
+        query_magnitude = np.linalg.norm(query)
+        vector_magnitude = np.linalg.norm(vector)
+        data.append((dot_product) / (query_magnitude * vector_magnitude))
+    df = pd.DataFrame({
+        "Post_id": documents_ids,
+        "Name": documents,
+        "Score": data
+    })
+    df = df.sort_values(by=['Score'], axis=0, ascending=False)
+    return list(df['Post_id'])

@@ -31,7 +31,7 @@ router.register(r'violation', ViolationViewSet, basename="violation")
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('search', search, name='search'),
+    path('search/<str:query>', search, name='search'),
     path('profile/<str:user>', profile, name='profile'),
     path('send_account_removal/<str:user>', send_account_removal, name='send_account_removal'),
     re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
