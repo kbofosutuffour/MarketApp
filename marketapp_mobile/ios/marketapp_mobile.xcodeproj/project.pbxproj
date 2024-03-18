@@ -10,9 +10,9 @@
 		00E356F31AD99517003FC87E /* marketapp_mobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* marketapp_mobileTests.m */; };
 		0C80B921A6F3F58F76C31292 /* libPods-marketapp_mobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-marketapp_mobile.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
-		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		397445BF17E9C51C0872F5EC /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211FC4256B323B4EC1ECCA99 /* ExpoModulesProvider.swift */; };
+		4C5D0DE62B9F7C14008233EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4C5D0DE52B9F7C14008233EE /* Assets.xcassets */; };
 		7309F4D431B78C514ED7ACA3 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E5F8A65FEC93D42B745C03 /* ExpoModulesProvider.swift */; };
 		7699B88040F8A987B510C191 /* libPods-marketapp_mobile-marketapp_mobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-marketapp_mobile-marketapp_mobileTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -35,13 +35,13 @@
 		13B07F961A680F5B00A75B9A /* marketapp_mobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = marketapp_mobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = marketapp_mobile/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = marketapp_mobile/AppDelegate.mm; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = marketapp_mobile/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = marketapp_mobile/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = marketapp_mobile/main.m; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-marketapp_mobile-marketapp_mobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-marketapp_mobile-marketapp_mobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		211FC4256B323B4EC1ECCA99 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-marketapp_mobile/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		34E5F8A65FEC93D42B745C03 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-marketapp_mobile-marketapp_mobileTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-marketapp_mobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-marketapp_mobile.debug.xcconfig"; path = "Target Support Files/Pods-marketapp_mobile/Pods-marketapp_mobile.debug.xcconfig"; sourceTree = "<group>"; };
+		4C5D0DE52B9F7C14008233EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-marketapp_mobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-marketapp_mobile.release.xcconfig"; path = "Target Support Files/Pods-marketapp_mobile/Pods-marketapp_mobile.release.xcconfig"; sourceTree = "<group>"; };
 		5B7EB9410499542E8C5724F5 /* Pods-marketapp_mobile-marketapp_mobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-marketapp_mobile-marketapp_mobileTests.debug.xcconfig"; path = "Target Support Files/Pods-marketapp_mobile-marketapp_mobileTests/Pods-marketapp_mobile-marketapp_mobileTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-marketapp_mobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-marketapp_mobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,10 +92,10 @@
 			children = (
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
-				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				4C5D0DE52B9F7C14008233EE /* Assets.xcassets */,
 			);
 			name = marketapp_mobile;
 			sourceTree = "<group>";
@@ -243,7 +243,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "BOTL" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "marketapp_mobile" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -275,7 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				4C5D0DE62B9F7C14008233EE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -560,11 +560,14 @@
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-marketapp_mobile.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FCX7XS2X7A;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = marketapp_mobile/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BOTL;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -589,10 +592,13 @@
 			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-marketapp_mobile.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FCX7XS2X7A;
 				INFOPLIST_FILE = marketapp_mobile/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BOTL;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -786,7 +792,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "BOTL" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "marketapp_mobile" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
