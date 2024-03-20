@@ -268,7 +268,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         code = random.randint(10000,99999)
         code = str(code)
-        send_code(request, code, request.data['email'])
+        print(code)
+        #send_code(request, code, request.data['email'])
         return Response({'code': code, 'status': 200})
     
     @action(methods=['post'], detail=False)

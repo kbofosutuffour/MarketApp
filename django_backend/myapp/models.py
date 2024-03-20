@@ -41,7 +41,7 @@ class Post(models.Model):
         TECHNOLOGY = "TECHNOLOGY", _("TECHNOLOGY")
         HOBBIES = "HOBBIES", _("HOBBIES")
         OFFICE_SUPPLIES = "OFFICE SUPPLIES", _("OFFICE SUPPLIES")
-        DORM_GOODS = "DORM_GOODS", _("DORM_GOODS")
+        DORM_GOODS = "DORM GOODS", _("DORM GOODS")
         FOOD = "FOOD", _("FOOD")
         ENTERTAINMENT = "ENTERTAINMENT", _("ENTERTAINMENT")
         BOOKS = "BOOKS", _("BOOKS")
