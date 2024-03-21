@@ -46,10 +46,19 @@ class Post(models.Model):
         ENTERTAINMENT = "ENTERTAINMENT", _("ENTERTAINMENT")
         BOOKS = "BOOKS", _("BOOKS")
         MISC = "MISC.", _("MISC.")
+        APPLIANCES = "APPLIANCES", _("APPLIANCES")
 
         
     product = models.CharField(max_length=100)
-    username = models.CharField(max_length=500, default=None)
+    username = models.ForeignKey(
+        "Profile",
+        on_delete=models.CASCADE,
+        default=None,
+        null=True,
+        to_field="username",
+        db_column="username",
+        blank=False
+    )
     date = models.DateTimeField(auto_now=True)
     display_image = models.ImageField("Display Image:", upload_to="posts")
     description = models.TextField(max_length=1000, blank=True)
@@ -95,7 +104,16 @@ class Room(models.Model):
     """
     Room table is used to hold data on a conversation between two users
     """
-    seller = models.CharField(max_length=500, default=None)
+    seller = models.ForeignKey(
+        "Profile",
+        on_delete=models.CASCADE,
+        default=None,
+        null=True,
+        to_field="username",
+        db_column="seller",
+        blank=False,
+        related_name="seller"
+    )
     seller_profile_picture = models.ImageField(verbose_name="seller_picture",upload_to="images/", blank=False)
     buyer = models.CharField(max_length=500, default=None)
     buyer_profile_picture = models.ImageField(verbose_name="buyer_picture",upload_to="images/", blank=False)
