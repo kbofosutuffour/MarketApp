@@ -79,6 +79,7 @@ function Room(props): JSX.Element {
           props.display_image,
           props.product,
         );
+        props.setCurrentRoom(props.rooms);
       }}>
       <View style={styles.room}>
         <Image
@@ -96,6 +97,16 @@ function Room(props): JSX.Element {
           style={styles.productImage}
           source={{uri: props.display_image}}
         />
+        {props.buyer && props.rooms.buyer_notifications != 0 && (
+          <View>
+            <Text>{props.rooms.buyer_notifications}</Text>
+          </View>
+        )}
+        {props.seller && props.rooms.seller_notifications != 0 && (
+          <View>
+            <Text>{props.rooms.seller_notifications}</Text>
+          </View>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -198,6 +209,7 @@ function Chats(props): JSX.Element {
   });
 
   const [text, setText] = useState('');
+  const [currentRoom, setCurrentRoom] = useState({});
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -396,6 +408,8 @@ function Chats(props): JSX.Element {
       room: room_id,
       image: null,
     };
+
+    var isBuyer = props.profile.username === props.buyer;
     await axios
       .post(
         `${inProdMode ? prodURL : emulator ? devURL : ngrok}/messages/`,
@@ -409,6 +423,24 @@ function Chats(props): JSX.Element {
         }
       })
       .catch((err: any) => console.log(err));
+
+    await axios
+      .patch(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/${currentRoom.id}/`,
+        {
+          buyer_notifications: isBuyer
+            ? currentRoom.buyer_notifications + 1
+            : currentRoom.buyer_notifications,
+          seller_notifications: isBuyer
+            ? currentRoom.seller_notifications
+            : currentRoom.seller_notifications + 1,
+          buyer: currentRoom.buyer,
+          seller: currentRoom.seller,
+          id: currentRoom.id,
+        },
+      )
+      .catch((err: any) => console.log(err));
+
     if (ws.current?.readyState) {
       ws.current?.send(JSON.stringify(data));
     }
@@ -431,6 +463,8 @@ function Chats(props): JSX.Element {
                 <Room
                   other_user={value.seller}
                   rooms={value}
+                  setCurrentRoom={setCurrentRoom}
+                  profile={props.profile}
                   chats={chats}
                   setRooms={setRooms}
                   getChats={getChats}
@@ -438,8 +472,8 @@ function Chats(props): JSX.Element {
                   display_image={value.image}
                   product={value.product}
                   id={value.id}
-                  seller={false}
-                  buyer={true}
+                  seller={value.seller}
+                  buyer={value.buyer}
                   key={uuid.v4()}
                 />
               );
@@ -450,6 +484,8 @@ function Chats(props): JSX.Element {
                 return (
                   <Room
                     other_user={value.buyer}
+                    profile={props.profile}
+                    setCurrentRoom={setCurrentRoom}
                     rooms={value}
                     chats={chats}
                     setRooms={setRooms}

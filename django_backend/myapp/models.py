@@ -119,6 +119,8 @@ class Room(models.Model):
     buyer_profile_picture = models.ImageField(verbose_name="buyer_picture",upload_to="images/", blank=False)
     product = models.CharField(max_length=100)
     image = models.ImageField("images/", default=None)
+    buyer_notifications = models.IntegerField(default=0)
+    seller_notifications = models.IntegerField(default=0)
 
 class Message(models.Model):
     """
