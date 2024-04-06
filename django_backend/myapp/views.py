@@ -351,22 +351,25 @@ class Rooms(viewsets.ModelViewSet):
         
     def partial_update(self, request, pk=None):
         # room = Room.objects.get(pk=pk)
-        print(request.data)
-        room = Room.objects.get(pk=request.data['id'])
+        try:
+            room = Room.objects.get(pk=request.data['id'])
 
-        # Add update notifications based on who delivered the message
-        if request.data['buyer_notifications']:
-            room.buyer_notifications = room.buyer_notifications + 1
-        elif request.data['seller_notifications']:
-            room.seller_notifications = room.seller_notifications + 1
+            # Update the buyer and seller notifications for the room based on user action
+            room.buyer_notifications = room.buyer_notifications + int(request.data['buyer_notifications'])
+            room.seller_notifications = room.seller_notifications + int(request.data['seller_notifications'])
 
-        serializer = RoomSerializer(data=request.data, partial=True)
-        if serializer.is_valid():
+            # Added to fix rare bug when removing notifications
+            # request information can send negative values
+            if room.buyer_notifications < 0:
+                room.buyer_notifications = 0
+            if room.seller_notifications < 0:
+                room.seller_notifications = 0
+
             room.save()
-            return Response({'message': 'You have successfully edited your post'})
-        else:
-            print(serializer.errors)
-            return Response({'error': serializer.errors})
+            return Response({'code': 200})
+        except:
+            return Response({'code': 400})
+
 
 
     

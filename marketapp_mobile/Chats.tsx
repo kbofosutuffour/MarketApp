@@ -66,9 +66,51 @@ function filterHeight(height: number) {
  * @returns button lead to DM's of two users stored in the props object
  */
 function Room(props): JSX.Element {
+  const inProdMode = false;
+  const emulator = false;
+  const devURL =
+    Platform.OS === 'android'
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
+  const prodURL = 'https://marketappwm-django-api.link';
+  const ngrok = 'https://classic-pegasus-factual.ngrok-free.app';
+
+  /**
+   * Removes the notifications stored in the database
+   * for the current user when they enter a specific room
+   */
+  const refreshNotifications = async () => {
+    var isBuyer = props.profile.username === props.buyer;
+
+    /**
+     * Refresh buyer notifications if user is buying;
+     * Refresh seller notifications if user is selling
+     */
+    await axios
+      .patch(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/${
+          props.id
+        }/`,
+        {
+          buyer_notifications: isBuyer
+            ? Number(props.rooms.buyer_notifications) * -1
+            : 0,
+          seller_notifications: isBuyer
+            ? 0
+            : Number(props.rooms.seller_notifications) * -1,
+          buyer: props.rooms.buyer,
+          seller: props.rooms.seller,
+          id: props.rooms.id,
+          refresh: 1,
+        },
+      )
+      .catch((err: any) => console.log(err, 'refreshNotifications'));
+  };
+
   return (
     <TouchableWithoutFeedback
       onPress={() => {
+        refreshNotifications();
         props.setRooms({...props.rooms, showRooms: false});
         props.getChats(
           props.id,
@@ -80,6 +122,7 @@ function Room(props): JSX.Element {
           props.product,
         );
         props.setCurrentRoom(props.rooms);
+        props.getRooms();
       }}>
       <View style={styles.room}>
         <Image
@@ -93,20 +136,24 @@ function Room(props): JSX.Element {
             {props.other_user}
           </Text>
         </View>
-        <Image
-          style={styles.productImage}
-          source={{uri: props.display_image}}
-        />
-        {props.buyer && props.rooms.buyer_notifications != 0 && (
-          <View>
-            <Text>{props.rooms.buyer_notifications}</Text>
-          </View>
-        )}
-        {props.seller && props.rooms.seller_notifications != 0 && (
-          <View>
-            <Text>{props.rooms.seller_notifications}</Text>
-          </View>
-        )}
+        <View style={styles.productImageContainer}>
+          <Image
+            style={styles.productImage}
+            source={{uri: props.display_image}}
+          />
+          {props.buyer === props.profile.username &&
+            props.rooms.buyer_notifications !== 0 && (
+              <Text style={styles.notification}>
+                {props.rooms.buyer_notifications}
+              </Text>
+            )}
+          {props.seller === props.profile.username &&
+            props.rooms.seller_notifications !== 0 && (
+              <Text style={styles.notification}>
+                {props.rooms.seller_notifications}
+              </Text>
+            )}
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -409,7 +456,8 @@ function Chats(props): JSX.Element {
       image: null,
     };
 
-    var isBuyer = props.profile.username === props.buyer;
+    var isBuyer = props.profile.username === currentRoom.buyer;
+    console.log(props.profile.username, currentRoom.buyer)
     await axios
       .post(
         `${inProdMode ? prodURL : emulator ? devURL : ngrok}/messages/`,
@@ -424,22 +472,25 @@ function Chats(props): JSX.Element {
       })
       .catch((err: any) => console.log(err));
 
+    /**
+     * Add a buyer notification if user is buying;
+     * Add a seller notification if user is selling
+     */
     await axios
       .patch(
-        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/${currentRoom.id}/`,
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/rooms/${
+          currentRoom.id
+        }/`,
         {
-          buyer_notifications: isBuyer
-            ? currentRoom.buyer_notifications + 1
-            : currentRoom.buyer_notifications,
-          seller_notifications: isBuyer
-            ? currentRoom.seller_notifications
-            : currentRoom.seller_notifications + 1,
+          buyer_notifications: isBuyer ? 0 : 1,
+          seller_notifications: isBuyer ? 1 : 0,
           buyer: currentRoom.buyer,
           seller: currentRoom.seller,
           id: currentRoom.id,
+          refresh: 0,
         },
       )
-      .catch((err: any) => console.log(err));
+      .catch((err: any) => console.log(err, 'adding a buyer/seller notification'));
 
     if (ws.current?.readyState) {
       ws.current?.send(JSON.stringify(data));
@@ -462,6 +513,7 @@ function Chats(props): JSX.Element {
               return (
                 <Room
                   other_user={value.seller}
+                  current_user={props.current_user}
                   rooms={value}
                   setCurrentRoom={setCurrentRoom}
                   profile={props.profile}
@@ -474,6 +526,7 @@ function Chats(props): JSX.Element {
                   id={value.id}
                   seller={value.seller}
                   buyer={value.buyer}
+                  getRooms={props.getRooms}
                   key={uuid.v4()}
                 />
               );
@@ -496,6 +549,7 @@ function Chats(props): JSX.Element {
                     id={value.id}
                     seller={value.seller}
                     buyer={value.buyer}
+                    getRooms={props.getRooms}
                     key={uuid.v4()}
                   />
                 );
@@ -651,14 +705,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.black,
   },
+  productImageContainer: {
+    position: 'absolute',
+    right: 30,
+  },
   productImage: {
     width: normalize(60),
     height: normalize(60),
     borderRadius: normalize(35),
     overflow: 'hidden',
     backgroundColor: Colors.black,
-    position: 'absolute',
-    right: 30,
   },
   profilePicture: {
     width: normalize(50),
@@ -765,6 +821,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: normalize(10),
     marginBottom: normalize(10),
+  },
+  notification: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FF6B00',
+    width: normalize(20),
+    height: normalize(20),
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    color: 'white',
+    borderRadius: normalize(10),
+    borderWidth: 1,
+    overflow: 'hidden',
+    textAlign: 'center',
+    lineHeight: normalize(20),
   },
 });
 

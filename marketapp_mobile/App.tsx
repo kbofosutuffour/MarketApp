@@ -1231,6 +1231,7 @@ function App(): JSX.Element {
               hasLoaded={hasLoaded}
               chatNotifications={chatNotifications}
               setChatNotifications={setChatNotifications}
+              getRooms={getRooms}
             />
           </View>
         )}
