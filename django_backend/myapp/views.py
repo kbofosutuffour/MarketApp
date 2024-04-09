@@ -79,6 +79,14 @@ class EditProfileViewSet(viewsets.ViewSet):
         """
         Likes or removes a like from a post
         """
+
+        serializer = InteractionSerializer(
+            data = {
+            'username': username,
+            'post': request.data['liked_posts'],
+            'liked_post': True
+        }, partial = True)
+    
         try:
             profile = Profile.objects.get(username=username)
 
@@ -87,12 +95,24 @@ class EditProfileViewSet(viewsets.ViewSet):
                 profile.liked_posts.remove(request.data['liked_posts'])
             except:
                 profile.liked_posts.add(request.data['liked_posts'])
+                print(profile.username, request.data['liked_posts'], Interactions.objects.all())
+
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    print('errors in serializer')
+            print('test')
 
             profile.save()
             return Response({'message': 'You have successfully edited your profile'})
         except:
-            print('error')
-            return Response({'error': 'There was an error liking the post.  Pleas try again.'})
+
+            if serializer.is_valid():
+                pass
+            else:
+                print(serializer.errors, 'test')
+
+            return Response({'error': 'There was an error liking the post.  Please try again.', 'errors': serializer.errors})
         
         
     def partial_update(self, request, pk=None):
@@ -559,7 +579,7 @@ def search(request, query):
     View used for the functionality of the search bar of the home screen (home.html)
     """
     posts = Post.objects.all()
-    ranked_ids = rank_similarity(query)
+    ranked_ids = rank_similarity(query, False)
     ranked_posts = []
     for post in posts:
         if post.id in ranked_ids:
@@ -821,6 +841,50 @@ class EditPostView(FormView):
         return response
 
 
+@api_view()
+def profile(request, user):
+    """
+    View used for the functionality of the profile page (profile.html)
+    """
+    try:
+        profile = Profile.objects.get(username=user)
+
+        posts = profile.liked_posts.all()
+        liked_posts = []
+        for post in posts:
+            liked_posts.append(post.id)
+        drafts = list(profile.drafts.all())
+
+        posts = profile.buy_history.all()
+        buy_history = []
+        for post in posts:
+            buy_history.append(post.id)
+
+        posts = profile.drafts.all()
+        drafts = []
+        for post in posts:
+            drafts.append(post.id)
+
+        context = {
+            'id': profile.id,
+            'username': user,
+            'profile_picture': profile.profile_picture.url,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'date': profile.date,
+            'email': profile.email,
+            'liked_posts': liked_posts,
+            'buy_history': buy_history,
+            'drafts': drafts,
+        }
+    except: 
+        hasProfile = False
+        context = {
+            'error': 'Error retrieving the profile'
+        }
+
+    return Response(context)
+
 def getImage(request):
     """
     DO NOT DELETE, MAY BE USED FOR CHAT FEATURE
@@ -893,7 +957,7 @@ def get_embeddings(documents):
     response = requests.post(api_url, headers=headers, json={"inputs": documents, "options":{"wait_for_model":True}})
     return response.json()
 
-def rank_similarity(input):
+def rank_similarity(input, recommendation):
     """
     Ranks the similarity between the input vector and the document vectors using cosine similarity.
     In other words, it ranks the posts based on the user's search input
@@ -907,9 +971,9 @@ def rank_similarity(input):
     query = embeddings.pop(0)
     documents.pop(0)
 
-    return similarity(query, embeddings, documents, documents_ids)
+    return similarity(query, embeddings, documents, documents_ids, recommendation)
 
-def similarity(query, embeddings, documents, documents_ids):
+def similarity(query, embeddings, documents, documents_ids, recommendation):
     """
     Function that calculates the cosine similarity between the query and document vectors.
     Return a list of posts in descending order by their search ranking
@@ -926,4 +990,18 @@ def similarity(query, embeddings, documents, documents_ids):
         "Score": data
     })
     df = df.sort_values(by=['Score'], axis=0, ascending=False)
+
+    if recommendation:
+        return df
     return list(df['Post_id'])
+
+def search_similarity(queries):
+
+    dataframes = []
+
+    for i in range(len(queries)):
+        dataframes.append( rank_similarity( queries[i], True) )
+
+    dataframes[0].concat(dataframes[1], dataframes[2])
+    dataframes[0] = dataframes[0].sort_values(by=['Score'], axis=0, ascending=False)
+    return list(dataframes[0]['Post_id'])

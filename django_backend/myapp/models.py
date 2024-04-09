@@ -269,3 +269,26 @@ class Violation(models.Model):
         max_length=15
     )
     appeal = models.BooleanField(default=False, blank=True)
+
+
+class Interactions(models.Model):
+    """
+    Table to record user interactions with posts and profiles within the application
+    """
+    username = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="interaction_username",
+        to_field="username",
+        db_column="seller",
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="post_interaction",
+    )
+    query = models.TextField(max_length=100, blank=True)
+    # from_home = models.BooleanField(default=False, blank=True)
+    liked_post = models.BooleanField(default=False, blank=True)
+    has_messaged = models.BooleanField(default=False, blank=True)
+    # category = models.TextField(max_length=1000, blank=False)
