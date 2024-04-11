@@ -585,7 +585,7 @@ class InteractionViewSet(viewsets.ModelViewSet):
                 "liked_post": val.liked_post,
                 "has_messaged": val.has_messaged,
                 "username": val.username.username,
-                "post": val.post.product
+                "post": val.post.product if val.post else None
             }
         for val in interactions_list]
         
@@ -603,7 +603,7 @@ def home(request):
     return Response({'posts': posts, 'number_of_posts': number_of_posts})
 
 @api_view()
-def search(request, query):
+def search(request, query, username):
     """
     View used for the functionality of the search bar of the home screen (home.html)
     """
@@ -613,10 +613,30 @@ def search(request, query):
     for post in posts:
         if post.id in ranked_ids:
             ranked_posts.append(post)
+
+    interaction_serializer = InteractionSerializer(
+        data = {
+            'username': username,
+            'query': query
+        }, partial = True
+    )
+
+    if interaction_serializer.is_valid():
+        interaction_serializer.save()
+
     context = {
         'posts': ranked_ids,
     }
     return Response(context)
+
+@api_view()
+def user_recommendations(request, username):
+    interactions = Interaction.objects.filter(username=username)
+    top_queries = [val.query for val in interactions if len(val.query)]
+    ranked_ids = search_similarity(top_queries)
+    print(ranked_ids)
+    
+    return Response({'code': 200, 'posts': ranked_ids})
 
 def edit_button(request):
     username = request.POST['username']
@@ -1025,12 +1045,15 @@ def similarity(query, embeddings, documents, documents_ids, recommendation):
     return list(df['Post_id'])
 
 def search_similarity(queries):
+    """
+    Used to rank all post based on their recent interactions
+    """
 
     dataframes = []
 
     for i in range(len(queries)):
         dataframes.append( rank_similarity( queries[i], True) )
 
-    dataframes[0].concat(dataframes[1], dataframes[2])
-    dataframes[0] = dataframes[0].sort_values(by=['Score'], axis=0, ascending=False)
-    return list(dataframes[0]['Post_id'])
+    data = pd.concat([dataframes[0], dataframes[1], dataframes[2]])
+    data = data.sort_values(by=['Score'], axis=0, ascending=False)
+    return list(pd.unique(data['Post_id']))

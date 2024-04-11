@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from django.conf.urls import include
 from . import consumers
-from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, InteractionViewSet, search, profile, send_account_removal
+from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, InteractionViewSet, search, profile, send_account_removal, user_recommendations
 from rest_framework.routers import DefaultRouter
 
 """
@@ -32,7 +32,8 @@ router.register(r'interaction', InteractionViewSet, basename='interaction')
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('search/<str:query>', search, name='search'),
+    path('search/<str:query>/<str:username>', search, name='search'),
+    path('user_recommendations/<str:username>', user_recommendations, name='user_recommendations'),
     path('profile/<str:user>', profile, name='profile'),
     path('send_account_removal/<str:user>', send_account_removal, name='send_account_removal'),
     re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),

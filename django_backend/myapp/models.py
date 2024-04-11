@@ -286,6 +286,8 @@ class Interaction(models.Model):
         Post,
         on_delete=models.CASCADE,
         related_name="post_interaction",
+        blank=True,
+        null=True
     )
     query = models.TextField(max_length=100, blank=True)
     # from_home = models.BooleanField(default=False, blank=True)
