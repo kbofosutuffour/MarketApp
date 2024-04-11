@@ -90,29 +90,26 @@ class EditProfileViewSet(viewsets.ViewSet):
         try:
             profile = Profile.objects.get(username=username)
 
+            # When clicking the like button on the product description page,
+            # If user has already liked the post, remove the like.  Otherwise, like the post
             try:
                 profile.liked_posts.get(pk=request.data['liked_posts'])
                 profile.liked_posts.remove(request.data['liked_posts'])
             except:
                 profile.liked_posts.add(request.data['liked_posts'])
-                print(profile.username, request.data['liked_posts'], Interactions.objects.all())
+                # print(profile.username, request.data['liked_posts'], Interactions.objects.all())
 
                 if serializer.is_valid():
                     serializer.save()
                 else:
-                    print('errors in serializer')
-            print('test')
+                    return Response({'error': 'There was an error liking the post.  Please try again.', 'errors': serializer.errors, 'code': 400})
 
             profile.save()
-            return Response({'message': 'You have successfully edited your profile'})
+            return Response({'message': 'User has successfully liked a post', 'code': 200})
+        
         except:
-
-            if serializer.is_valid():
-                pass
-            else:
-                print(serializer.errors, 'test')
-
-            return Response({'error': 'There was an error liking the post.  Please try again.', 'errors': serializer.errors})
+            serializer.is_valid() # Needed to call serializer.errors
+            return Response({'error': 'There was an error liking the post.  Please try again.', 'errors': serializer.errors, 'code': 400})
         
         
     def partial_update(self, request, pk=None):
@@ -355,18 +352,25 @@ class Rooms(viewsets.ModelViewSet):
     
     def create(self, request):
         serializer = RoomSerializer(data=request.data)
+        interaction_serializer = InteractionSerializer(data={
+            'username': request.data['buyer'],
+            'post': request.data['id'],
+            'has_messaged': True
+        }, partial=True)
+
         try:
             exists = Room.objects.get(seller=request.data['seller'], buyer=request.data['buyer'], product=request.data['product'])
         except:
             exists = False
 
         if exists:
-            return Response({'exists': 1})
+            return Response({'exists': 1, 'code': 200})
         elif serializer.is_valid():
             serializer.save()
-            return Response({'created': 1})
+            if interaction_serializer.is_valid():
+                interaction_serializer.save()
+            return Response({'created': 1, 'code': 200})
         else:
-            print(serializer.errors)
             return Response({'error': serializer.errors})
         
     def partial_update(self, request, pk=None):
@@ -562,6 +566,31 @@ class ViolationViewSet(viewsets.ModelViewSet):
         self.update(request, *args, **kwargs)
         send_appeal(request.data)
         return Response({'message': 'Appeal sent'})
+    
+class InteractionViewSet(viewsets.ModelViewSet):
+
+    queryset = Interaction.objects.all()
+    serializer_class = InteractionSerializer
+
+    @action(methods=['get'], detail=False, url_path=r'get_interactions/(?P<username>\w+)')
+    def get_interactions(self, request, username):
+        """
+        Gets a list of all interactions a user has made with a post
+        """
+        interactions_list = Interaction.objects.filter(username=username)
+        interactions = [
+            {
+                "id": val.id,
+                "query": val.query,
+                "liked_post": val.liked_post,
+                "has_messaged": val.has_messaged,
+                "username": val.username.username,
+                "post": val.post.product
+            }
+        for val in interactions_list]
+        
+        return Response({'code': 200, 'interactions': interactions})
+            
 #----------------------------
 
 def home(request):

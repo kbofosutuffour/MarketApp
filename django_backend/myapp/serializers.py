@@ -113,5 +113,5 @@ class ViolationSerializer(serializers.ModelSerializer):
 class InteractionSerializer(serializers.ModelSerializer):
 
 	class Meta:
-		model = Interactions
+		model = Interaction
 		fields = '__all__'

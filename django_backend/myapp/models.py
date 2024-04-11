@@ -271,7 +271,7 @@ class Violation(models.Model):
     appeal = models.BooleanField(default=False, blank=True)
 
 
-class Interactions(models.Model):
+class Interaction(models.Model):
     """
     Table to record user interactions with posts and profiles within the application
     """

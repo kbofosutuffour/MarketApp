@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from django.conf.urls import include
 from . import consumers
-from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, search, profile, send_account_removal
+from myapp.views import Posts, Profiles, UserViewSet, Rooms, Messages, EditProfileViewSet, EditPostViewSet, UserSettingsViewSet, ReportViewSet, ImageViewSet, FeedbackViewSet, RatingViewSet, FlaggedPostViewSet, ViolationViewSet, InteractionViewSet, search, profile, send_account_removal
 from rest_framework.routers import DefaultRouter
 
 """
@@ -27,6 +27,7 @@ router.register(r'feedback', FeedbackViewSet, basename="feedback")
 router.register(r'ratings', RatingViewSet, basename="ratings")
 router.register(r'flag', FlaggedPostViewSet, basename="flag")
 router.register(r'violation', ViolationViewSet, basename="violation")
+router.register(r'interaction', InteractionViewSet, basename='interaction')
 
 urlpatterns = [
     path('', include(router.urls)),
