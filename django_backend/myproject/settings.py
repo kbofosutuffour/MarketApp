@@ -122,6 +122,16 @@ DATABASES = {
 
 }
 
+# Static images storage
+# https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "storages.backends.s3.S3Storage",
+#         "OPTIONS": {
+          
+#         },
+#     },
+# }
 
 
 # Password validation
