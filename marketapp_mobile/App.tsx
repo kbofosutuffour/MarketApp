@@ -382,6 +382,15 @@ function App(): JSX.Element {
     post: {},
   });
 
+  /**
+   * Boolean on whether to order posts on the homescreen by
+   * relevancy or by date posted
+   */
+  const [relevancy, setRelevancy] = useState({
+    showRelevancy: true,
+    posts: [],
+  });
+
   // When the defined components finish rendering, fetch
   // posts and profile information from the database
   useEffect(() => {
@@ -510,6 +519,29 @@ function App(): JSX.Element {
         })
         .catch((err: any) => console.log(err));
       setProfile(data);
+      await axios
+        .get(
+          `${
+            inProdMode ? prodURL : emulator ? devURL : ngrok
+          }/user_recommendations/${user.username}`,
+        )
+        .then(res => {
+          let results: any[] = [];
+          let post_ids = res.data.posts;
+
+          for (let i = 0; i < post_ids.length; i++) {
+            for (let j = 0; j < posts.posts.length; j++) {
+              if (post_ids[i] == posts.posts[j].id) {
+                results.push(posts.posts[j]);
+              }
+            }
+          }
+
+          setRelevancy({...relevancy, posts: results});
+        })
+        .catch((err: any) => {
+          console.log(err);
+        });
     }
   };
 
@@ -1004,6 +1036,35 @@ function App(): JSX.Element {
                 setCategory={setCategory}
               />
               <View style={styles.mainView}>
+                <View style={styles.postOrder}>
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setRelevancy({...relevancy, showRelevancy: false})
+                    }>
+                    <View
+                      style={
+                        !relevancy.showRelevancy
+                          ? styles.postOrderItemChosen
+                          : styles.postOrderItem
+                      }>
+                      <Text style={styles.postOrderText}>Newest</Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setRelevancy({...relevancy, showRelevancy: true})
+                    }>
+                    <View
+                      style={
+                        relevancy.showRelevancy
+                          ? styles.postOrderItemChosen
+                          : styles.postOrderItem
+                      }>
+                      <Text style={styles.postOrderText}>Relevancy</Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+
                 <ScrollView
                   contentInsetAdjustmentBehavior="automatic"
                   scrollEventThrottle={3}
@@ -1020,6 +1081,40 @@ function App(): JSX.Element {
                       opacity: !deletePost.deletePost ? 1.0 : 0.6,
                     }}>
                     {posts.showPosts &&
+                      relevancy.showRelevancy &&
+                      relevancy.posts.map(post => {
+                        /* Only show posts not created by the user on the home page */
+                        if (
+                          post.status !== 'SOLD' &&
+                          !post.draft &&
+                          !post.flag
+                        ) {
+                          return (
+                            <Post
+                              data={post}
+                              setDesc={setDesc}
+                              user={user}
+                              setDelete={setDelete}
+                              countFlagPost={countFlagPost}
+                              setHasLoaded={setHasLoaded}
+                              key={uuid.v4()}
+                              showPostOptions={showPostOptions}
+                            />
+                          );
+                        } else if (
+                          post.username === user.username &&
+                          post.draft &&
+                          !errorMessage &&
+                          !hasSeenDraft
+                        ) {
+                          setErrorMessage(
+                            'You have a draft. Would you like to continue writing it?',
+                          );
+                          setHasSeenDraft(true);
+                        }
+                      })}
+                    {posts.showPosts &&
+                      !relevancy.showRelevancy &&
                       posts.posts.map(post => {
                         /* Only show posts not created by the user on the home page */
                         if (
@@ -1670,6 +1765,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: normalize(15),
     fontSize: 17.5,
+  },
+  postOrder: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postOrderItem: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#D9D9D9',
+    width: '50%',
+  },
+  postOrderItemChosen: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    width: '50%',
+  },
+  postOrderText: {
+    color: 'black',
+    fontSize: normalize(20),
+    padding: 5,
   },
 });
 
