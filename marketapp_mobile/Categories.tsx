@@ -11,6 +11,9 @@ import dorm_goods from './media/categories/Dorm_goods-96.png';
 import supplies from './media/categories/Office_Supplies-96.png';
 import misc from './media/categories/Misc-96.png';
 import wm_logo from './media/categories/wm_logo.jpg';
+import technology from './media/categories/Technology-96.png';
+import appliances from './media/categories/Appliances-96.png';
+
 import {
   View,
   TouchableWithoutFeedback,
@@ -39,6 +42,8 @@ export function Categories(props: any): JSX.Element {
     Entertainment: entertainment,
     'Books': book,
     'Misc.': misc,
+    Technology: technology,
+    Appliances: appliances,
   };
 
   return (

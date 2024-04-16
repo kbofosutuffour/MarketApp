@@ -83,7 +83,7 @@ function ProductDescription(props: any): JSX.Element {
       .then(res => {
         data.data = res.data;
       })
-      .catch((err: any) => console.log(err));
+      .catch((err: any) => console.log(err, 'profile'));
     await axios
       .get(
         `${
@@ -106,7 +106,8 @@ function ProductDescription(props: any): JSX.Element {
       )
       .then(res => {
         data.date = res.data.date.split('-');
-      });
+      })
+      .catch((err: any) => console.log(err, 'get_date_created'));
     await axios
       .get(
         `${inProdMode ? prodURL : emulator ? devURL : ngrok}/profiles/get_id/${
@@ -115,7 +116,8 @@ function ProductDescription(props: any): JSX.Element {
       )
       .then(res => {
         data.id = res.data.id;
-      });
+      })
+      .catch((err: any) => console.log(err, 'get_id'));
     await axios
       .get(
         `${inProdMode ? prodURL : emulator ? devURL : ngrok}/user_settings/${
@@ -124,7 +126,8 @@ function ProductDescription(props: any): JSX.Element {
       )
       .then(res => {
         data.userSettings = res.data;
-      });
+      })
+      .catch((err: any) => console.log(err, 'user_settings'));
     setProfile(data);
     addAllImages();
     props.setHasLoaded(true);
@@ -172,6 +175,7 @@ function ProductDescription(props: any): JSX.Element {
     data.append('seller_profile_picture', spf);
     data.append('product', product);
     data.append('image', image);
+    data.append('id', props.post.id);
 
     await axios
       .post(

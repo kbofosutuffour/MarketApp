@@ -835,6 +835,8 @@ function Login(props): JSX.Element {
     verifyEmail: false,
   });
 
+  const [hasLoggedIn, disableLogin] = useState(false);
+
   const [info, setInfo] = useState({
     username: '',
     password: '',
@@ -886,7 +888,6 @@ function Login(props): JSX.Element {
           data,
         )
         .then(response => {
-          console.log(response.data);
           if (response.data.login) {
             if (response.data.register) {
               setLoginState({
@@ -902,6 +903,7 @@ function Login(props): JSX.Element {
           } else {
             setErrorMessage('Invalid Login Credentials.  Please try again.');
             setInfo({...info, password: ''});
+            disableLogin(false);
           }
         })
         .catch((err: any) => console.log(err));
@@ -939,8 +941,13 @@ function Login(props): JSX.Element {
                 textContentType="password"
                 secureTextEntry={true}
               />
-              <TouchableWithoutFeedback onPress={() => login()}>
-                <Text style={styles.loginButton}>Log In</Text>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  login();
+                  disableLogin(true);
+                }}
+                disabled={hasLoggedIn}>
+                <Text style={styles.loginButton}>Login</Text>
               </TouchableWithoutFeedback>
               <TouchableWithoutFeedback
                 onPress={() =>

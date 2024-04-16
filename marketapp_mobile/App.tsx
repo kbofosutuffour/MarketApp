@@ -17,7 +17,6 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  useColorScheme,
   View,
 } from 'react-native';
 
@@ -597,7 +596,11 @@ function App(): JSX.Element {
 
     // Send the user search to the searching algorithm function in the backend
     await axios
-      .get(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/search/${text}`)
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/search/${text}/${
+          user.username
+        }`,
+      )
       .then(res => {
         post_ids = res.data.posts;
       })
@@ -608,7 +611,6 @@ function App(): JSX.Element {
     for (let i = 0; i < post_ids.length; i++) {
       for (let j = 0; j < posts.posts.length; j++) {
         if (post_ids[i] == posts.posts[j].id) {
-          console.log(post_ids[i], posts.posts[j]);
           results.push(posts.posts[j]);
         }
       }
@@ -1231,6 +1233,7 @@ function App(): JSX.Element {
               hasLoaded={hasLoaded}
               chatNotifications={chatNotifications}
               setChatNotifications={setChatNotifications}
+              getRooms={getRooms}
             />
           </View>
         )}

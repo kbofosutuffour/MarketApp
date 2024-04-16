@@ -79,20 +79,37 @@ class EditProfileViewSet(viewsets.ViewSet):
         """
         Likes or removes a like from a post
         """
+
+        serializer = InteractionSerializer(
+            data = {
+            'username': username,
+            'post': request.data['liked_posts'],
+            'liked_post': True
+        }, partial = True)
+    
         try:
             profile = Profile.objects.get(username=username)
 
+            # When clicking the like button on the product description page,
+            # If user has already liked the post, remove the like.  Otherwise, like the post
             try:
                 profile.liked_posts.get(pk=request.data['liked_posts'])
                 profile.liked_posts.remove(request.data['liked_posts'])
             except:
                 profile.liked_posts.add(request.data['liked_posts'])
+                # print(profile.username, request.data['liked_posts'], Interactions.objects.all())
+
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response({'error': 'There was an error liking the post.  Please try again.', 'errors': serializer.errors, 'code': 400})
 
             profile.save()
-            return Response({'message': 'You have successfully edited your profile'})
+            return Response({'message': 'User has successfully liked a post', 'code': 200})
+        
         except:
-            print('error')
-            return Response({'error': 'There was an error liking the post.  Pleas try again.'})
+            serializer.is_valid() # Needed to call serializer.errors
+            return Response({'error': 'There was an error liking the post.  Please try again.', 'errors': serializer.errors, 'code': 400})
         
         
     def partial_update(self, request, pk=None):
@@ -336,19 +353,49 @@ class Rooms(viewsets.ModelViewSet):
     
     def create(self, request):
         serializer = RoomSerializer(data=request.data)
+        interaction_serializer = InteractionSerializer(data={
+            'username': request.data['buyer'],
+            'post': request.data['id'],
+            'has_messaged': True
+        }, partial=True)
+
         try:
             exists = Room.objects.get(seller=request.data['seller'], buyer=request.data['buyer'], product=request.data['product'])
         except:
             exists = False
 
         if exists:
-            return Response({'exists': 1})
+            return Response({'exists': 1, 'code': 200})
         elif serializer.is_valid():
             serializer.save()
-            return Response({'created': 1})
+            if interaction_serializer.is_valid():
+                interaction_serializer.save()
+            return Response({'created': 1, 'code': 200})
         else:
-            print(serializer.errors)
             return Response({'error': serializer.errors})
+        
+    def partial_update(self, request, pk=None):
+        # room = Room.objects.get(pk=pk)
+        try:
+            room = Room.objects.get(pk=request.data['id'])
+
+            # Update the buyer and seller notifications for the room based on user action
+            room.buyer_notifications = room.buyer_notifications + int(request.data['buyer_notifications'])
+            room.seller_notifications = room.seller_notifications + int(request.data['seller_notifications'])
+
+            # Added to fix rare bug when removing notifications
+            # request information can send negative values
+            if room.buyer_notifications < 0:
+                room.buyer_notifications = 0
+            if room.seller_notifications < 0:
+                room.seller_notifications = 0
+
+            room.save()
+            return Response({'code': 200})
+        except:
+            return Response({'code': 400})
+
+
 
     
 class Messages(viewsets.ModelViewSet):
@@ -520,6 +567,31 @@ class ViolationViewSet(viewsets.ModelViewSet):
         self.update(request, *args, **kwargs)
         send_appeal(request.data)
         return Response({'message': 'Appeal sent'})
+    
+class InteractionViewSet(viewsets.ModelViewSet):
+
+    queryset = Interaction.objects.all()
+    serializer_class = InteractionSerializer
+
+    @action(methods=['get'], detail=False, url_path=r'get_interactions/(?P<username>\w+)')
+    def get_interactions(self, request, username):
+        """
+        Gets a list of all interactions a user has made with a post
+        """
+        interactions_list = Interaction.objects.filter(username=username)
+        interactions = [
+            {
+                "id": val.id,
+                "query": val.query,
+                "liked_post": val.liked_post,
+                "has_messaged": val.has_messaged,
+                "username": val.username.username,
+                "post": val.post.product if val.post else None
+            }
+        for val in interactions_list]
+        
+        return Response({'code': 200, 'interactions': interactions})
+            
 #----------------------------
 
 def home(request):
@@ -532,20 +604,40 @@ def home(request):
     return Response({'posts': posts, 'number_of_posts': number_of_posts})
 
 @api_view()
-def search(request, query):
+def search(request, query, username):
     """
     View used for the functionality of the search bar of the home screen (home.html)
     """
     posts = Post.objects.all()
-    ranked_ids = rank_similarity(query)
+    ranked_ids = rank_similarity(query, False)
     ranked_posts = []
     for post in posts:
         if post.id in ranked_ids:
             ranked_posts.append(post)
+
+    interaction_serializer = InteractionSerializer(
+        data = {
+            'username': username,
+            'query': query
+        }, partial = True
+    )
+
+    if interaction_serializer.is_valid():
+        interaction_serializer.save()
+
     context = {
         'posts': ranked_ids,
     }
     return Response(context)
+
+@api_view()
+def user_recommendations(request, username):
+    interactions = Interaction.objects.filter(username=username)
+    top_queries = [val.query for val in interactions if len(val.query)]
+    ranked_ids = search_similarity(top_queries)
+    print(ranked_ids)
+    
+    return Response({'code': 200, 'posts': ranked_ids})
 
 def edit_button(request):
     username = request.POST['username']
@@ -799,6 +891,50 @@ class EditPostView(FormView):
         return response
 
 
+@api_view()
+def profile(request, user):
+    """
+    View used for the functionality of the profile page (profile.html)
+    """
+    try:
+        profile = Profile.objects.get(username=user)
+
+        posts = profile.liked_posts.all()
+        liked_posts = []
+        for post in posts:
+            liked_posts.append(post.id)
+        drafts = list(profile.drafts.all())
+
+        posts = profile.buy_history.all()
+        buy_history = []
+        for post in posts:
+            buy_history.append(post.id)
+
+        posts = profile.drafts.all()
+        drafts = []
+        for post in posts:
+            drafts.append(post.id)
+
+        context = {
+            'id': profile.id,
+            'username': user,
+            'profile_picture': profile.profile_picture.url,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'date': profile.date,
+            'email': profile.email,
+            'liked_posts': liked_posts,
+            'buy_history': buy_history,
+            'drafts': drafts,
+        }
+    except: 
+        hasProfile = False
+        context = {
+            'error': 'Error retrieving the profile'
+        }
+
+    return Response(context)
+
 def getImage(request):
     """
     DO NOT DELETE, MAY BE USED FOR CHAT FEATURE
@@ -871,7 +1007,7 @@ def get_embeddings(documents):
     response = requests.post(api_url, headers=headers, json={"inputs": documents, "options":{"wait_for_model":True}})
     return response.json()
 
-def rank_similarity(input):
+def rank_similarity(input, recommendation):
     """
     Ranks the similarity between the input vector and the document vectors using cosine similarity.
     In other words, it ranks the posts based on the user's search input
@@ -885,9 +1021,9 @@ def rank_similarity(input):
     query = embeddings.pop(0)
     documents.pop(0)
 
-    return similarity(query, embeddings, documents, documents_ids)
+    return similarity(query, embeddings, documents, documents_ids, recommendation)
 
-def similarity(query, embeddings, documents, documents_ids):
+def similarity(query, embeddings, documents, documents_ids, recommendation):
     """
     Function that calculates the cosine similarity between the query and document vectors.
     Return a list of posts in descending order by their search ranking
@@ -904,4 +1040,21 @@ def similarity(query, embeddings, documents, documents_ids):
         "Score": data
     })
     df = df.sort_values(by=['Score'], axis=0, ascending=False)
+
+    if recommendation:
+        return df
     return list(df['Post_id'])
+
+def search_similarity(queries):
+    """
+    Used to rank all post based on their recent interactions
+    """
+
+    dataframes = []
+
+    for i in range(len(queries)):
+        dataframes.append( rank_similarity( queries[i], True) )
+
+    data = pd.concat([dataframes[0], dataframes[1], dataframes[2]])
+    data = data.sort_values(by=['Score'], axis=0, ascending=False)
+    return list(pd.unique(data['Post_id']))
