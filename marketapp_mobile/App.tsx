@@ -1414,9 +1414,8 @@ function App(): JSX.Element {
             </TouchableWithoutFeedback>
           </View>
         )}
-        {postOptions.showOptions &&
-          user.username !== postOptions.post.username &&
-          !searchedPosts.showResults(
+        {postOptions.showOptions && !searchedPosts.showResults &&
+          user.username !== postOptions.post.username && (
             <View style={styles.newPostOptionsContainer}>
               <View style={{width: '80%'}}>
                 <TouchableWithoutFeedback
@@ -1462,7 +1461,7 @@ function App(): JSX.Element {
                   <Text style={styles.closePostOptions}>Close</Text>
                 </TouchableWithoutFeedback>
               </View>
-            </View>,
+            </View>
           )}
       </UserContext.Provider>
     </SafeAreaView>

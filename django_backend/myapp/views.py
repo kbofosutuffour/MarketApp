@@ -987,6 +987,12 @@ def profile(request, user):
 
     return Response(context)
 
+@api_view()
+def create_sample_posts(request):
+    df = pd.read_csv('../NLP/new_amazon.csv')
+    print(df.head())
+    return Response({'code': 200})
+
 
 #------------------------------------------------------------ Machine Learning ----------------------------------------------------------#
 
