@@ -36,7 +36,7 @@ urlpatterns = [
     path('user_recommendations/<str:username>', user_recommendations, name='user_recommendations'),
     path('profile/<str:user>', profile, name='profile'),
     path('send_account_removal/<str:user>', send_account_removal, name='send_account_removal'),
-    path('create_sample_posts', create_sample_posts, name='create_sample_posts'),
+    # path('create_sample_posts', create_sample_posts, name='create_sample_posts'),
     re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
 ]
 
