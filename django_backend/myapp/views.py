@@ -989,8 +989,18 @@ def profile(request, user):
 
 @api_view()
 def create_sample_posts(request):
-    df = pd.read_csv('../NLP/new_amazon.csv')
-    print(df.head())
+    df = pd.read_csv('../NLP/countries_amazon.csv')
+    usernames = [profile.username for profile in Profile.objects.all()]
+    for index, row in df.iterrows():
+        try:
+            post = Post.objects.create(
+                product = row['Product Title'],
+                description = row['Product Description'],
+                price = float(row['Price']),
+                username = Profile.objects.get( username = usernames[random.randint(0, len(usernames)-1)] )
+            )
+        except:
+            print(row)
     return Response({'code': 200})
 
 
