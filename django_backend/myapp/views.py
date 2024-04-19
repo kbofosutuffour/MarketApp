@@ -327,7 +327,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'error': serializer.errors, "status": 400})
     
          
-
 class Rooms(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
@@ -396,8 +395,6 @@ class Rooms(viewsets.ModelViewSet):
             return Response({'code': 400})
 
 
-
-    
 class Messages(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
