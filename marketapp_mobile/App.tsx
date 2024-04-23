@@ -391,6 +391,12 @@ function App(): JSX.Element {
     posts: [],
   });
 
+  /**
+   * Sets the current page on the home screen
+   */
+
+  const [page, setPage] = useState(1);
+
   // When the defined components finish rendering, fetch
   // posts and profile information from the database
   useEffect(() => {
@@ -428,7 +434,8 @@ function App(): JSX.Element {
    * of the current user
    */
   const fetchData = async () => {
-    await getPosts();
+    await getPosts(1);
+    setPage(1);
 
     // asynchronous function that gets the profile information
     // for the given username
@@ -548,9 +555,13 @@ function App(): JSX.Element {
   /**
    * asynchronous function that gets all existing posts
    */
-  const getPosts = async () => {
+  const getPosts = async (page = 1) => {
     await axios
-      .get(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts`)
+      .get(
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/posts/?page=${page}`,
+      )
       .then(res => {
         if (res.data.length === 0) {
           setErrorMessage(
@@ -559,7 +570,10 @@ function App(): JSX.Element {
         }
         setPosts({
           showPosts: true,
-          posts: res.data.reverse(),
+          posts:
+            page === 1
+              ? res.data.results.reverse()
+              : posts.posts.concat(res.data.results.reverse()),
         });
       })
       .catch((err: any) => {
@@ -599,7 +613,7 @@ function App(): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     setProfile({...profile, data: data});
-    await getPosts();
+    await getPosts(page);
   };
 
   /**
@@ -866,7 +880,8 @@ function App(): JSX.Element {
    * Boolean on whether the user is on top of the page
    */
   const [onTop, isOnTop] = useState(true);
-
+  const [onBottom, isOnBottom] = useState(false);
+  const [maxHeight, setMaxHeight] = useState(0);
   /**
    * Used to detect whether the user has scrolled to the
    * top of the page.  Used in conjunction with refreshPage to
@@ -875,6 +890,7 @@ function App(): JSX.Element {
    */
   const handleScroll = (height: number) => {
     isOnTop(height <= 0 ? true : false);
+    isOnBottom(height !== 0 && height >= maxHeight ? true : false);
   };
 
   /**
@@ -910,6 +926,14 @@ function App(): JSX.Element {
     }
   };
 
+  const newPage = async (velocity: number | undefined) => {
+    if (onBottom && velocity && velocity > MAX_VELOCITY) {
+      console.log('onBottom', onBottom, velocity, MAX_VELOCITY);
+      await getPosts(page + 1);
+      setPage(page + 1);
+    }
+  };
+
   /**
    * Function to delete the post in the database
    * @param id The id of the selected post
@@ -931,7 +955,8 @@ function App(): JSX.Element {
       data: {},
       deletePost: false,
     });
-    await getPosts();
+    await getPosts(1);
+    setPage(1);
     refreshPage(MAX_VELOCITY + 1);
   };
 
@@ -1071,19 +1096,22 @@ function App(): JSX.Element {
                   onScroll={event =>
                     handleScroll(event.nativeEvent.contentOffset.y)
                   }
-                  onScrollEndDrag={event =>
-                    refreshPage(Math.abs(event.nativeEvent.velocity?.y))
-                  }
+                  onScrollEndDrag={event => {
+                    refreshPage(Math.abs(event.nativeEvent.velocity?.y));
+                    newPage(Math.abs(event.nativeEvent.velocity?.y));
+                  }}
                   style={styles.scrollView}>
                   <View
                     style={{
                       backgroundColor: Colors.white,
                       opacity: !deletePost.deletePost ? 1.0 : 0.6,
-                    }}>
+                    }}
+                    onLayout={e =>
+                      setMaxHeight(e.nativeEvent.layout.height - 545)
+                    }>
                     {posts.showPosts &&
                       relevancy.showRelevancy &&
                       relevancy.posts.map(post => {
-                        /* Only show posts not created by the user on the home page */
                         if (
                           post.status !== 'SOLD' &&
                           !post.draft &&
@@ -1414,7 +1442,8 @@ function App(): JSX.Element {
             </TouchableWithoutFeedback>
           </View>
         )}
-        {postOptions.showOptions && !searchedPosts.showResults &&
+        {postOptions.showOptions &&
+          !searchedPosts.showResults &&
           user.username !== postOptions.post.username && (
             <View style={styles.newPostOptionsContainer}>
               <View style={{width: '80%'}}>

@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.core.paginator import Paginator
 
 from .serializers import *
 import random
