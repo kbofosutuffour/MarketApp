@@ -37,13 +37,15 @@ class Posts(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    @action(methods=['get'], detail=False, url_path=r'get_posts/(?P<username>\w+)')
-    def get_posts(self, request, username, *args, **kwargs):
+    @action(methods=['get'], detail=False, url_path=r'get_posts/(?P<username>\w+)/(?P<page>\w+)')
+    def get_posts(self, request, username, page, *args, **kwargs):
 
         posts = Post.objects.filter(username=username)
         posts = self.filter_queryset(posts)
+        paginator = Paginator(posts, 10)
+        page_obj = paginator.get_page(page)
         # page = self.paginate_queryset(posts)
-        serializer = self.get_serializer(posts, many=True)
+        serializer = self.get_serializer(page_obj, many=True)
         print(serializer.data)
         return Response(serializer.data)
     
