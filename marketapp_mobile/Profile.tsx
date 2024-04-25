@@ -342,7 +342,6 @@ function EditProfile(props: any): JSX.Element {
  * @returns The profile page
  */
 function Profile(props: any): JSX.Element {
-  const [posts, setPosts] = useState([]); // Will hold all of the post created by the user
 
   /**
    * The base url used to access images and other data within the app directory.
@@ -389,6 +388,7 @@ function Profile(props: any): JSX.Element {
     data: {},
   });
 
+
   /**
    * Function to delete the post in the database
    * @param id The id of the selected post
@@ -421,7 +421,8 @@ function Profile(props: any): JSX.Element {
   // Function that retrieves all of the post created
   // by the user currently in the database after the page renders
   useEffect(() => {
-    setPosts(view.main ? props.profile.posts : props.posts);
+    props.getProfilePosts(1);
+    props.setProfilePage(1);
     setLikedPosts(props.profile.data.liked_posts);
     setBuyHistory(props.profile.data.buy_history);
   }, []);
@@ -432,6 +433,35 @@ function Profile(props: any): JSX.Element {
       await refreshPage();
     }
   });
+
+  const [onBottom, isOnBottom] = useState(false);
+  const [maxHeight, setMaxHeight] = useState(0);
+  /**
+   * Used to detect whether the user has scrolled to the
+   * top of the page.  Used in conjunction with refreshPage to
+   * refresh the page when user swipes down
+   * @param height the height of the scroll view
+   */
+  const handleScroll = (height: number) => {
+    isOnBottom(height !== 0 && height >= maxHeight ? true : false);
+  };
+
+  /**
+   * Maximum vertical speed considered before
+   * the page will refresh
+   */
+  const MAX_VELOCITY = 1.5;
+
+  /**
+   * When the user is on the bottom of the home page,
+   * add more posts by making another api call for more posts
+   */
+  const newPage = async (velocity: number | undefined) => {
+    if (onBottom && velocity && velocity > MAX_VELOCITY) {
+      await props.getProfilePosts(props.page + 1);
+      props.setProfilePage(props.page + 1);
+    }
+  };
 
   const refreshPage = async () => {
     await axios
@@ -644,7 +674,15 @@ function Profile(props: any): JSX.Element {
               {/* Where the user's posts are shown */}
               <ScrollView
                 contentInsetAdjustmentBehavior="automatic"
-                style={styles.scrollView}>
+                scrollEventThrottle={3}
+                style={styles.scrollView}
+                onScroll={event =>
+                  handleScroll(event.nativeEvent.contentOffset.y)
+                }
+                onScrollEndDrag={event => {
+                  refreshPage(Math.abs(event.nativeEvent.velocity?.y));
+                  newPage(Math.abs(event.nativeEvent.velocity?.y));
+                }}>
                 <View
                   style={{
                     display: 'flex',
@@ -652,7 +690,7 @@ function Profile(props: any): JSX.Element {
                     alignItems: 'flex-end',
                     padding: 0,
                   }}>
-                  {props.all_posts.map(post => {
+                  {props.posts.map(post => {
                     if (type.sell_history) {
                       if (post.username === props.profile.data.username) {
                         return (
@@ -672,7 +710,7 @@ function Profile(props: any): JSX.Element {
                     }
                   })}
                   {view.main &&
-                    props.all_posts.map(post => {
+                    props.posts.map(post => {
                       if (type.liked_posts) {
                         if (
                           likedPosts &&

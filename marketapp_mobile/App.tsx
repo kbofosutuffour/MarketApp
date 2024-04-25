@@ -6,10 +6,10 @@
  * @format
  */
 
-import React, {useEffect, useState, useContext} from 'react';
-import {Dimensions, Platform, PixelRatio} from 'react-native';
+import React, {useEffect, useState, useContext, memo} from 'react';
 
 import {
+  View,
   Image,
   SafeAreaView,
   ScrollView,
@@ -17,7 +17,9 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  View,
+  Dimensions,
+  Platform,
+  PixelRatio,
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -319,6 +321,8 @@ function App(): JSX.Element {
     posts: [],
   });
 
+  const [profilePosts, setProfilePosts] = useState([]);
+
   const [searchedPosts, setSearch] = useState({
     showSearchBar: false,
     showResults: false,
@@ -387,15 +391,15 @@ function App(): JSX.Element {
    * relevancy or by date posted
    */
   const [relevancy, setRelevancy] = useState({
-    showRelevancy: true,
+    showRelevancy: false,
     posts: [],
   });
 
   /**
    * Sets the current page on the home screen
    */
-
   const [page, setPage] = useState(1);
+  const [profilePage, setProfilePage] = useState(1);
 
   // When the defined components finish rendering, fetch
   // posts and profile information from the database
@@ -484,16 +488,7 @@ function App(): JSX.Element {
           data.id = res.data.id;
         })
         .catch((err: any) => console.log(err));
-      await axios
-        .get(
-          `${
-            inProdMode ? prodURL : emulator ? devURL : ngrok
-          }/posts/get_posts/${user.username}`,
-        )
-        .then(res => {
-          data.posts = res.data;
-        })
-        .catch((err: any) => console.log(err));
+      await getProfilePosts(1);
       await axios
         .get(
           `${
@@ -579,6 +574,23 @@ function App(): JSX.Element {
       .catch((err: any) => {
         console.log(err);
       });
+  };
+
+  const getProfilePosts = async (page = 1) => {
+    await axios
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/get_posts/${
+          user.username
+        }/${page}`,
+      )
+      .then(res => {
+        setProfilePosts(
+          profilePage === 1
+            ? res.data.reverse()
+            : profilePosts.concat(res.data.reverse()),
+        );
+      })
+      .catch((err: any) => console.log(err));
   };
 
   /**
@@ -926,9 +938,12 @@ function App(): JSX.Element {
     }
   };
 
+  /**
+   * When the user is on the bottom of the home page,
+   * add more posts by making another api call for more posts
+   */
   const newPage = async (velocity: number | undefined) => {
     if (onBottom && velocity && velocity > MAX_VELOCITY) {
-      console.log('onBottom', onBottom, velocity, MAX_VELOCITY);
       await getPosts(page + 1);
       setPage(page + 1);
     }
@@ -1303,7 +1318,10 @@ function App(): JSX.Element {
             <Profile
               profile={profile}
               returnHome={returnHome}
-              all_posts={posts.posts}
+              posts={profilePosts}
+              page={profilePage}
+              setProfilePage={setProfilePage}
+              getProfilePosts={getProfilePosts}
               viewSettings={viewSettings}
               viewPost={viewPost}
               current_user={user.username}
