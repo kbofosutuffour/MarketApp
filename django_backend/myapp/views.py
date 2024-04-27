@@ -1032,6 +1032,8 @@ def rank_similarity(input, recommendation):
     In other words, it ranks the posts based on the user's search input
     """
     posts = Post.objects.all()
+    paginator = Paginator(posts, 500)
+    posts = paginator.get_page(1)
     documents = [post.product for post in posts]
     documents.insert(0, input)
     documents_ids = [post.id for post in posts]

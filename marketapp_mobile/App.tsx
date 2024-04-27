@@ -521,29 +521,6 @@ function App(): JSX.Element {
         })
         .catch((err: any) => console.log(err));
       setProfile(data);
-      await axios
-        .get(
-          `${
-            inProdMode ? prodURL : emulator ? devURL : ngrok
-          }/user_recommendations/${user.username}`,
-        )
-        .then(res => {
-          let results: any[] = [];
-          let post_ids = res.data.posts;
-
-          for (let i = 0; i < post_ids.length; i++) {
-            for (let j = 0; j < posts.posts.length; j++) {
-              if (post_ids[i] == posts.posts[j].id) {
-                results.push(posts.posts[j]);
-              }
-            }
-          }
-
-          setRelevancy({...relevancy, posts: results});
-        })
-        .catch((err: any) => {
-          console.log(err);
-        });
     }
   };
 
@@ -642,6 +619,19 @@ function App(): JSX.Element {
         setRooms(res.data);
       })
       .catch((err: any) => console.log(err));
+  };
+
+  const getRelevancy = () => {
+    let results: any[] = [];
+
+    for (let i = 0; i < relevancy.posts.length; i++) {
+      for (let j = 0; j < posts.posts.length; j++) {
+        if (relevancy.posts[i] == posts.posts[j].id) {
+          results.push(posts.posts[j]);
+        }
+      }
+    }
+    setRelevancy({...relevancy, posts: results});
   };
 
   /**
@@ -944,8 +934,12 @@ function App(): JSX.Element {
    */
   const newPage = async (velocity: number | undefined) => {
     if (onBottom && velocity && velocity > MAX_VELOCITY) {
-      await getPosts(page + 1);
-      setPage(page + 1);
+      if (relevancy.showRelevancy) {
+        getRelevancy();
+      } else {
+        await getPosts(page + 1);
+        setPage(page + 1);
+      }
     }
   };
 
