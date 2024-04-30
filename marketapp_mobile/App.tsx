@@ -631,6 +631,7 @@ function App(): JSX.Element {
         }
       }
     }
+    console.log(results);
     setRelevancy({...relevancy, posts: results});
   };
 

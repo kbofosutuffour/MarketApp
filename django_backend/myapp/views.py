@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core.paginator import Paginator
+from wonderwords import RandomWord
 
 from .serializers import *
 import random
@@ -1004,6 +1005,35 @@ def create_sample_posts(request):
     #         )
     #     except:
     #         print(row)
+    return Response({'code': 200})
+
+@api_view()
+def create_interactions(request):
+    posts = Post.objects.all()
+    usernames = [profile.username for profile in Profile.objects.all()]
+    for i in range(2000):
+        try:
+            from_post = random.randint(0,1) == 1
+            liked_post = random.randint(0,1) == 1
+            if from_post:
+                post = Post.objects.get(pk = random.randint(0, len(posts)-1))
+                interaction = Interaction.objects.create(
+                    username = Profile.objects.get( username = usernames[random.randint(0, len(usernames)-1)] ),
+                    post = post,
+                    liked_post = liked_post,
+                    has_messaged = not liked_post,
+                )
+            else:
+                query = RandomWord()
+                interaction = Interaction.objects.create(
+                    username = Profile.objects.get( username = usernames[random.randint(0, len(usernames)-1)] ),
+                    post = None,
+                    liked_post = False,
+                    has_messaged = False,
+                    query = query.word()
+                )
+        finally:
+            pass
     return Response({'code': 200})
 
 
