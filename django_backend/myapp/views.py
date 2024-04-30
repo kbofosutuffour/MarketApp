@@ -1023,7 +1023,6 @@ def create_interactions(request):
                     liked_post = liked_post,
                     has_messaged = not liked_post,
                 )
-                print(interaction.id, interaction.post)
             else:
                 query = RandomWord()
                 interaction = Interaction.objects.create(
@@ -1033,7 +1032,6 @@ def create_interactions(request):
                     has_messaged = False,
                     query = query.word()
                 )
-                print(interaction.id, interaction.query)
         finally:
             pass
     return Response({'code': 200})
