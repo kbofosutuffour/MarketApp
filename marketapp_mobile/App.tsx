@@ -6,7 +6,7 @@
  * @format
  */
 
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useEffect, useState, useContext,Component} from 'react';
 import {Dimensions, Platform, PixelRatio} from 'react-native';
 
 import {
@@ -19,6 +19,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+
+import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
@@ -58,6 +60,10 @@ function normalize(size: any) {
     return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
   }
 }
+
+// onSwipeLeft(gestureState) {
+//   // your function to go back
+// }
 
 /**
  * An attempt to make the height of each page
@@ -231,7 +237,7 @@ function Post(props: any): JSX.Element {
   };
 
   return (
-    <TouchableWithoutFeedback //Makes the post component react to a tap
+    <TouchableWithoutFeedback //Makes the post component react to a tap //Home page -> Post Description Page
       onPress={() => {
         props.setHasLoaded(false);
         props.setDesc({
@@ -250,11 +256,9 @@ function Post(props: any): JSX.Element {
           <Text style={{color: 'black', fontSize: 17.5}}>
             {props.data.product}
           </Text>
-          <Text style={{fontSize: normalize(10)}}>{props.data.username}</Text>
-          <Text style={{fontSize: normalize(10)}}>${props.data.price}</Text>
-          <Text style={styles.postedDate}>
-            {'Posted ' + getDifference(props.data.date) + ' ago'}
+          <Text style={{fontSize: normalize(10)}}>{props.data.username} • {getDifference(props.data.date) + ' ago'}
           </Text>
+          <Text style={{fontSize: normalize(13)}}>${props.data.price}</Text>
         </View>
 
         {props.user && (
@@ -525,6 +529,7 @@ function App(): JSX.Element {
             'There are currently no posts.  Create a post or try again later.',
           );
         }
+        console.log(res.data)
         setPosts({
           showPosts: true,
           posts: res.data.reverse(),
