@@ -16,6 +16,8 @@ from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.core.paginator import Paginator
+from wonderwords import RandomWord
 
 from .serializers import *
 import random
@@ -36,13 +38,15 @@ class Posts(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    @action(methods=['get'], detail=False, url_path=r'get_posts/(?P<username>\w+)')
-    def get_posts(self, request, username, *args, **kwargs):
+    @action(methods=['get'], detail=False, url_path=r'get_posts/(?P<username>\w+)/(?P<page>\w+)')
+    def get_posts(self, request, username, page, *args, **kwargs):
 
         posts = Post.objects.filter(username=username)
         posts = self.filter_queryset(posts)
+        paginator = Paginator(posts, 10)
+        page_obj = paginator.get_page(page)
         # page = self.paginate_queryset(posts)
-        serializer = self.get_serializer(posts, many=True)
+        serializer = self.get_serializer(page_obj, many=True)
         print(serializer.data)
         return Response(serializer.data)
     
@@ -285,7 +289,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         code = random.randint(10000,99999)
         code = str(code)
-        send_code(request, code, request.data['email'])
+        print(code)
+        #send_code(request, code, request.data['email'])
         return Response({'code': code, 'status': 200})
     
     @action(methods=['post'], detail=False)
@@ -326,7 +331,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'error': serializer.errors, "status": 400})
     
          
-
 class Rooms(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
@@ -395,8 +399,6 @@ class Rooms(viewsets.ModelViewSet):
             return Response({'code': 400})
 
 
-
-    
 class Messages(viewsets.ModelViewSet):
     """
     View to list all of the profiles in the system
@@ -986,6 +988,54 @@ def profile(request, user):
 
     return Response(context)
 
+@api_view()
+def create_sample_posts(request):
+    """
+    Used to create a large amount of sample posts
+    """
+    # df = pd.read_csv('../NLP/preprocessed_amazon.csv')
+    # usernames = [profile.username for profile in Profile.objects.all()]
+    # for index, row in df.iterrows():
+    #     try:
+    #         post = Post.objects.create(
+    #             product = row['Product Title'],
+    #             description = row['Product Description'],
+    #             price = float(row['Price']),
+    #             username = Profile.objects.get( username = usernames[random.randint(0, len(usernames)-1)] )
+    #         )
+    #     except:
+    #         print(row)
+    return Response({'code': 200})
+
+@api_view()
+def create_interactions(request):
+    posts = Post.objects.all()
+    usernames = [profile.username for profile in Profile.objects.all()]
+    for i in range(2000):
+        try:
+            from_post = random.randint(0,1) == 1
+            liked_post = random.randint(0,1) == 1
+            if from_post:
+                post = Post.objects.get(pk = random.randint(0, len(posts)-1))
+                interaction = Interaction.objects.create(
+                    username = Profile.objects.get( username = usernames[random.randint(0, len(usernames)-1)] ),
+                    post = post,
+                    liked_post = liked_post,
+                    has_messaged = not liked_post,
+                )
+            else:
+                query = RandomWord()
+                interaction = Interaction.objects.create(
+                    username = Profile.objects.get( username = usernames[random.randint(0, len(usernames)-1)] ),
+                    post = None,
+                    liked_post = False,
+                    has_messaged = False,
+                    query = query.word()
+                )
+        finally:
+            pass
+    return Response({'code': 200})
+
 
 #------------------------------------------------------------ Machine Learning ----------------------------------------------------------#
 
@@ -1012,6 +1062,8 @@ def rank_similarity(input, recommendation):
     In other words, it ranks the posts based on the user's search input
     """
     posts = Post.objects.all()
+    paginator = Paginator(posts, 500)
+    posts = paginator.get_page(1)
     documents = [post.product for post in posts]
     documents.insert(0, input)
     documents_ids = [post.id for post in posts]

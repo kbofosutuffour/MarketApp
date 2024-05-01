@@ -40,7 +40,7 @@ export function Categories(props: any): JSX.Element {
     'Dorm Goods': dorm_goods,
     Food: food,
     Entertainment: entertainment,
-    'Books/Textbooks': book,
+    'Books': book,
     'Misc.': misc,
     Technology: technology,
     Appliances: appliances,

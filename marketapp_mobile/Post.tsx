@@ -94,7 +94,6 @@ function EditPost(props): JSX.Element {
     }
 
     let validInput = Number(props.post.price);
-    console.log(validInput, 'test');
 
     if (validInput) {
       await axios

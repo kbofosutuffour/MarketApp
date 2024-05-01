@@ -6,10 +6,10 @@
  * @format
  */
 
-import React, {useEffect, useState, useContext} from 'react';
-import {Dimensions, Platform, PixelRatio} from 'react-native';
+import React, {useEffect, useState, useContext, memo} from 'react';
 
 import {
+  View,
   Image,
   SafeAreaView,
   ScrollView,
@@ -17,7 +17,9 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  View,
+  Dimensions,
+  Platform,
+  PixelRatio,
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -319,6 +321,8 @@ function App(): JSX.Element {
     posts: [],
   });
 
+  const [profilePosts, setProfilePosts] = useState([]);
+
   const [searchedPosts, setSearch] = useState({
     showSearchBar: false,
     showResults: false,
@@ -382,6 +386,21 @@ function App(): JSX.Element {
     post: {},
   });
 
+  /**
+   * Boolean on whether to order posts on the homescreen by
+   * relevancy or by date posted
+   */
+  const [relevancy, setRelevancy] = useState({
+    showRelevancy: false,
+    posts: [],
+  });
+
+  /**
+   * Sets the current page on the home screen
+   */
+  const [page, setPage] = useState(1);
+  const [profilePage, setProfilePage] = useState(1);
+
   // When the defined components finish rendering, fetch
   // posts and profile information from the database
   useEffect(() => {
@@ -419,7 +438,8 @@ function App(): JSX.Element {
    * of the current user
    */
   const fetchData = async () => {
-    await getPosts();
+    await getPosts(1);
+    setPage(1);
 
     // asynchronous function that gets the profile information
     // for the given username
@@ -468,16 +488,7 @@ function App(): JSX.Element {
           data.id = res.data.id;
         })
         .catch((err: any) => console.log(err));
-      await axios
-        .get(
-          `${
-            inProdMode ? prodURL : emulator ? devURL : ngrok
-          }/posts/get_posts/${user.username}`,
-        )
-        .then(res => {
-          data.posts = res.data;
-        })
-        .catch((err: any) => console.log(err));
+      await getProfilePosts(1);
       await axios
         .get(
           `${
@@ -516,9 +527,13 @@ function App(): JSX.Element {
   /**
    * asynchronous function that gets all existing posts
    */
-  const getPosts = async () => {
+  const getPosts = async (page = 1) => {
     await axios
-      .get(`${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts`)
+      .get(
+        `${
+          inProdMode ? prodURL : emulator ? devURL : ngrok
+        }/posts/?page=${page}`,
+      )
       .then(res => {
         if (res.data.length === 0) {
           setErrorMessage(
@@ -527,12 +542,32 @@ function App(): JSX.Element {
         }
         setPosts({
           showPosts: true,
-          posts: res.data.reverse(),
+          posts:
+            page === 1
+              ? res.data.results.reverse()
+              : posts.posts.concat(res.data.results.reverse()),
         });
       })
       .catch((err: any) => {
         console.log(err);
       });
+  };
+
+  const getProfilePosts = async (page = 1) => {
+    await axios
+      .get(
+        `${inProdMode ? prodURL : emulator ? devURL : ngrok}/posts/get_posts/${
+          user.username
+        }/${page}`,
+      )
+      .then(res => {
+        setProfilePosts(
+          profilePage === 1
+            ? res.data.reverse()
+            : profilePosts.concat(res.data.reverse()),
+        );
+      })
+      .catch((err: any) => console.log(err));
   };
 
   /**
@@ -567,7 +602,7 @@ function App(): JSX.Element {
       })
       .catch((err: any) => console.log(err));
     setProfile({...profile, data: data});
-    await getPosts();
+    await getPosts(page);
   };
 
   /**
@@ -584,6 +619,20 @@ function App(): JSX.Element {
         setRooms(res.data);
       })
       .catch((err: any) => console.log(err));
+  };
+
+  const getRelevancy = () => {
+    let results: any[] = [];
+
+    for (let i = 0; i < relevancy.posts.length; i++) {
+      for (let j = 0; j < posts.posts.length; j++) {
+        if (relevancy.posts[i] == posts.posts[j].id) {
+          results.push(posts.posts[j]);
+        }
+      }
+    }
+    console.log(results);
+    setRelevancy({...relevancy, posts: results});
   };
 
   /**
@@ -834,7 +883,8 @@ function App(): JSX.Element {
    * Boolean on whether the user is on top of the page
    */
   const [onTop, isOnTop] = useState(true);
-
+  const [onBottom, isOnBottom] = useState(false);
+  const [maxHeight, setMaxHeight] = useState(0);
   /**
    * Used to detect whether the user has scrolled to the
    * top of the page.  Used in conjunction with refreshPage to
@@ -843,6 +893,7 @@ function App(): JSX.Element {
    */
   const handleScroll = (height: number) => {
     isOnTop(height <= 0 ? true : false);
+    isOnBottom(height !== 0 && height >= maxHeight ? true : false);
   };
 
   /**
@@ -879,6 +930,21 @@ function App(): JSX.Element {
   };
 
   /**
+   * When the user is on the bottom of the home page,
+   * add more posts by making another api call for more posts
+   */
+  const newPage = async (velocity: number | undefined) => {
+    if (onBottom && velocity && velocity > MAX_VELOCITY) {
+      if (relevancy.showRelevancy) {
+        getRelevancy();
+      } else {
+        await getPosts(page + 1);
+        setPage(page + 1);
+      }
+    }
+  };
+
+  /**
    * Function to delete the post in the database
    * @param id The id of the selected post
    */
@@ -899,7 +965,8 @@ function App(): JSX.Element {
       data: {},
       deletePost: false,
     });
-    await getPosts();
+    await getPosts(1);
+    setPage(1);
     refreshPage(MAX_VELOCITY + 1);
   };
 
@@ -1004,22 +1071,88 @@ function App(): JSX.Element {
                 setCategory={setCategory}
               />
               <View style={styles.mainView}>
+                <View style={styles.postOrder}>
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setRelevancy({...relevancy, showRelevancy: false})
+                    }>
+                    <View
+                      style={
+                        !relevancy.showRelevancy
+                          ? styles.postOrderItemChosen
+                          : styles.postOrderItem
+                      }>
+                      <Text style={styles.postOrderText}>Newest</Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                  <TouchableWithoutFeedback
+                    onPress={() =>
+                      setRelevancy({...relevancy, showRelevancy: true})
+                    }>
+                    <View
+                      style={
+                        relevancy.showRelevancy
+                          ? styles.postOrderItemChosen
+                          : styles.postOrderItem
+                      }>
+                      <Text style={styles.postOrderText}>Relevancy</Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+
                 <ScrollView
                   contentInsetAdjustmentBehavior="automatic"
                   scrollEventThrottle={3}
                   onScroll={event =>
                     handleScroll(event.nativeEvent.contentOffset.y)
                   }
-                  onScrollEndDrag={event =>
-                    refreshPage(Math.abs(event.nativeEvent.velocity?.y))
-                  }
+                  onScrollEndDrag={event => {
+                    refreshPage(Math.abs(event.nativeEvent.velocity?.y));
+                    newPage(Math.abs(event.nativeEvent.velocity?.y));
+                  }}
                   style={styles.scrollView}>
                   <View
                     style={{
                       backgroundColor: Colors.white,
                       opacity: !deletePost.deletePost ? 1.0 : 0.6,
-                    }}>
+                    }}
+                    onLayout={e =>
+                      setMaxHeight(e.nativeEvent.layout.height - 545)
+                    }>
                     {posts.showPosts &&
+                      relevancy.showRelevancy &&
+                      relevancy.posts.map(post => {
+                        if (
+                          post.status !== 'SOLD' &&
+                          !post.draft &&
+                          !post.flag
+                        ) {
+                          return (
+                            <Post
+                              data={post}
+                              setDesc={setDesc}
+                              user={user}
+                              setDelete={setDelete}
+                              countFlagPost={countFlagPost}
+                              setHasLoaded={setHasLoaded}
+                              key={uuid.v4()}
+                              showPostOptions={showPostOptions}
+                            />
+                          );
+                        } else if (
+                          post.username === user.username &&
+                          post.draft &&
+                          !errorMessage &&
+                          !hasSeenDraft
+                        ) {
+                          setErrorMessage(
+                            'You have a draft. Would you like to continue writing it?',
+                          );
+                          setHasSeenDraft(true);
+                        }
+                      })}
+                    {posts.showPosts &&
+                      !relevancy.showRelevancy &&
                       posts.posts.map(post => {
                         /* Only show posts not created by the user on the home page */
                         if (
@@ -1180,7 +1313,10 @@ function App(): JSX.Element {
             <Profile
               profile={profile}
               returnHome={returnHome}
-              all_posts={posts.posts}
+              posts={profilePosts}
+              page={profilePage}
+              setProfilePage={setProfilePage}
+              getProfilePosts={getProfilePosts}
               viewSettings={viewSettings}
               viewPost={viewPost}
               current_user={user.username}
@@ -1320,6 +1456,7 @@ function App(): JSX.Element {
           </View>
         )}
         {postOptions.showOptions &&
+          !searchedPosts.showResults &&
           user.username !== postOptions.post.username && (
             <View style={styles.newPostOptionsContainer}>
               <View style={{width: '80%'}}>
@@ -1670,6 +1807,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: normalize(15),
     fontSize: 17.5,
+  },
+  postOrder: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postOrderItem: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#D9D9D9',
+    width: '50%',
+  },
+  postOrderItemChosen: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    width: '50%',
+  },
+  postOrderText: {
+    color: 'black',
+    fontSize: normalize(20),
+    padding: 5,
   },
 });
 
