@@ -41,7 +41,7 @@ class Post(models.Model):
         TECHNOLOGY = "TECHNOLOGY", _("TECHNOLOGY")
         HOBBIES = "HOBBIES", _("HOBBIES")
         OFFICE_SUPPLIES = "OFFICE SUPPLIES", _("OFFICE SUPPLIES")
-        DORM_GOODS = "DORM_GOODS", _("DORM_GOODS")
+        DORM_GOODS = "DORM GOODS", _("DORM GOODS")
         FOOD = "FOOD", _("FOOD")
         ENTERTAINMENT = "ENTERTAINMENT", _("ENTERTAINMENT")
         BOOKS = "BOOKS", _("BOOKS")
@@ -60,7 +60,7 @@ class Post(models.Model):
         blank=False
     )
     date = models.DateTimeField(auto_now=True)
-    display_image = models.ImageField("Display Image:", upload_to="posts")
+    display_image = models.ImageField("Display Image:", upload_to="posts", default=None, blank=True)
     description = models.TextField(max_length=1000, blank=True)
     price = models.DecimalField("Price:", decimal_places=2, max_digits=9)
     draft = models.BooleanField(blank=False, default=False)
