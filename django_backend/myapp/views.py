@@ -22,6 +22,8 @@ from wonderwords import RandomWord
 from .serializers import *
 import random
 import datetime
+import os
+from PIL import Image as img
 
 """
     A view function is a Python function that takes a Web request and returns a Web response (geeksforgeeks.org).
@@ -51,11 +53,14 @@ class Posts(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def create(self, request):
-        print('testing')
+        
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
             new_post = serializer.save()
-            print(new_post.id, 'post_id')
+            # Resize the post's display image
+            new_image = compressimages(new_post.display_image)
+            new_image.save(new_post.display_image.path)
+          
             return Response({'message': 'You have successfully created your post', 'post_id': new_post.id})
         else:
             print(serializer.errors, 'error')
@@ -75,6 +80,27 @@ class Posts(viewsets.ModelViewSet):
         print('test delete')
         post.delete()
         return Response({'message': 'You have successfully deleted your post'})
+
+def compressimages(input):
+    """
+    Function used to compress images
+    """
+
+    # # opening the file
+    image = img.open(input)
+    # maximum pixel size
+    maxwidth = 512
+    # Calculating the width and height of the original photo
+    width, height = image.size
+    # calculating the aspect ratio of the image
+    aspectratio = width / height
+ 
+    # Calculating the new height of the compressed image
+    newheight = maxwidth / aspectratio
+ 
+     # Resizing the original image
+    return image.resize((maxwidth, round(newheight)))
+ 
 
 class EditProfileViewSet(viewsets.ViewSet):
     
@@ -471,6 +497,31 @@ class ImageViewSet(viewsets.ModelViewSet):
 
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+    
+    def create(self, request):
+        
+        serializer = ImageSerializer(data=request.data)
+        if serializer.is_valid():
+            images = serializer.save()
+
+            # Compresses all images before storing
+            # TODO: Make this more efficient
+            if images.image1:
+                new_image = compressimages(images.image1)
+                new_image.save(images.image1.path)
+            if images.image2:
+                new_image = compressimages(images.image2)
+                new_image.save(images.image2.path)
+            if images.image3:
+                new_image = compressimages(images.image3)
+                new_image.save(images.image3.path)
+            if images.image4:
+                new_image = compressimages(images.image4)
+                new_image.save(images.image4.path)
+            return Response({'code': 200})
+        else:
+            print(serializer.errors, 'error')
+            return Response({'error': serializer.errors})
 
 class FeedbackViewSet(viewsets.ModelViewSet):
 

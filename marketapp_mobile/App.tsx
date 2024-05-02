@@ -1071,7 +1071,7 @@ function App(): JSX.Element {
                 setCategory={setCategory}
               />
               <View style={styles.mainView}>
-                <View style={styles.postOrder}>
+                {/* <View style={styles.postOrder}>
                   <TouchableWithoutFeedback
                     onPress={() =>
                       setRelevancy({...relevancy, showRelevancy: false})
@@ -1098,7 +1098,7 @@ function App(): JSX.Element {
                       <Text style={styles.postOrderText}>Relevancy</Text>
                     </View>
                   </TouchableWithoutFeedback>
-                </View>
+                </View> */}
 
                 <ScrollView
                   contentInsetAdjustmentBehavior="automatic"
